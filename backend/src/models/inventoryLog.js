@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "InventoryLog",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      deletedAt: "deleted_at",
     },
   );
   return InventoryLog;

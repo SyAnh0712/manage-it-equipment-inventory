@@ -16,8 +16,9 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "ImportOrder",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
       deletedAt: "deleted_at",
-      paranoid: true,
     },
   );
   return ImportOrder;
