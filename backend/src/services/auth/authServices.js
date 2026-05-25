@@ -26,7 +26,7 @@ const loginService = async (data) => {
   const token = generateAccessToken({
     id: user.id,
     email: user.email,
-    role_id: user.role_id,
+    role: user.role,
   });
 
   return {
@@ -36,7 +36,7 @@ const loginService = async (data) => {
       id: user.id,
       fullname: user.fullname,
       email: user.email,
-      role_id: user.role_id,
+      role: user.role,
     },
   };
 };
