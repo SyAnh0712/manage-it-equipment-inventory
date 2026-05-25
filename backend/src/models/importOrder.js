@@ -7,16 +7,17 @@ module.exports = (sequelize, DataTypes) => {
   ImportOrder.init(
     {
       code: DataTypes.STRING,
-      supplierId: DataTypes.INTEGER,
-      createdBy: DataTypes.INTEGER,
+      supplier_id: DataTypes.INTEGER,
+      created_by: DataTypes.INTEGER,
       status: DataTypes.ENUM("pending", "approved", "rejected"),
       note: DataTypes.TEXT,
-      approvedAt: DataTypes.DATE,
-      deletedAt: DataTypes.DATE,
+      approved_at: DataTypes.DATE,
     },
     {
       sequelize,
       modelName: "ImportOrder",
+      deletedAt: "deleted_at",
+      paranoid: true,
     },
   );
   return ImportOrder;

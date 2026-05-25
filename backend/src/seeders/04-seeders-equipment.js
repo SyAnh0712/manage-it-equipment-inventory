@@ -17,6 +17,9 @@ module.exports = {
 
         price: 25000000,
 
+        image_url:
+          "https://images.unsplash.com/photo-1496181133206-80ce9b88a853",
+
         description: "Laptop văn phòng Dell",
 
         created_at: new Date(),
@@ -38,6 +41,9 @@ module.exports = {
 
         price: 7000000,
 
+        image_url:
+          "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6",
+
         description: "Máy in laser HP",
 
         created_at: new Date(),
@@ -58,6 +64,8 @@ module.exports = {
         quantity: 3,
 
         price: 12000000,
+
+        image_url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31",
 
         description: "Switch mạng Cisco",
 

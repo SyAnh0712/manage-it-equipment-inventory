@@ -58,7 +58,10 @@ module.exports = {
         type: Sequelize.DECIMAL(15, 2),
         defaultValue: 0,
       },
-
+      image_url: {
+        type: Sequelize.STRING(255),
+        allowNull: true,
+      },
       description: {
         type: Sequelize.TEXT,
         allowNull: true,

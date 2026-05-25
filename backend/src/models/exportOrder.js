@@ -8,14 +8,15 @@ module.exports = (sequelize, DataTypes) => {
     {
       username: DataTypes.STRING,
       password: DataTypes.STRING,
-      fullName: DataTypes.STRING,
+      full_name: DataTypes.STRING,
       email: DataTypes.STRING,
       role: DataTypes.ENUM("admin", "staff"),
-      deletedAt: DataTypes.DATE,
     },
     {
       sequelize,
       modelName: "ExportOrder",
+      deletedAt: "deleted_at",
+      paranoid: true,
     },
   );
   return ExportOrder;

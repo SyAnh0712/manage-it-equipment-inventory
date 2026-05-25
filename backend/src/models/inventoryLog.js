@@ -6,13 +6,13 @@ module.exports = (sequelize, DataTypes) => {
   }
   InventoryLog.init(
     {
-      equipmentId: DataTypes.INTEGER,
-      actionType: DataTypes.ENUM("import", "export", "adjust"),
-      quantityBefore: DataTypes.INTEGER,
-      quantityChanged: DataTypes.INTEGER,
-      quantityAfter: DataTypes.INTEGER,
-      referenceCode: DataTypes.STRING,
-      createdBy: DataTypes.INTEGER,
+      equipment_id: DataTypes.INTEGER,
+      action_type: DataTypes.ENUM("import", "export", "adjust"),
+      quantity_before: DataTypes.INTEGER,
+      quantity_changed: DataTypes.INTEGER,
+      quantity_after: DataTypes.INTEGER,
+      reference_code: DataTypes.STRING,
+      created_by: DataTypes.INTEGER,
     },
     {
       sequelize,

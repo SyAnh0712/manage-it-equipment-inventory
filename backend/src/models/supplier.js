@@ -10,11 +10,12 @@ module.exports = (sequelize, DataTypes) => {
       phone: DataTypes.STRING,
       email: DataTypes.STRING,
       address: DataTypes.STRING,
-      deletedAt: DataTypes.DATE,
     },
     {
       sequelize,
       modelName: "Supplier",
+      deletedAt: "deleted_at",
+      paranoid: true,
     },
   );
   return Supplier;

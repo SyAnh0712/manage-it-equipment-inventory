@@ -6,10 +6,10 @@ module.exports = (sequelize, DataTypes) => {
   }
   ImportOrderDetail.init(
     {
-      importOrderId: DataTypes.INTEGER,
-      equipmentId: DataTypes.INTEGER,
+      import_order_id: DataTypes.INTEGER,
+      equipment_id: DataTypes.INTEGER,
       quantity: DataTypes.INTEGER,
-      unitPrice: DataTypes.DECIMAL,
+      unit_price: DataTypes.DECIMAL,
     },
     {
       sequelize,

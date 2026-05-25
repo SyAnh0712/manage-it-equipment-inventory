@@ -8,17 +8,19 @@ module.exports = (sequelize, DataTypes) => {
     {
       code: DataTypes.STRING,
       name: DataTypes.STRING,
-      categoryId: DataTypes.INTEGER,
-      supplierId: DataTypes.INTEGER,
+      category_id: DataTypes.INTEGER,
+      supplier_id: DataTypes.INTEGER,
       unit: DataTypes.STRING,
       quantity: DataTypes.INTEGER,
       price: DataTypes.DECIMAL,
+      image_url: DataTypes.STRING,
       description: DataTypes.TEXT,
-      deletedAt: DataTypes.DATE,
     },
     {
       sequelize,
       modelName: "Equipment",
+      deletedAt: "deleted_at",
+      paranoid: true,
     },
   );
   return Equipment;

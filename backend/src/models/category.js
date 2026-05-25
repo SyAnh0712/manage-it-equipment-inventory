@@ -8,11 +8,12 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: DataTypes.STRING,
       description: DataTypes.STRING,
-      deletedAt: DataTypes.DATE,
     },
     {
       sequelize,
       modelName: "Category",
+      deletedAt: "deleted_at",
+      paranoid: true,
     },
   );
   return Category;
