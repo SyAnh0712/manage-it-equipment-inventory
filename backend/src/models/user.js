@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
 
       updatedAt: "updated_at",
 
-      paranoid: true,
+      paranoid: false,
 
       deletedAt: "deleted_at",
     },

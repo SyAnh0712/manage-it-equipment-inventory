@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Form, Card } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -115,8 +115,13 @@ const Login = () => {
               </Button>
             </div>
 
-            <div className="text-center mt-3 text-muted small">
-              <p>Demo: admin / password</p>
+            <div className="text-center mt-3">
+              <p className="small">
+                Don't have an account?{" "}
+                <Link to="/register" className="text-decoration-none">
+                  Register here
+                </Link>
+              </p>
             </div>
           </Form>
         </Card.Body>

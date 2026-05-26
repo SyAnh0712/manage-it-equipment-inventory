@@ -23,16 +23,17 @@ const authService = {
   register: async (data) => {
     const response = await axiosClient.post("/auth/register", data);
 
-    const authData = response.data ? response.data : response;
+    // response is { success, message, data: { token, user } }
+    const userData = response.data;
 
     return {
-      token: authData.data.token,
+      token: userData.token,
       user: {
-        id: authData.data.user.id,
-        username: authData.data.user.username,
-        full_name: authData.data.user.full_name,
-        email: authData.data.user.email,
-        role: authData.data.user.role,
+        id: userData.user.id,
+        username: userData.user.username,
+        full_name: userData.user.full_name,
+        email: userData.user.email,
+        role: userData.user.role,
       },
     };
   },

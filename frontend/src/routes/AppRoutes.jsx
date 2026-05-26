@@ -7,6 +7,7 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import AdminLayout from "../layouts/AdminLayout";
 import Login from "../pages/auth/Login";
+import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import UsersList from "../pages/users/UsersList";
 import AddUsers from "../pages/users/AddUsers";
@@ -21,13 +22,21 @@ const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        {/* Auth Routes */}
+        {}
         <Route
           path="/login"
           element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
         />
 
-        {/* Admin Routes */}
+        {}
+        <Route
+          path="/register"
+          element={
+            isAuthenticated ? <Navigate to="/dashboard" /> : <Register />
+          }
+        />
+
+        {}
         <Route
           path="/dashboard"
           element={
@@ -41,7 +50,7 @@ const AppRoutes = () => {
           }
         />
 
-        {/* User Management Routes - Admin only */}
+        {}
         <Route
           path="/users"
           element={
@@ -87,7 +96,7 @@ const AppRoutes = () => {
           }
         />
 
-        {/* 404 */}
+        {}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

@@ -30,6 +30,26 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const register = useCallback(async (data) => {
+    try {
+      setLoading(true);
+      const response = await authService.register(data);
+
+      if (response.token) {
+        authService.setAuthToken(response.token);
+        authService.setUser(response.user);
+        setUser(response.user);
+        setIsAuthenticated(true);
+        return response;
+      }
+    } catch (error) {
+      console.error("Register error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(() => {
     authService.logout();
     setUser(null);
@@ -41,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     loading,
     login,
+    register,
     logout,
     setUser,
   };

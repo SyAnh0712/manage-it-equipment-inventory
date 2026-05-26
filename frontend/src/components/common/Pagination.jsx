@@ -3,7 +3,6 @@ import { Pagination as BSPagination } from "react-bootstrap";
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const items = [];
 
-  // Previous button
   items.push(
     <BSPagination.Prev
       key="prev"
@@ -12,7 +11,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     />,
   );
 
-  // Page numbers
   const startPage = Math.max(1, currentPage - 2);
   const endPage = Math.min(totalPages, currentPage + 2);
 
@@ -53,7 +51,6 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     );
   }
 
-  // Next button
   items.push(
     <BSPagination.Next
       key="next"

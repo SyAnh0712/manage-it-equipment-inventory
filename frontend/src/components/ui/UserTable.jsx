@@ -1,4 +1,3 @@
-import React from "react";
 import { Table, Button as BSButton } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import StatusBadge from "../common/StatusBadge";
