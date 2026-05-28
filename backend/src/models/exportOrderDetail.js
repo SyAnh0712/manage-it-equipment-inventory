@@ -1,8 +1,17 @@
 "use strict";
 const { Model } = require("sequelize");
-module.exports = (sequelize, DataTypes) => {
+module.exports = function defineExportOrderDetail(sequelize, DataTypes) {
   class ExportOrderDetail extends Model {
-    static associate(models) {}
+    static associate(models) {
+      ExportOrderDetail.belongsTo(models.ExportOrder, {
+        foreignKey: "export_order_id",
+        as: "exportOrder",
+      });
+      ExportOrderDetail.belongsTo(models.Equipment, {
+        foreignKey: "equipment_id",
+        as: "equipment",
+      });
+    }
   }
   ExportOrderDetail.init(
     {

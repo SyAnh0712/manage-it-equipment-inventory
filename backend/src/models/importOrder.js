@@ -1,8 +1,21 @@
 "use strict";
 const { Model } = require("sequelize");
-module.exports = (sequelize, DataTypes) => {
+module.exports = function defineImportOrder(sequelize, DataTypes) {
   class ImportOrder extends Model {
-    static associate(models) {}
+    static associate(models) {
+      ImportOrder.belongsTo(models.Supplier, {
+        foreignKey: "supplier_id",
+        as: "supplier",
+      });
+      ImportOrder.belongsTo(models.User, {
+        foreignKey: "created_by",
+        as: "creator",
+      });
+      ImportOrder.hasMany(models.ImportOrderDetail, {
+        foreignKey: "import_order_id",
+        as: "details",
+      });
+    }
   }
   ImportOrder.init(
     {
