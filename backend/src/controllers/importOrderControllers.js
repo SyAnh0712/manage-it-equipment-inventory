@@ -1,39 +1,41 @@
 const importOrderService = require("../services/inventory/importOrderServices");
 
-const createImportOrder = async (req, res) => {
+const createImportOrder = async (req, res, nextHandler) => {
   try {
     const importOrder = await importOrderService.createImportOrder(req.body);
     res.status(201).json(importOrder);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const getAllImportOrders = async (req, res) => {
+const getAllImportOrders = async (req, res, nextHandler) => {
   try {
     const importOrders = await importOrderService.getAllImportOrders(req.query);
     res.json(importOrders);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const getImportOrderById = async (req, res) => {
+const getImportOrderById = async (req, res, nextHandler) => {
   try {
     const importOrder = await importOrderService.getImportOrderById(
       req.params.id,
     );
     if (!importOrder) {
-      return res.status(404).json({ error: "Import order not found" });
+      const err = new Error("Import order not found");
+      err.status = 404;
+      throw err;
     }
 
     res.json(importOrder);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const updateImportOrder = async (req, res) => {
+const updateImportOrder = async (req, res, nextHandler) => {
   try {
     const importOrder = await importOrderService.updateImportOrder(
       req.params.id,
@@ -42,24 +44,16 @@ const updateImportOrder = async (req, res) => {
 
     res.json(importOrder);
   } catch (error) {
-    if (error.message === "Import order not found") {
-      return res.status(404).json({ error: error.message });
-    }
-
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const deleteImportOrder = async (req, res) => {
+const deleteImportOrder = async (req, res, nextHandler) => {
   try {
     const result = await importOrderService.deleteImportOrder(req.params.id);
     res.json(result);
   } catch (error) {
-    if (error.message === "Import order not found") {
-      return res.status(404).json({ error: error.message });
-    }
-
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 

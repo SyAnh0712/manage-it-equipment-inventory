@@ -1,39 +1,41 @@
 const supplierService = require("../services/supplier/supplierServices");
 
-const createSupplier = async (req, res) => {
+const createSupplier = async (req, res, nextHandler) => {
   try {
     const supplierData = req.body;
     const supplier = await supplierService.createSupplier(supplierData);
     res.status(201).json(supplier);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const getAllSuppliers = async (req, res) => {
+const getAllSuppliers = async (req, res, nextHandler) => {
   try {
     const suppliers = await supplierService.getAllSuppliers(req.query);
     res.json(suppliers);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const getSupplierById = async (req, res) => {
+const getSupplierById = async (req, res, nextHandler) => {
   try {
     const supplierId = req.params.id;
     const supplier = await supplierService.getSupplierById(supplierId);
     if (supplier) {
       res.json(supplier);
     } else {
-      res.status(404).json({ error: "Supplier not found" });
+      const err = new Error("Supplier not found");
+      err.status = 404;
+      throw err;
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const updateSupplier = async (req, res) => {
+const updateSupplier = async (req, res, nextHandler) => {
   try {
     const supplierId = req.params.id;
     const supplierData = req.body;
@@ -44,20 +46,22 @@ const updateSupplier = async (req, res) => {
     if (updatedSupplier) {
       res.json(updatedSupplier);
     } else {
-      res.status(404).json({ error: "Supplier not found" });
+      const err = new Error("Supplier not found");
+      err.status = 404;
+      throw err;
     }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const deleteSupplier = async (req, res) => {
+const deleteSupplier = async (req, res, nextHandler) => {
   try {
     const supplierId = req.params.id;
     const result = await supplierService.deleteSupplier(supplierId);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 

@@ -1,39 +1,41 @@
 const catagoryService = require("../services/equipment/categoryServices");
 
-const createCategory = async (req, res) => {
+const createCategory = async (req, res, nextHandler) => {
   try {
     const categoryData = req.body;
     const category = await catagoryService.createCategory(categoryData);
     res.status(201).json(category);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const getAllCategories = async (req, res) => {
+const getAllCategories = async (req, res, nextHandler) => {
   try {
     const categories = await catagoryService.getAllCategories(req.query);
     res.json(categories);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const getCategoryById = async (req, res) => {
+const getCategoryById = async (req, res, nextHandler) => {
   try {
     const categoryId = req.params.id;
     const category = await catagoryService.getCategoryById(categoryId);
     if (category) {
       res.json(category);
     } else {
-      res.status(404).json({ error: "Category not found" });
+      const err = new Error("Category not found");
+      err.status = 404;
+      throw err;
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const updateCategory = async (req, res) => {
+const updateCategory = async (req, res, nextHandler) => {
   try {
     const categoryId = req.params.id;
     const categoryData = req.body;
@@ -44,20 +46,22 @@ const updateCategory = async (req, res) => {
     if (updatedCategory) {
       res.json(updatedCategory);
     } else {
-      res.status(404).json({ error: "Category not found" });
+      const err = new Error("Category not found");
+      err.status = 404;
+      throw err;
     }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
-const deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res, nextHandler) => {
   try {
     const categoryId = req.params.id;
     const result = await catagoryService.deleteCategory(categoryId);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 

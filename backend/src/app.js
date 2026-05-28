@@ -3,6 +3,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 
 const routes = require("./routes");
+const errorMiddleware = require("./middlewares/errorMiddleware");
 
 const app = express();
 
@@ -12,5 +13,7 @@ app.use(morgan("dev"));
 app.use("/uploads", express.static("uploads"));
 
 app.use("/api", routes);
+
+app.use(errorMiddleware);
 
 module.exports = app;

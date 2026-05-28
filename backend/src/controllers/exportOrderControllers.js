@@ -1,39 +1,41 @@
 const exportOrderService = require("../services/inventory/exportOrderServices");
 
-const createExportOrder = async (req, res) => {
+const createExportOrder = async (req, res, nextHandler) => {
   try {
     const exportOrder = await exportOrderService.createExportOrder(req.body);
     res.status(201).json(exportOrder);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    nextHandler(error);
   }
 };
 
-const getAllExportOrders = async (req, res) => {
+const getAllExportOrders = async (req, res, nextHandler) => {
   try {
     const exportOrders = await exportOrderService.getAllExportOrders(req.query);
     res.json(exportOrders);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    nextHandler(error);
   }
 };
 
-const getExportOrderById = async (req, res) => {
+const getExportOrderById = async (req, res, nextHandler) => {
   try {
     const exportOrder = await exportOrderService.getExportOrderById(
       req.params.id,
     );
     if (!exportOrder) {
-      return res.status(404).json({ error: "Export order not found" });
+      const err = new Error("Export order not found");
+      err.status = 404;
+      throw err;
     }
 
     res.json(exportOrder);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    nextHandler(error);
   }
 };
 
-const updateExportOrder = async (req, res) => {
+const updateExportOrder = async (req, res, nextHandler) => {
   try {
     const exportOrder = await exportOrderService.updateExportOrder(
       req.params.id,
@@ -42,24 +44,16 @@ const updateExportOrder = async (req, res) => {
 
     res.json(exportOrder);
   } catch (error) {
-    if (error.message === "Export order not found") {
-      return res.status(404).json({ error: error.message });
-    }
-
-    res.status(400).json({ error: error.message });
+    nextHandler(error);
   }
 };
 
-const deleteExportOrder = async (req, res) => {
+const deleteExportOrder = async (req, res, nextHandler) => {
   try {
     const result = await exportOrderService.deleteExportOrder(req.params.id);
     res.json(result);
   } catch (error) {
-    if (error.message === "Export order not found") {
-      return res.status(404).json({ error: error.message });
-    }
-
-    res.status(500).json({ error: error.message });
+    nextHandler(error);
   }
 };
 
