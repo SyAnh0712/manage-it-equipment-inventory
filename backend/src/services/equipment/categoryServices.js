@@ -1,4 +1,5 @@
 const db = require("../../models");
+const { Op } = require("sequelize");
 
 const Category = db.Category;
 
@@ -11,10 +12,37 @@ const createCategory = async (categoryData) => {
   }
 };
 
-const getAllCategories = async () => {
+const getAllCategories = async (query = {}) => {
   try {
-    const categories = await Category.findAll();
-    return categories;
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Number(query.limit) || 10);
+    const search = (query.search || "").trim();
+
+    const where = search
+      ? {
+          [Op.or]: [
+            { name: { [Op.like]: `%${search}%` } },
+            { description: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    const { count, rows } = await Category.findAndCountAll({
+      where,
+      limit,
+      offset: (page - 1) * limit,
+      order: [["created_at", "DESC"]],
+    });
+
+    return {
+      data: rows,
+      pagination: {
+        page,
+        limit,
+        total: count,
+        totalPages: Math.ceil(count / limit),
+      },
+    };
   } catch (error) {
     throw new Error("Error fetching categories: " + error.message);
   }

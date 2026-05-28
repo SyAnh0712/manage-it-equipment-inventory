@@ -1,4 +1,5 @@
 const db = require("../../models");
+const { Op } = require("sequelize");
 
 const ImportOrder = db.ImportOrder;
 
@@ -24,15 +25,42 @@ const createImportOrder = async (importOrderData) => {
   }
 };
 
-const getAllImportOrders = async () => {
+const getAllImportOrders = async (query = {}) => {
   try {
-    return await ImportOrder.findAll({
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Number(query.limit) || 10);
+    const search = (query.search || "").trim();
+
+    const where = search
+      ? {
+          [Op.or]: [
+            { code: { [Op.like]: `%${search}%` } },
+            { status: { [Op.like]: `%${search}%` } },
+            { note: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    const { count, rows } = await ImportOrder.findAndCountAll({
+      where,
+      limit,
+      offset: (page - 1) * limit,
       order: [["created_at", "DESC"]],
       include: [
         { model: db.Supplier, as: "supplier" },
         { model: db.User, as: "creator" },
       ],
     });
+
+    return {
+      data: rows,
+      pagination: {
+        page,
+        limit,
+        total: count,
+        totalPages: Math.ceil(count / limit),
+      },
+    };
   } catch (error) {
     throw new Error("Error fetching import orders: " + error.message);
   }

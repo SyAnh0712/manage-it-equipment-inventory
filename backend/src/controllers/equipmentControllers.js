@@ -12,7 +12,7 @@ const createEquipment = async (req, res) => {
 
 const getAllEquipment = async (req, res) => {
   try {
-    const equipment = await equipmentService.getAllEquipment();
+    const equipment = await equipmentService.getAllEquipment(req.query);
     res.json(equipment);
   } catch (error) {
     res.status(500).json({ error: error.message });

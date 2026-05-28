@@ -12,7 +12,7 @@ const createSupplier = async (req, res) => {
 
 const getAllSuppliers = async (req, res) => {
   try {
-    const suppliers = await supplierService.getAllSuppliers();
+    const suppliers = await supplierService.getAllSuppliers(req.query);
     res.json(suppliers);
   } catch (error) {
     res.status(500).json({ error: error.message });

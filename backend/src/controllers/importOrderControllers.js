@@ -11,7 +11,7 @@ const createImportOrder = async (req, res) => {
 
 const getAllImportOrders = async (req, res) => {
   try {
-    const importOrders = await importOrderService.getAllImportOrders();
+    const importOrders = await importOrderService.getAllImportOrders(req.query);
     res.json(importOrders);
   } catch (error) {
     res.status(500).json({ error: error.message });

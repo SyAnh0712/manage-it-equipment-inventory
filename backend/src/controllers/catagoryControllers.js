@@ -12,7 +12,7 @@ const createCategory = async (req, res) => {
 
 const getAllCategories = async (req, res) => {
   try {
-    const categories = await catagoryService.getAllCategories();
+    const categories = await catagoryService.getAllCategories(req.query);
     res.json(categories);
   } catch (error) {
     res.status(500).json({ error: error.message });

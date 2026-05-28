@@ -11,7 +11,7 @@ const createExportOrder = async (req, res) => {
 
 const getAllExportOrders = async (req, res) => {
   try {
-    const exportOrders = await exportOrderService.getAllExportOrders();
+    const exportOrders = await exportOrderService.getAllExportOrders(req.query);
     res.json(exportOrders);
   } catch (error) {
     res.status(500).json({ error: error.message });

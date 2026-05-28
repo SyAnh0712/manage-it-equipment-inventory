@@ -1,4 +1,5 @@
 const db = require("../../models");
+const { Op } = require("sequelize");
 
 const User = db.User;
 
@@ -12,11 +13,38 @@ const createUser = async (userData) => {
   }
 };
 
-const getAllUsers = async () => {
+const getAllUsers = async (query = {}) => {
   try {
-    const users = await User.findAll();
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Number(query.limit) || 10);
+    const search = (query.search || "").trim();
 
-    return users;
+    const where = search
+      ? {
+          [Op.or]: [
+            { username: { [Op.like]: `%${search}%` } },
+            { full_name: { [Op.like]: `%${search}%` } },
+            { email: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
+
+    const { count, rows } = await User.findAndCountAll({
+      where,
+      limit,
+      offset: (page - 1) * limit,
+      order: [["created_at", "DESC"]],
+    });
+
+    return {
+      data: rows,
+      pagination: {
+        page,
+        limit,
+        total: count,
+        totalPages: Math.ceil(count / limit),
+      },
+    };
   } catch (error) {
     throw new Error("Error fetching users: " + error.message);
   }
