@@ -9,7 +9,6 @@ const axiosClient = axios.create({
   },
 });
 
-// Request interceptor
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
@@ -23,7 +22,6 @@ axiosClient.interceptors.request.use(
   },
 );
 
-// Response interceptor
 axiosClient.interceptors.response.use(
   (response) => {
     return response.data;

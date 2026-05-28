@@ -32,15 +32,19 @@ const Sidebar = () => {
               <i className="bi bi-people me-2"></i> Users
             </Nav.Link>
 
-            <Nav.Link href="#" className="text-light nav-item">
+            <Nav.Link as={Link} to="/equipment" className="text-light nav-item">
               <i className="bi bi-inbox me-2"></i> Equipment
             </Nav.Link>
 
-            <Nav.Link href="#" className="text-light nav-item">
+            <Nav.Link
+              as={Link}
+              to="/categories"
+              className="text-light nav-item"
+            >
               <i className="bi bi-bookmark me-2"></i> Categories
             </Nav.Link>
 
-            <Nav.Link href="#" className="text-light nav-item">
+            <Nav.Link as={Link} to="/suppliers" className="text-light nav-item">
               <i className="bi bi-truck me-2"></i> Suppliers
             </Nav.Link>
           </>
