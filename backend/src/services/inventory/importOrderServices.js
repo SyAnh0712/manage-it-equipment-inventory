@@ -2,6 +2,9 @@ const db = require("../../models");
 const { Op } = require("sequelize");
 
 const ImportOrder = db.ImportOrder;
+const ImportOrderDetail = db.ImportOrderDetail;
+const InventoryLog = db.InventoryLog;
+const Equipment = db.Equipment;
 
 const generateImportCode = () => {
   const date = new Date();
@@ -14,12 +17,68 @@ const generateImportCode = () => {
 
 const createImportOrder = async (importOrderData) => {
   try {
+    const { details, ...orderData } = importOrderData;
     const payload = {
-      ...importOrderData,
+      ...orderData,
       code: importOrderData?.code || generateImportCode(),
     };
 
-    return await ImportOrder.create(payload);
+    const result = await db.sequelize.transaction(async (transaction) => {
+      const importOrder = await ImportOrder.create(payload, { transaction });
+
+      const detailList = Array.isArray(details) ? details : [];
+
+      for (const item of detailList) {
+        if (!item.equipment_id) {
+          throw new Error("Thiếu equipment_id trong chi tiết nhập kho");
+        }
+
+        const equipment = await Equipment.findByPk(item.equipment_id, { transaction });
+        if (!equipment) {
+          throw new Error(`Thiếu thiết bị với id ${item.equipment_id}`);
+        }
+
+        const quantity = Number(item.quantity || 0);
+        if (quantity <= 0) {
+          throw new Error("Số lượng nhập phải lớn hơn 0");
+        }
+
+        const quantityBefore = Number(equipment.quantity || 0);
+        const quantityAfter = quantityBefore + quantity;
+
+        await equipment.update(
+          { quantity: quantityAfter },
+          { transaction },
+        );
+
+        await ImportOrderDetail.create(
+          {
+            import_order_id: importOrder.id,
+            equipment_id: item.equipment_id,
+            quantity,
+            unit_price: item.unit_price || 0,
+          },
+          { transaction },
+        );
+
+        await InventoryLog.create(
+          {
+            equipment_id: item.equipment_id,
+            action_type: "import",
+            quantity_before: quantityBefore,
+            quantity_changed: quantity,
+            quantity_after: quantityAfter,
+            reference_code: importOrder.code,
+            created_by: importOrder.created_by || null,
+          },
+          { transaction },
+        );
+      }
+
+      return importOrder;
+    });
+
+    return result;
   } catch (error) {
     throw new Error("Error creating import order: " + error.message);
   }
