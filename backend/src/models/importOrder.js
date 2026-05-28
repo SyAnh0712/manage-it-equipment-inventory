@@ -29,6 +29,7 @@ module.exports = function defineImportOrder(sequelize, DataTypes) {
     {
       sequelize,
       modelName: "ImportOrder",
+      tableName: "import_orders",
       createdAt: "created_at",
       updatedAt: "updated_at",
       deletedAt: "deleted_at",

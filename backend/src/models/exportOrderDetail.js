@@ -22,6 +22,7 @@ module.exports = function defineExportOrderDetail(sequelize, DataTypes) {
     {
       sequelize,
       modelName: "ExportOrderDetail",
+      tableName: "export_order_details",
       createdAt: "created_at",
       updatedAt: "updated_at",
       deletedAt: "deleted_at",
