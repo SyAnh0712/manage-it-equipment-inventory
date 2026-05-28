@@ -2,9 +2,23 @@ const db = require("../../models");
 
 const ExportOrder = db.ExportOrder;
 
+const generateExportCode = () => {
+  const date = new Date();
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `EXP-${yyyy}${mm}${dd}-${random}`;
+};
+
 const createExportOrder = async (exportOrderData) => {
   try {
-    return await ExportOrder.create(exportOrderData);
+    const payload = {
+      ...exportOrderData,
+      code: exportOrderData?.code || generateExportCode(),
+    };
+
+    return await ExportOrder.create(payload);
   } catch (error) {
     throw new Error("Error creating export order: " + error.message);
   }

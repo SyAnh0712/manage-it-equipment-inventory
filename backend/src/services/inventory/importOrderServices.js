@@ -2,9 +2,23 @@ const db = require("../../models");
 
 const ImportOrder = db.ImportOrder;
 
+const generateImportCode = () => {
+  const date = new Date();
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `IMP-${yyyy}${mm}${dd}-${random}`;
+};
+
 const createImportOrder = async (importOrderData) => {
   try {
-    return await ImportOrder.create(importOrderData);
+    const payload = {
+      ...importOrderData,
+      code: importOrderData?.code || generateImportCode(),
+    };
+
+    return await ImportOrder.create(payload);
   } catch (error) {
     throw new Error("Error creating import order: " + error.message);
   }
