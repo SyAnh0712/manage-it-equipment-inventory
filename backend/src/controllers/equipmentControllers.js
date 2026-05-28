@@ -2,7 +2,12 @@ const equipmentService = require("../services/equipment/equipmentServices");
 
 const createEquipment = async (req, res) => {
   try {
-    const equipmentData = req.body;
+    const equipmentData = {
+      ...req.body,
+      image_url: req.file
+        ? `/uploads/${req.file.filename}`
+        : req.body.image_url,
+    };
     const equipment = await equipmentService.createEquipment(equipmentData);
     res.status(201).json(equipment);
   } catch (error) {
@@ -36,7 +41,12 @@ const getEquipmentById = async (req, res) => {
 const updateEquipment = async (req, res) => {
   try {
     const equipmentId = req.params.id;
-    const equipmentData = req.body;
+    const equipmentData = {
+      ...req.body,
+      image_url: req.file
+        ? `/uploads/${req.file.filename}`
+        : req.body.image_url,
+    };
     const updatedEquipment = await equipmentService.updateEquipment(
       equipmentId,
       equipmentData,
