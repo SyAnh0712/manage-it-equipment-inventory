@@ -2,6 +2,9 @@ const express = require("express");
 
 const router = express.Router();
 const importOrderController = require("../controllers/importOrderControllers");
+const { authMiddleware } = require("../middlewares/authMiddlewares");
+
+router.use(authMiddleware);
 
 router.post("/", importOrderController.createImportOrder);
 router.get("/", importOrderController.getAllImportOrders);

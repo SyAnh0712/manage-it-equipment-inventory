@@ -2,6 +2,9 @@ const express = require("express");
 
 const router = express.Router();
 const exportOrderController = require("../controllers/exportOrderControllers");
+const { authMiddleware } = require("../middlewares/authMiddlewares");
+
+router.use(authMiddleware);
 
 router.post("/", exportOrderController.createExportOrder);
 router.get("/", exportOrderController.getAllExportOrders);

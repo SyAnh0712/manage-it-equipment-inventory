@@ -3,6 +3,9 @@ const express = require("express");
 const router = express.Router();
 
 const supplierController = require("../controllers/supplierControllers");
+const { authMiddleware } = require("../middlewares/authMiddlewares");
+
+router.use(authMiddleware);
 
 router.post("/", supplierController.createSupplier);
 router.get("/", supplierController.getAllSuppliers);
