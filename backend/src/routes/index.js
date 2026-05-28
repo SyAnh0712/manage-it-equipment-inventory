@@ -9,6 +9,7 @@ const supplierRoutes = require("./supplierRouters");
 const equipmentRoutes = require("./equipmentRouters");
 const importRoutes = require("./importRoutes");
 const exportRoutes = require("./exportRoutes");
+const dashboardRoutes = require("./dashboardRoutes");
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
@@ -17,5 +18,6 @@ router.use("/suppliers", supplierRoutes);
 router.use("/equipment", equipmentRoutes);
 router.use("/imports", importRoutes);
 router.use("/exports", exportRoutes);
+router.use("/dashboard", dashboardRoutes);
 
 module.exports = router;
