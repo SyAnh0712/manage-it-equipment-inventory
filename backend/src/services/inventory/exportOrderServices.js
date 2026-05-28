@@ -33,7 +33,9 @@ const createExportOrder = async (exportOrderData) => {
           throw new Error("Thiếu equipment_id trong chi tiết xuất kho");
         }
 
-        const equipment = await Equipment.findByPk(item.equipment_id, { transaction });
+        const equipment = await Equipment.findByPk(item.equipment_id, {
+          transaction,
+        });
         if (!equipment) {
           throw new Error(`Thiếu thiết bị với id ${item.equipment_id}`);
         }
@@ -45,15 +47,14 @@ const createExportOrder = async (exportOrderData) => {
 
         const quantityBefore = Number(equipment.quantity || 0);
         if (quantityBefore < quantity) {
-          throw new Error(`Không đủ số lượng tồn kho cho thiết bị ${equipment.name || item.equipment_id}`);
+          throw new Error(
+            `Không đủ số lượng tồn kho cho thiết bị ${equipment.name || item.equipment_id}`,
+          );
         }
 
         const quantityAfter = quantityBefore - quantity;
 
-        await equipment.update(
-          { quantity: quantityAfter },
-          { transaction },
-        );
+        await equipment.update({ quantity: quantityAfter }, { transaction });
 
         await ExportOrderDetail.create(
           {

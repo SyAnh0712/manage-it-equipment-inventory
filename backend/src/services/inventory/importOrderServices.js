@@ -33,7 +33,9 @@ const createImportOrder = async (importOrderData) => {
           throw new Error("Thiếu equipment_id trong chi tiết nhập kho");
         }
 
-        const equipment = await Equipment.findByPk(item.equipment_id, { transaction });
+        const equipment = await Equipment.findByPk(item.equipment_id, {
+          transaction,
+        });
         if (!equipment) {
           throw new Error(`Thiếu thiết bị với id ${item.equipment_id}`);
         }
@@ -46,10 +48,7 @@ const createImportOrder = async (importOrderData) => {
         const quantityBefore = Number(equipment.quantity || 0);
         const quantityAfter = quantityBefore + quantity;
 
-        await equipment.update(
-          { quantity: quantityAfter },
-          { transaction },
-        );
+        await equipment.update({ quantity: quantityAfter }, { transaction });
 
         await ImportOrderDetail.create(
           {
