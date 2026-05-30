@@ -1,6 +1,6 @@
 const db = require("../../models");
 const { Op } = require("sequelize");
-const { hashPassword } = require("../../utils/passwordHelper");
+const { hashPassword, comparePassword } = require("../../utils/passwordHelper");
 
 const User = db.User;
 
@@ -120,10 +120,94 @@ const deleteUser = async (id) => {
   }
 };
 
+const changePassword = async (userId, oldPassword, newPassword) => {
+  try {
+    if (!oldPassword || !newPassword) {
+      throw new Error("Old password and new password are required");
+    }
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const isPasswordValid = await comparePassword(oldPassword, user.password);
+
+    if (!isPasswordValid) {
+      throw new Error("Old password is incorrect");
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    await user.update({ password: hashedPassword });
+
+    return removePasswordField(user);
+  } catch (error) {
+    throw new Error("Error changing password: " + error.message);
+  }
+};
+
+const lockUser = async (id) => {
+  try {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await user.update({ is_locked: true });
+
+    return removePasswordField(user);
+  } catch (error) {
+    throw new Error("Error locking user: " + error.message);
+  }
+};
+
+const unlockUser = async (id) => {
+  try {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await user.update({ is_locked: false });
+
+    return removePasswordField(user);
+  } catch (error) {
+    throw new Error("Error unlocking user: " + error.message);
+  }
+};
+
+const resetPassword = async (id, newPassword) => {
+  try {
+    if (!newPassword) {
+      throw new Error("New password is required");
+    }
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+    await user.update({ password: hashedPassword });
+
+    return removePasswordField(user);
+  } catch (error) {
+    throw new Error("Error resetting password: " + error.message);
+  }
+};
+
 module.exports = {
   createUser,
   getAllUsers,
   getUserById,
   updateUser,
   deleteUser,
+  changePassword,
+  lockUser,
+  unlockUser,
+  resetPassword,
 };

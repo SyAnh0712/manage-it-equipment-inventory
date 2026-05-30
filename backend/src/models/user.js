@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
       email: DataTypes.STRING,
 
       role: DataTypes.ENUM("admin", "staff"),
+
+      is_locked: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
     {
       sequelize,

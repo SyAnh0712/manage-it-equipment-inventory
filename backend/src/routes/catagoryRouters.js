@@ -3,10 +3,8 @@ const express = require("express");
 const router = express.Router();
 
 const catagoryController = require("../controllers/catagoryControllers");
-const {
-  authMiddleware,
-  roleMiddleware,
-} = require("../middlewares/authMiddlewares");
+const authMiddleware = require("../middlewares/authMiddlewares");
+const roleMiddleware = require("../middlewares/roleMiddleware");
 const {
   validate,
   categorySchema,

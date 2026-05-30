@@ -2,10 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 const importOrderController = require("../controllers/importOrderControllers");
-const {
-  authMiddleware,
-  roleMiddleware,
-} = require("../middlewares/authMiddlewares");
+const authMiddleware = require("../middlewares/authMiddlewares");
+const roleMiddleware = require("../middlewares/roleMiddleware");
 const {
   validate,
   importOrderSchema,

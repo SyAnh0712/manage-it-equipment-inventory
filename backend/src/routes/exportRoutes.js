@@ -2,10 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 const exportOrderController = require("../controllers/exportOrderControllers");
-const {
-  authMiddleware,
-  roleMiddleware,
-} = require("../middlewares/authMiddlewares");
+const authMiddleware = require("../middlewares/authMiddlewares");
+const roleMiddleware = require("../middlewares/roleMiddleware");
 const {
   validate,
   exportOrderSchema,

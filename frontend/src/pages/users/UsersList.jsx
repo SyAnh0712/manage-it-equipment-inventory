@@ -43,7 +43,7 @@ const UsersList = () => {
     try {
       setLoading(true);
       const response = await userService.getAllUsers();
-      setUsers(response?.data || response || []);
+      setUsers(response?.data?.data || []);
     } catch (error) {
       toast.error("Failed to fetch users");
       console.error(error);

@@ -1,55 +1,61 @@
 const jwt = require("jsonwebtoken");
+const db = require("../models");
 
-const { accessTokenSecret } = require("../config/jwt");
-
-const authMiddleware = (req, res, next) => {
+const authMiddlewares = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.headers.authorization?.split(" ")[1];
 
-    if (!authHeader) {
+    if (!token) {
       return res.status(401).json({
-        message: "Chưa đăng nhập",
+        success: false,
+        message: "Unauthorized: No token provided",
       });
     }
 
-    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your-secret-key",
+    );
 
-    const decoded = jwt.verify(token, accessTokenSecret);
+    const user = await db.User.findByPk(decoded.id);
 
-    req.user = decoded;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: User not found",
+      });
+    }
+
+    if (user.is_locked) {
+      return res.status(403).json({
+        success: false,
+        message: "Account is locked",
+      });
+    }
+
+    req.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+      is_locked: user.is_locked,
+    };
 
     next();
   } catch (error) {
-    console.error("Auth middleware error:", error.message);
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        message: "Token expired",
+      });
+    }
+
     return res.status(401).json({
-      message: "Token không hợp lệ",
+      success: false,
+      message: "Invalid token",
     });
   }
 };
 
-const roleMiddleware = (allowedRoles = []) => {
-  return (req, res, next) => {
-    if (!req.user?.role) {
-      return res.status(403).json({
-        success: false,
-        message: "Không có quyền truy cập",
-      });
-    }
-
-    const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
-
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: "Bạn không có quyền thực hiện thao tác này",
-      });
-    }
-
-    next();
-  };
-};
-
-module.exports = {
-  authMiddleware,
-  roleMiddleware,
-};
+module.exports = authMiddlewares;

@@ -26,6 +26,7 @@ module.exports = function InventoryLog(sequelize, DataTypes) {
     {
       sequelize,
       modelName: "InventoryLog",
+      tableName: "inventory_logs",
       createdAt: "created_at",
       updatedAt: "updated_at",
       deletedAt: "deleted_at",

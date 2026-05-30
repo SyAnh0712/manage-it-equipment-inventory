@@ -2,10 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 const inventoryLogController = require("../controllers/inventoryLogControllers");
-const {
-  authMiddleware,
-  roleMiddleware,
-} = require("../middlewares/authMiddlewares");
+const authMiddleware = require("../middlewares/authMiddlewares");
+const roleMiddleware = require("../middlewares/roleMiddleware");
 
 router.use(authMiddleware);
 router.get(
