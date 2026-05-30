@@ -8,7 +8,7 @@ const suppliersRoutes = [
   {
     path: "/suppliers",
     element: (
-      <AdminRoute>
+      <AdminRoute adminOnly={true}>
         <SuppliersList />
       </AdminRoute>
     ),

@@ -17,7 +17,7 @@ const equipmentRoutes = [
   {
     path: "/equipment/add",
     element: (
-      <AdminRoute adminOnly>
+      <AdminRoute adminOnly={true}>
         <AddEquipments />
       </AdminRoute>
     ),
@@ -26,7 +26,7 @@ const equipmentRoutes = [
   {
     path: "/equipment/:id/edit",
     element: (
-      <AdminRoute adminOnly>
+      <AdminRoute adminOnly={true}>
         <EditEquipments />
       </AdminRoute>
     ),

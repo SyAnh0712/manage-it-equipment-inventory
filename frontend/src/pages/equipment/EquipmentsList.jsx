@@ -3,6 +3,7 @@ import { Container, Row, Col, Button as BSButton, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import { useAuth } from "../../hooks/useAuth";
 import EquipmentTable from "../../components/ui/EquipmentTable";
 import Pagination from "../../components/common/Pagination";
 import SearchBox from "../../components/common/SearchBox";
@@ -82,6 +83,9 @@ const EquipmentsList = () => {
     return <Loading />;
   }
 
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
   return (
     <Container fluid className="py-4">
       <Row className="mb-4 align-items-center">
@@ -89,14 +93,16 @@ const EquipmentsList = () => {
           <h1>Equipments Management</h1>
         </Col>
 
-        <Col className="text-end">
-          <Link to="/equipment/add">
-            <BSButton variant="primary">
-              <i className="bi bi-plus-circle me-2"></i>
-              Add New Equipment
-            </BSButton>
-          </Link>
-        </Col>
+        {isAdmin && (
+          <Col className="text-end">
+            <Link to="/equipment/add">
+              <BSButton variant="primary">
+                <i className="bi bi-plus-circle me-2"></i>
+                Add New Equipment
+              </BSButton>
+            </Link>
+          </Col>
+        )}
       </Row>
 
       <Card className="mb-3">
@@ -130,6 +136,7 @@ const EquipmentsList = () => {
               <EquipmentTable
                 equipments={pagination.paginatedItems}
                 onDelete={(id) => setDeleteId(id)}
+                isAdmin={isAdmin}
               />
 
               <div className="d-flex justify-content-center mt-4">

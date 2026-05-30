@@ -3,6 +3,7 @@ import { Container, Row, Col, Button as BSButton, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import { useAuth } from "../../hooks/useAuth";
 import CategoriesTable from "../../components/ui/CategoriesTable";
 import Pagination from "../../components/common/Pagination";
 import SearchBox from "../../components/common/SearchBox";
@@ -73,6 +74,9 @@ const CategoriesList = () => {
     }
   };
 
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
   if (loading) {
     return <Loading />;
   }
@@ -84,14 +88,16 @@ const CategoriesList = () => {
           <h1>Categories Management</h1>
         </Col>
 
-        <Col className="text-end">
-          <Link to="/categories/add">
-            <BSButton variant="primary">
-              <i className="bi bi-plus-circle me-2"></i>
-              Add New Category
-            </BSButton>
-          </Link>
-        </Col>
+        {isAdmin && (
+          <Col className="text-end">
+            <Link to="/categories/add">
+              <BSButton variant="primary">
+                <i className="bi bi-plus-circle me-2"></i>{" "}
+                Add New Category
+              </BSButton>
+            </Link>
+          </Col>
+        )}
       </Row>
 
       <Card className="mb-3">
@@ -125,6 +131,7 @@ const CategoriesList = () => {
               <CategoriesTable
                 categories={pagination.paginatedItems}
                 onDelete={(id) => setDeleteId(id)}
+                isAdmin={isAdmin}
               />
 
               <div className="d-flex justify-content-center mt-4">

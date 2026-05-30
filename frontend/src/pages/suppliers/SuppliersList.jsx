@@ -3,6 +3,7 @@ import { Container, Row, Col, Button as BSButton, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import { useAuth } from "../../hooks/useAuth";
 import SuppliersTable from "../../components/ui/SuppliersTable";
 import Pagination from "../../components/common/Pagination";
 import SearchBox from "../../components/common/SearchBox";
@@ -67,6 +68,9 @@ const SuppliersList = () => {
     }
   };
 
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
   if (loading) {
     return <Loading />;
   }
@@ -77,14 +81,16 @@ const SuppliersList = () => {
         <Col>
           <h1>Suppliers Management</h1>
         </Col>
-        <Col className="text-end">
-          <Link to="/suppliers/add">
-            <BSButton variant="primary">
-              <i className="bi bi-plus-circle me-2"></i>
-              Add New Supplier
-            </BSButton>
-          </Link>
-        </Col>
+        {isAdmin && (
+          <Col className="text-end">
+            <Link to="/suppliers/add">
+              <BSButton variant="primary">
+                <i className="bi bi-plus-circle me-2"></i>{" "}
+                Add New Supplier
+              </BSButton>
+            </Link>
+          </Col>
+        )}
       </Row>
 
       <Card className="mb-3">
@@ -117,6 +123,7 @@ const SuppliersList = () => {
               <SuppliersTable
                 suppliers={pagination.paginatedItems}
                 onDelete={(id) => setDeleteId(id)}
+                isAdmin={isAdmin}
               />
 
               <div className="d-flex justify-content-center mt-4">
