@@ -20,8 +20,8 @@ router.post(
   validate(categorySchema),
   catagoryController.createCategory,
 );
-router.get("/", catagoryController.getAllCategories);
-router.get("/:id", catagoryController.getCategoryById);
+router.get("/", roleMiddleware("admin"), catagoryController.getAllCategories);
+router.get("/:id", roleMiddleware("admin"), catagoryController.getCategoryById);
 router.put(
   "/:id",
   roleMiddleware("admin"),

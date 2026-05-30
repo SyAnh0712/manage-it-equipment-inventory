@@ -31,16 +31,21 @@ const Sidebar = () => {
         <div className="text-muted small px-2 mb-2">QUẢN LÝ</div>
 
         <Nav.Link as={Link} to="/equipment" className="text-light nav-item">
-          <i className="bi bi-inbox me-2"></i> Equipment
+          <i className="bi bi-inbox me-2"></i>{" "}
+          {isAdmin ? "Equipment" : "Kiểm kê kho"}
         </Nav.Link>
 
-        <Nav.Link as={Link} to="/categories" className="text-light nav-item">
-          <i className="bi bi-bookmark me-2"></i> Categories
-        </Nav.Link>
+        {isAdmin && (
+          <>
+            <Nav.Link as={Link} to="/categories" className="text-light nav-item">
+              <i className="bi bi-bookmark me-2"></i> Categories
+            </Nav.Link>
 
-        <Nav.Link as={Link} to="/suppliers" className="text-light nav-item">
-          <i className="bi bi-truck me-2"></i> Suppliers
-        </Nav.Link>
+            <Nav.Link as={Link} to="/suppliers" className="text-light nav-item">
+              <i className="bi bi-truck me-2"></i> Suppliers
+            </Nav.Link>
+          </>
+        )}
 
         <Nav.Link as={Link} to="/imports" className="text-light nav-item">
           <i className="bi bi-box-arrow-in-down me-2"></i> Import Orders
@@ -50,13 +55,15 @@ const Sidebar = () => {
           <i className="bi bi-box-arrow-up me-2"></i> Export Orders
         </Nav.Link>
 
-        <Nav.Link
-          as={Link}
-          to="/inventory-logs"
-          className="text-light nav-item"
-        >
-          <i className="bi bi-journal-text me-2"></i> Inventory History
-        </Nav.Link>
+        {isAdmin && (
+          <Nav.Link
+            as={Link}
+            to="/inventory-logs"
+            className="text-light nav-item"
+          >
+            <i className="bi bi-journal-text me-2"></i> Inventory History
+          </Nav.Link>
+        )}
 
         {isAdmin && (
           <>

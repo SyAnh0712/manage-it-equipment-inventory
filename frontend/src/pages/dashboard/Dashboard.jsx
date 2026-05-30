@@ -320,9 +320,9 @@ const Dashboard = () => {
                 <Card.Body>
                   <p>Các chức năng chính của bạn:</p>
                   <ul>
+                    <li>Xem thiết bị và kiểm kê tồn kho</li>
                     <li>Tạo phiếu nhập kho</li>
                     <li>Tạo phiếu xuất kho</li>
-                    <li>Xem lịch sử nhập xuất</li>
                     <li>Quản lý tài khoản cá nhân</li>
                   </ul>
                 </Card.Body>

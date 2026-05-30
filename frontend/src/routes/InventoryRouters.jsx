@@ -5,7 +5,7 @@ const inventoryRoutes = [
   {
     path: "/inventory-logs",
     element: (
-      <AdminRoute>
+      <AdminRoute adminOnly={true}>
         <InventoryLogs />
       </AdminRoute>
     ),
