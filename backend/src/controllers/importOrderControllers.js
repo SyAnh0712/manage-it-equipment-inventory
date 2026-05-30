@@ -14,7 +14,10 @@ const createImportOrder = async (req, res, nextHandler) => {
 
 const getAllImportOrders = async (req, res, nextHandler) => {
   try {
-    const importOrders = await importOrderService.getAllImportOrders(req.query);
+    const importOrders = await importOrderService.getAllImportOrders(
+      req.query,
+      req.user,
+    );
     res.json(importOrders);
   } catch (error) {
     next(error);
@@ -25,6 +28,7 @@ const getImportOrderById = async (req, res, nextHandler) => {
   try {
     const importOrder = await importOrderService.getImportOrderById(
       req.params.id,
+      req.user,
     );
     if (!importOrder) {
       const err = new Error("Import order not found");

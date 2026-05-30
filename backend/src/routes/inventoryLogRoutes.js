@@ -2,9 +2,16 @@ const express = require("express");
 
 const router = express.Router();
 const inventoryLogController = require("../controllers/inventoryLogControllers");
-const { authMiddleware } = require("../middlewares/authMiddlewares");
+const {
+  authMiddleware,
+  roleMiddleware,
+} = require("../middlewares/authMiddlewares");
 
 router.use(authMiddleware);
-router.get("/", inventoryLogController.getAllInventoryLogs);
+router.get(
+  "/",
+  roleMiddleware("admin"),
+  inventoryLogController.getAllInventoryLogs,
+);
 
 module.exports = router;

@@ -199,11 +199,43 @@ const rejectImportOrder = async (id, approverId) => {
   }
 };
 
-const getAllImportOrders = async (query = {}) => {
+const verifyImportOrderAccess = (order, user) => {
+  if (!order) {
+    throw new Error("Import order not found");
+  }
+
+  if (user?.role === "admin") {
+    return;
+  }
+
+  if (String(order.created_by) !== String(user?.id)) {
+    throw new Error("Bạn không có quyền xem đơn hàng này");
+  }
+};
+
+const getImportOrderById = async (id, user) => {
   try {
-    const page = Math.max(1, Number(query.page) || 1);
-    const limit = Math.max(1, Number(query.limit) || 10);
-    const search = (query.search || "").trim();
+    const importOrder = await ImportOrder.findByPk(id, {
+      include: [
+        { model: db.Supplier, as: "supplier" },
+        { model: db.User, as: "creator" },
+        { model: db.ImportOrderDetail, as: "details" },
+      ],
+    });
+
+    verifyImportOrderAccess(importOrder, user);
+    return importOrder;
+  } catch (error) {
+    throw new Error("Error fetching import order: " + error.message);
+  }
+};
+
+const getAllImportOrders = async (query, user) => {
+  try {
+    const safeQuery = query || {};
+    const page = Math.max(1, Number(safeQuery.page) || 1);
+    const limit = Math.max(1, Number(safeQuery.limit) || 10);
+    const search = (safeQuery.search || "").trim();
 
     const where = search
       ? {
@@ -214,6 +246,10 @@ const getAllImportOrders = async (query = {}) => {
           ],
         }
       : {};
+
+    if (user?.role !== "admin") {
+      where.created_by = user?.id;
+    }
 
     const { count, rows } = await ImportOrder.findAndCountAll({
       where,
@@ -237,20 +273,6 @@ const getAllImportOrders = async (query = {}) => {
     };
   } catch (error) {
     throw new Error("Error fetching import orders: " + error.message);
-  }
-};
-
-const getImportOrderById = async (id) => {
-  try {
-    return await ImportOrder.findByPk(id, {
-      include: [
-        { model: db.Supplier, as: "supplier" },
-        { model: db.User, as: "creator" },
-        { model: db.ImportOrderDetail, as: "details" },
-      ],
-    });
-  } catch (error) {
-    throw new Error("Error fetching import order: " + error.message);
   }
 };
 

@@ -204,11 +204,42 @@ const rejectExportOrder = async (id, approverId) => {
   }
 };
 
-const getAllExportOrders = async (query = {}) => {
+const verifyExportOrderAccess = (order, user) => {
+  if (!order) {
+    throw new Error("Export order not found");
+  }
+
+  if (user?.role === "admin") {
+    return;
+  }
+
+  if (String(order.created_by) !== String(user?.id)) {
+    throw new Error("Bạn không có quyền xem đơn hàng này");
+  }
+};
+
+const getExportOrderById = async (id, user) => {
   try {
-    const page = Math.max(1, Number(query.page) || 1);
-    const limit = Math.max(1, Number(query.limit) || 10);
-    const search = (query.search || "").trim();
+    const exportOrder = await ExportOrder.findByPk(id, {
+      include: [
+        { model: db.User, as: "creator" },
+        { model: db.ExportOrderDetail, as: "details" },
+      ],
+    });
+
+    verifyExportOrderAccess(exportOrder, user);
+    return exportOrder;
+  } catch (error) {
+    throw new Error("Error fetching export order: " + error.message);
+  }
+};
+
+const getAllExportOrders = async (query, user) => {
+  try {
+    const safeQuery = query || {};
+    const page = Math.max(1, Number(safeQuery.page) || 1);
+    const limit = Math.max(1, Number(safeQuery.limit) || 10);
+    const search = (safeQuery.search || "").trim();
 
     const where = search
       ? {
@@ -220,6 +251,10 @@ const getAllExportOrders = async (query = {}) => {
           ],
         }
       : {};
+
+    if (user?.role !== "admin") {
+      where.created_by = user?.id;
+    }
 
     const { count, rows } = await ExportOrder.findAndCountAll({
       where,
@@ -240,19 +275,6 @@ const getAllExportOrders = async (query = {}) => {
     };
   } catch (error) {
     throw new Error("Error fetching export orders: " + error.message);
-  }
-};
-
-const getExportOrderById = async (id) => {
-  try {
-    return await ExportOrder.findByPk(id, {
-      include: [
-        { model: db.User, as: "creator" },
-        { model: db.ExportOrderDetail, as: "details" },
-      ],
-    });
-  } catch (error) {
-    throw new Error("Error fetching export order: " + error.message);
   }
 };
 

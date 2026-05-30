@@ -14,7 +14,10 @@ const createExportOrder = async (req, res, nextHandler) => {
 
 const getAllExportOrders = async (req, res, nextHandler) => {
   try {
-    const exportOrders = await exportOrderService.getAllExportOrders(req.query);
+    const exportOrders = await exportOrderService.getAllExportOrders(
+      req.query,
+      req.user,
+    );
     res.json(exportOrders);
   } catch (error) {
     nextHandler(error);
@@ -25,6 +28,7 @@ const getExportOrderById = async (req, res, nextHandler) => {
   try {
     const exportOrder = await exportOrderService.getExportOrderById(
       req.params.id,
+      req.user,
     );
     if (!exportOrder) {
       const err = new Error("Export order not found");
