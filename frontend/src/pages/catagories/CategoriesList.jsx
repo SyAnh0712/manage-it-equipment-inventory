@@ -92,8 +92,7 @@ const CategoriesList = () => {
           <Col className="text-end">
             <Link to="/categories/add">
               <BSButton variant="primary">
-                <i className="bi bi-plus-circle me-2"></i>{" "}
-                Add New Category
+                <i className="bi bi-plus-circle me-2"></i> Add New Category
               </BSButton>
             </Link>
           </Col>

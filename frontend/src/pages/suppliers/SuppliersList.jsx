@@ -85,8 +85,7 @@ const SuppliersList = () => {
           <Col className="text-end">
             <Link to="/suppliers/add">
               <BSButton variant="primary">
-                <i className="bi bi-plus-circle me-2"></i>{" "}
-                Add New Supplier
+                <i className="bi bi-plus-circle me-2"></i> Add New Supplier
               </BSButton>
             </Link>
           </Col>
