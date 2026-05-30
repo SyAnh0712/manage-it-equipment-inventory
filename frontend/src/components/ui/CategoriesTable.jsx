@@ -15,6 +15,7 @@ const CategoriesTable = ({ categories, onDelete, isAdmin }) => {
       <thead>
         <tr>
           <th>#</th>
+          <th>Image</th>
           <th>Category Name</th>
           <th>Description</th>
           <th>Created At</th>
@@ -26,6 +27,18 @@ const CategoriesTable = ({ categories, onDelete, isAdmin }) => {
         {categories.map((category, index) => (
           <tr key={category.id}>
             <td>{index + 1}</td>
+
+            <td>
+              {category.image_url ? (
+                <img
+                  src={category.image_url}
+                  alt={category.name}
+                  style={{ width: 60, height: 60, objectFit: "cover" }}
+                />
+              ) : (
+                "No Image"
+              )}
+            </td>
 
             <td>{category.name}</td>
 

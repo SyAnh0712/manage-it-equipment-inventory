@@ -24,14 +24,14 @@ const SuppliersList = () => {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  const filteredSuppliers = suppliers.filter(
-    (supplier) =>
-      supplier.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      supplier.contact_person
-        .toLowerCase()
-        .includes(debouncedSearchTerm.toLowerCase()) ||
-      supplier.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()),
-  );
+  const filteredSuppliers = suppliers.filter((supplier) => {
+    const name = supplier.name?.toLowerCase() || "";
+    const contact = supplier.contact_person?.toLowerCase() || "";
+    const email = supplier.email?.toLowerCase() || "";
+    const query = debouncedSearchTerm.toLowerCase();
+
+    return name.includes(query) || contact.includes(query) || email.includes(query);
+  });
 
   const pagination = usePagination(filteredSuppliers, 10);
 

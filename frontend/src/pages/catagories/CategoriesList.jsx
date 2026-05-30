@@ -24,21 +24,17 @@ const CategoriesList = () => {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  const filteredCategories = categories.filter(
-    (category) =>
-      category.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      category.description
-        .toLowerCase()
-        .includes(debouncedSearchTerm.toLowerCase()),
-  );
+  const filteredCategories = categories.filter((category) => {
+    const name = category.name?.toLowerCase() || "";
+    const description = category.description?.toLowerCase() || "";
+    const query = debouncedSearchTerm.toLowerCase();
+
+    return name.includes(query) || description.includes(query);
+  });
 
   const pagination = usePagination(filteredCategories, 10);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
+  async function fetchCategories() {
     try {
       setLoading(true);
 
@@ -51,7 +47,11 @@ const CategoriesList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleDelete = async () => {
     try {

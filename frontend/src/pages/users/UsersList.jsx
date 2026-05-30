@@ -20,14 +20,18 @@ const UsersList = () => {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.username.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      user.full_name
-        .toLowerCase()
-        .includes(debouncedSearchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase()),
-  );
+  const filteredUsers = users.filter((user) => {
+    const username = user.username?.toLowerCase() || "";
+    const fullName = user.full_name?.toLowerCase() || "";
+    const email = user.email?.toLowerCase() || "";
+    const query = debouncedSearchTerm.toLowerCase();
+
+    return (
+      username.includes(query) ||
+      fullName.includes(query) ||
+      email.includes(query)
+    );
+  });
 
   const pagination = usePagination(filteredUsers, 10);
 
@@ -77,7 +81,7 @@ const UsersList = () => {
         <Col className="text-end">
           <Link to="/users/add">
             <BSButton variant="primary">
-              <i className="bi bi-plus-circle me-2"></i>
+              <i className="bi bi-plus-circle me-2"></i>{" "}
               Add New User
             </BSButton>
           </Link>
