@@ -17,6 +17,7 @@ const UsersList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [processingLockId, setProcessingLockId] = useState(null);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -65,6 +66,28 @@ const UsersList = () => {
       console.error(error);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleToggleLock = async (user) => {
+    try {
+      setProcessingLockId(user.id);
+      if (user.is_locked) {
+        const response = await userService.unlockUser(user.id);
+        const updated = response?.data || response;
+        setUsers((prev) => prev.map((u) => (u.id === user.id ? updated : u)));
+        toast.success("User unlocked successfully");
+      } else {
+        const response = await userService.lockUser(user.id);
+        const updated = response?.data || response;
+        setUsers((prev) => prev.map((u) => (u.id === user.id ? updated : u)));
+        toast.success("User locked successfully");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.message || "Failed to change lock status");
+    } finally {
+      setProcessingLockId(null);
     }
   };
 
@@ -117,6 +140,8 @@ const UsersList = () => {
               <UserTable
                 users={pagination.paginatedItems}
                 onDelete={(id) => setDeleteId(id)}
+                onToggleLock={handleToggleLock}
+                processingLockId={processingLockId}
               />
               <div className="d-flex justify-content-center mt-4">
                 <Pagination

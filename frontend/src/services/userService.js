@@ -20,6 +20,14 @@ const userService = {
   deleteUser: (id) => {
     return axiosClient.delete(`/users/${id}`);
   },
+
+  lockUser: (id) => {
+    return axiosClient.post(`/users/${id}/lock`);
+  },
+
+  unlockUser: (id) => {
+    return axiosClient.post(`/users/${id}/unlock`);
+  },
 };
 
 export default userService;

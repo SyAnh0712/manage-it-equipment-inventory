@@ -1,9 +1,11 @@
 import { Table, Button as BSButton } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import StatusBadge from "../common/StatusBadge";
+import { useAuth } from "../../hooks/useAuth";
 import { formatDate } from "../../utils/formatDate";
 
-const UserTable = ({ users, onDelete }) => {
+const UserTable = ({ users, onDelete, onToggleLock, processingLockId }) => {
+  const { user: currentUser } = useAuth();
   if (!users || users.length === 0) {
     return <div className="alert alert-info text-center">No users found</div>;
   }
@@ -17,6 +19,7 @@ const UserTable = ({ users, onDelete }) => {
           <th>Full Name</th>
           <th>Email</th>
           <th>Role</th>
+          {currentUser?.role === "admin" && <th>Locked</th>}
           <th>Created At</th>
           <th>Actions</th>
         </tr>
@@ -31,6 +34,15 @@ const UserTable = ({ users, onDelete }) => {
             <td>
               <StatusBadge status={user.role} />
             </td>
+            {currentUser?.role === "admin" && (
+              <td>
+                {user.is_locked ? (
+                  <span className="badge bg-danger">Locked</span>
+                ) : (
+                  <span className="badge bg-success">Active</span>
+                )}
+              </td>
+            )}
             <td>{formatDate(user.created_at)}</td>
             <td>
               <Link to={`/users/${user.id}/edit`}>
@@ -38,6 +50,37 @@ const UserTable = ({ users, onDelete }) => {
                   <i className="bi bi-pencil"></i> Edit
                 </BSButton>
               </Link>
+
+              {currentUser?.role === "admin" && (
+                <BSButton
+                  variant={user.is_locked ? "secondary" : "outline-secondary"}
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onToggleLock && onToggleLock(user)}
+                  disabled={processingLockId === user.id}
+                  title={user.is_locked ? "Unlock user" : "Lock user"}
+                >
+                  {processingLockId === user.id ? (
+                    <span
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                  ) : (
+                    <>
+                      <i
+                        className={
+                          user.is_locked ? "bi bi-unlock" : "bi bi-lock"
+                        }
+                      ></i>
+                      <span className="ms-1">
+                        {user.is_locked ? "Unlock" : "Lock"}
+                      </span>
+                    </>
+                  )}
+                </BSButton>
+              )}
+
               <BSButton
                 variant="danger"
                 size="sm"

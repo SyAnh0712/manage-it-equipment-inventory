@@ -21,7 +21,9 @@ const EditUsers = () => {
     try {
       setLoading(true);
       const response = await userService.getUserById(id);
-      setUser(response);
+      // axiosClient returns response.data as the API body, which is { success, data }
+      // so prefer response.data (the actual user) when available
+      setUser(response?.data || response);
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch user");

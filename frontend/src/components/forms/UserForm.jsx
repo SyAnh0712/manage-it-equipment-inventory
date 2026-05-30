@@ -1,5 +1,6 @@
 import { Form, Button } from "react-bootstrap";
 import { useForm, Controller } from "react-hook-form";
+import { useAuth } from "../../hooks/useAuth";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -28,9 +29,11 @@ const userValidationSchema = yup.object().shape({
     .string()
     .required("Role is required")
     .oneOf(["admin", "staff"], "Role must be either admin or staff"),
+  is_locked: yup.boolean(),
 });
 
 const UserForm = ({ onSubmit, initialData = null, isLoading = false }) => {
+  const { user: currentUser } = useAuth();
   const {
     control,
     handleSubmit,
@@ -43,6 +46,7 @@ const UserForm = ({ onSubmit, initialData = null, isLoading = false }) => {
       email: "",
       password: "",
       role: "staff",
+      is_locked: false,
     },
   });
 
@@ -157,6 +161,28 @@ const UserForm = ({ onSubmit, initialData = null, isLoading = false }) => {
           {errors.role?.message}
         </Form.Control.Feedback>
       </Form.Group>
+
+      {/* Show lock/unlock toggle only to admin users */}
+      {currentUser?.role === "admin" && (
+        <Form.Group className="mb-3">
+          <Form.Label>Locked</Form.Label>
+          <Controller
+            name="is_locked"
+            control={control}
+            render={({ field }) => (
+              <Form.Check
+                {...field}
+                type="switch"
+                id="is_locked"
+                label={field.value ? "Locked" : "Active"}
+                checked={!!field.value}
+                onChange={(e) => field.onChange(e.target.checked)}
+                disabled={isLoading}
+              />
+            )}
+          />
+        </Form.Group>
+      )}
 
       <div className="d-grid gap-2">
         <Button variant="primary" type="submit" disabled={isLoading}>
