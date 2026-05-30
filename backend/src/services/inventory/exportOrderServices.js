@@ -44,6 +44,24 @@ const validateExportItems = async (detailList, transaction) => {
   return validDetails;
 };
 
+const verifyExportOrderOwnership = (order, user) => {
+  if (!order) {
+    throw new Error("Export order not found");
+  }
+
+  if (order.status !== "pending") {
+    throw new Error("Chỉ có thể cập nhật đơn đang ở trạng thái pending");
+  }
+
+  if (user?.role === "admin") {
+    return;
+  }
+
+  if (String(order.created_by) !== String(user?.id)) {
+    throw new Error("Bạn không có quyền cập nhật đơn hàng này");
+  }
+};
+
 const createExportOrder = async (exportOrderData, userId) => {
   try {
     const { details, ...orderData } = exportOrderData;
@@ -238,16 +256,10 @@ const getExportOrderById = async (id) => {
   }
 };
 
-const updateExportOrder = async (id, exportOrderData) => {
+const updateExportOrder = async (id, exportOrderData, user) => {
   try {
     const exportOrder = await ExportOrder.findByPk(id);
-    if (!exportOrder) {
-      throw new Error("Export order not found");
-    }
-
-    if (exportOrder.status !== "pending") {
-      throw new Error("Chỉ có thể cập nhật đơn đang ở trạng thái pending");
-    }
+    verifyExportOrderOwnership(exportOrder, user);
 
     const { details, status, created_by, ...orderData } = exportOrderData;
 
@@ -285,16 +297,10 @@ const updateExportOrder = async (id, exportOrderData) => {
   }
 };
 
-const deleteExportOrder = async (id) => {
+const deleteExportOrder = async (id, user) => {
   try {
     const exportOrder = await ExportOrder.findByPk(id);
-    if (!exportOrder) {
-      throw new Error("Export order not found");
-    }
-
-    if (exportOrder.status !== "pending") {
-      throw new Error("Chỉ có thể xóa đơn đang ở trạng thái pending");
-    }
+    verifyExportOrderOwnership(exportOrder, user);
 
     await exportOrder.destroy();
     return { message: "Export order deleted successfully" };

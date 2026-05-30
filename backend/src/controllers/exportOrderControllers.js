@@ -43,6 +43,7 @@ const updateExportOrder = async (req, res, nextHandler) => {
     const exportOrder = await exportOrderService.updateExportOrder(
       req.params.id,
       req.body,
+      req.user,
     );
 
     res.json(exportOrder);
@@ -53,7 +54,10 @@ const updateExportOrder = async (req, res, nextHandler) => {
 
 const deleteExportOrder = async (req, res, nextHandler) => {
   try {
-    const result = await exportOrderService.deleteExportOrder(req.params.id);
+    const result = await exportOrderService.deleteExportOrder(
+      req.params.id,
+      req.user,
+    );
     res.json(result);
   } catch (error) {
     nextHandler(error);

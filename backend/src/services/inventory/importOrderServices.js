@@ -45,6 +45,24 @@ const validateImportItems = async (detailList, transaction) => {
   return validDetails;
 };
 
+const verifyImportOrderOwnership = (order, user) => {
+  if (!order) {
+    throw new Error("Import order not found");
+  }
+
+  if (order.status !== "pending") {
+    throw new Error("Chỉ có thể cập nhật đơn đang ở trạng thái pending");
+  }
+
+  if (user?.role === "admin") {
+    return;
+  }
+
+  if (String(order.created_by) !== String(user?.id)) {
+    throw new Error("Bạn không có quyền cập nhật đơn hàng này");
+  }
+};
+
 const createImportOrder = async (importOrderData, userId) => {
   try {
     const { details, ...orderData } = importOrderData;
@@ -236,16 +254,10 @@ const getImportOrderById = async (id) => {
   }
 };
 
-const updateImportOrder = async (id, importOrderData) => {
+const updateImportOrder = async (id, importOrderData, user) => {
   try {
     const importOrder = await ImportOrder.findByPk(id);
-    if (!importOrder) {
-      throw new Error("Import order not found");
-    }
-
-    if (importOrder.status !== "pending") {
-      throw new Error("Chỉ có thể cập nhật đơn đang ở trạng thái pending");
-    }
+    verifyImportOrderOwnership(importOrder, user);
 
     const { details, status, created_by, ...orderData } = importOrderData;
 
@@ -284,16 +296,10 @@ const updateImportOrder = async (id, importOrderData) => {
   }
 };
 
-const deleteImportOrder = async (id) => {
+const deleteImportOrder = async (id, user) => {
   try {
     const importOrder = await ImportOrder.findByPk(id);
-    if (!importOrder) {
-      throw new Error("Import order not found");
-    }
-
-    if (importOrder.status !== "pending") {
-      throw new Error("Chỉ có thể xóa đơn đang ở trạng thái pending");
-    }
+    verifyImportOrderOwnership(importOrder, user);
 
     await importOrder.destroy();
     return { message: "Import order deleted successfully" };

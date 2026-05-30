@@ -17,7 +17,7 @@ const suppliersRoutes = [
   {
     path: "/suppliers/add",
     element: (
-      <AdminRoute>
+      <AdminRoute adminOnly={true}>
         <AddSupplier />
       </AdminRoute>
     ),
@@ -26,7 +26,7 @@ const suppliersRoutes = [
   {
     path: "/suppliers/:id/edit",
     element: (
-      <AdminRoute>
+      <AdminRoute adminOnly={true}>
         <EditSupplier />
       </AdminRoute>
     ),

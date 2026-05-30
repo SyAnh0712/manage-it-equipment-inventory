@@ -23,37 +23,36 @@ const Sidebar = () => {
           <i className="bi bi-speedometer2 me-2"></i> Dashboard
         </Nav.Link>
 
+        <hr className="bg-secondary" />
+        <div className="text-muted small px-2 mb-2">QUẢN LÝ</div>
+
+        <Nav.Link as={Link} to="/equipment" className="text-light nav-item">
+          <i className="bi bi-inbox me-2"></i> Equipment
+        </Nav.Link>
+
+        <Nav.Link as={Link} to="/categories" className="text-light nav-item">
+          <i className="bi bi-bookmark me-2"></i> Categories
+        </Nav.Link>
+
+        <Nav.Link as={Link} to="/suppliers" className="text-light nav-item">
+          <i className="bi bi-truck me-2"></i> Suppliers
+        </Nav.Link>
+
+        <Nav.Link
+          as={Link}
+          to="/inventory-logs"
+          className="text-light nav-item"
+        >
+          <i className="bi bi-journal-text me-2"></i> Inventory History
+        </Nav.Link>
+
         {isAdmin && (
           <>
             <hr className="bg-secondary" />
-            <div className="text-muted small px-2 mb-2">MANAGEMENT</div>
+            <div className="text-muted small px-2 mb-2">ADMIN</div>
 
             <Nav.Link as={Link} to="/users" className="text-light nav-item">
               <i className="bi bi-people me-2"></i> Users
-            </Nav.Link>
-
-            <Nav.Link as={Link} to="/equipment" className="text-light nav-item">
-              <i className="bi bi-inbox me-2"></i> Equipment
-            </Nav.Link>
-
-            <Nav.Link
-              as={Link}
-              to="/categories"
-              className="text-light nav-item"
-            >
-              <i className="bi bi-bookmark me-2"></i> Categories
-            </Nav.Link>
-
-            <Nav.Link as={Link} to="/suppliers" className="text-light nav-item">
-              <i className="bi bi-truck me-2"></i> Suppliers
-            </Nav.Link>
-
-            <Nav.Link
-              as={Link}
-              to="/inventory-logs"
-              className="text-light nav-item"
-            >
-              <i className="bi bi-journal-text me-2"></i> Inventory History
             </Nav.Link>
           </>
         )}

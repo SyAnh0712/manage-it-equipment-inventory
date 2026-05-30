@@ -17,7 +17,7 @@ const categoriesRoutes = [
   {
     path: "/categories/add",
     element: (
-      <AdminRoute>
+      <AdminRoute adminOnly={true}>
         <AddCategories />
       </AdminRoute>
     ),
@@ -26,7 +26,7 @@ const categoriesRoutes = [
   {
     path: "/categories/:id/edit",
     element: (
-      <AdminRoute>
+      <AdminRoute adminOnly={true}>
         <EditCategories />
       </AdminRoute>
     ),

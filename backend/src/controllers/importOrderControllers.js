@@ -43,6 +43,7 @@ const updateImportOrder = async (req, res, nextHandler) => {
     const importOrder = await importOrderService.updateImportOrder(
       req.params.id,
       req.body,
+      req.user,
     );
 
     res.json(importOrder);
@@ -53,7 +54,10 @@ const updateImportOrder = async (req, res, nextHandler) => {
 
 const deleteImportOrder = async (req, res, nextHandler) => {
   try {
-    const result = await importOrderService.deleteImportOrder(req.params.id);
+    const result = await importOrderService.deleteImportOrder(
+      req.params.id,
+      req.user,
+    );
     res.json(result);
   } catch (error) {
     next(error);
