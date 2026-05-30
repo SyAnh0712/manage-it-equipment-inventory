@@ -2,7 +2,10 @@ const express = require("express");
 
 const router = express.Router();
 const importOrderController = require("../controllers/importOrderControllers");
-const { authMiddleware } = require("../middlewares/authMiddlewares");
+const {
+  authMiddleware,
+  roleMiddleware,
+} = require("../middlewares/authMiddlewares");
 const {
   validate,
   importOrderSchema,
@@ -23,5 +26,15 @@ router.put(
   importOrderController.updateImportOrder,
 );
 router.delete("/:id", importOrderController.deleteImportOrder);
+router.post(
+  "/:id/approve",
+  roleMiddleware("admin"),
+  importOrderController.approveImportOrder,
+);
+router.post(
+  "/:id/reject",
+  roleMiddleware("admin"),
+  importOrderController.rejectImportOrder,
+);
 
 module.exports = router;

@@ -15,60 +15,63 @@ const generateImportCode = () => {
   return `IMP-${yyyy}${mm}${dd}-${random}`;
 };
 
-const createImportOrder = async (importOrderData) => {
+const validateImportItems = async (detailList, transaction) => {
+  const validDetails = [];
+
+  for (const item of detailList) {
+    if (!item.equipment_id) {
+      throw new Error("Thiếu equipment_id trong chi tiết nhập kho");
+    }
+
+    const equipment = await Equipment.findByPk(item.equipment_id, {
+      transaction,
+    });
+    if (!equipment) {
+      throw new Error(`Thiếu thiết bị với id ${item.equipment_id}`);
+    }
+
+    const quantity = Number(item.quantity || 0);
+    if (quantity <= 0) {
+      throw new Error("Số lượng nhập phải lớn hơn 0");
+    }
+
+    validDetails.push({
+      equipment,
+      quantity,
+      unit_price: Number(item.unit_price ?? 0),
+    });
+  }
+
+  return validDetails;
+};
+
+const createImportOrder = async (importOrderData, userId) => {
   try {
     const { details, ...orderData } = importOrderData;
     const payload = {
       ...orderData,
       code: importOrderData?.code || generateImportCode(),
+      created_by: userId || null,
+      status: "pending",
     };
 
     const result = await db.sequelize.transaction(async (transaction) => {
       const importOrder = await ImportOrder.create(payload, { transaction });
 
       const detailList = Array.isArray(details) ? details : [];
+      if (detailList.length === 0) {
+        throw new Error("Chi tiết đơn nhập không được để trống");
+      }
+
+      await validateImportItems(detailList, transaction);
 
       for (const item of detailList) {
-        if (!item.equipment_id) {
-          throw new Error("Thiếu equipment_id trong chi tiết nhập kho");
-        }
-
-        const equipment = await Equipment.findByPk(item.equipment_id, {
-          transaction,
-        });
-        if (!equipment) {
-          throw new Error(`Thiếu thiết bị với id ${item.equipment_id}`);
-        }
-
-        const quantity = Number(item.quantity || 0);
-        if (quantity <= 0) {
-          throw new Error("Số lượng nhập phải lớn hơn 0");
-        }
-
-        const quantityBefore = Number(equipment.quantity || 0);
-        const quantityAfter = quantityBefore + quantity;
-
-        await equipment.update({ quantity: quantityAfter }, { transaction });
-
         await ImportOrderDetail.create(
           {
             import_order_id: importOrder.id,
             equipment_id: item.equipment_id,
-            quantity,
+            quantity: item.quantity,
             unit_price: item.unit_price || 0,
-          },
-          { transaction },
-        );
-
-        await InventoryLog.create(
-          {
-            equipment_id: item.equipment_id,
-            action_type: "import",
-            quantity_before: quantityBefore,
-            quantity_changed: quantity,
-            quantity_after: quantityAfter,
-            reference_code: importOrder.code,
-            created_by: importOrder.created_by || null,
           },
           { transaction },
         );
@@ -80,6 +83,101 @@ const createImportOrder = async (importOrderData) => {
     return result;
   } catch (error) {
     throw new Error("Error creating import order: " + error.message);
+  }
+};
+
+const applyImportOrder = async (importOrder, approverId, transaction) => {
+  const details = await ImportOrderDetail.findAll({
+    where: { import_order_id: importOrder.id },
+    transaction,
+  });
+
+  if (!details.length) {
+    throw new Error("Không có chi tiết đơn nhập để duyệt");
+  }
+
+  for (const item of details) {
+    const equipment = await Equipment.findByPk(item.equipment_id, {
+      transaction,
+    });
+    if (!equipment) {
+      throw new Error(`Thiếu thiết bị với id ${item.equipment_id}`);
+    }
+
+    const quantityBefore = Number(equipment.quantity || 0);
+    const quantityAfter = quantityBefore + Number(item.quantity);
+
+    await equipment.update({ quantity: quantityAfter }, { transaction });
+
+    await InventoryLog.create(
+      {
+        equipment_id: item.equipment_id,
+        action_type: "import",
+        quantity_before: quantityBefore,
+        quantity_changed: Number(item.quantity),
+        quantity_after: quantityAfter,
+        reference_code: importOrder.code,
+        created_by: approverId || importOrder.created_by || null,
+      },
+      { transaction },
+    );
+  }
+};
+
+const approveImportOrder = async (id, approverId) => {
+  try {
+    const result = await db.sequelize.transaction(async (transaction) => {
+      const importOrder = await ImportOrder.findByPk(id, {
+        include: [{ model: db.ImportOrderDetail, as: "details" }],
+        transaction,
+      });
+
+      if (!importOrder) {
+        throw new Error("Import order not found");
+      }
+
+      if (importOrder.status !== "pending") {
+        throw new Error("Chỉ có thể duyệt đơn ở trạng thái pending");
+      }
+
+      await applyImportOrder(importOrder, approverId, transaction);
+
+      await importOrder.update(
+        {
+          status: "approved",
+          approved_at: new Date(),
+        },
+        { transaction },
+      );
+
+      return importOrder;
+    });
+
+    return result;
+  } catch (error) {
+    throw new Error("Error approving import order: " + error.message);
+  }
+};
+
+const rejectImportOrder = async (id, approverId) => {
+  try {
+    const importOrder = await ImportOrder.findByPk(id);
+    if (!importOrder) {
+      throw new Error("Import order not found");
+    }
+
+    if (importOrder.status !== "pending") {
+      throw new Error("Chỉ có thể từ chối đơn ở trạng thái pending");
+    }
+
+    await importOrder.update({
+      status: "rejected",
+      approved_at: new Date(),
+    });
+
+    return importOrder;
+  } catch (error) {
+    throw new Error("Error rejecting import order: " + error.message);
   }
 };
 
@@ -145,7 +243,41 @@ const updateImportOrder = async (id, importOrderData) => {
       throw new Error("Import order not found");
     }
 
-    await importOrder.update(importOrderData);
+    if (importOrder.status !== "pending") {
+      throw new Error("Chỉ có thể cập nhật đơn đang ở trạng thái pending");
+    }
+
+    const { details, status, created_by, ...orderData } = importOrderData;
+
+    await db.sequelize.transaction(async (transaction) => {
+      await importOrder.update(orderData, { transaction });
+
+      if (Array.isArray(details)) {
+        await ImportOrderDetail.destroy({
+          where: { import_order_id: importOrder.id },
+          transaction,
+        });
+
+        if (details.length === 0) {
+          throw new Error("Chi tiết đơn nhập không được để trống");
+        }
+
+        await validateImportItems(details, transaction);
+
+        for (const item of details) {
+          await ImportOrderDetail.create(
+            {
+              import_order_id: importOrder.id,
+              equipment_id: item.equipment_id,
+              quantity: item.quantity,
+              unit_price: item.unit_price || 0,
+            },
+            { transaction },
+          );
+        }
+      }
+    });
+
     return importOrder;
   } catch (error) {
     throw new Error("Error updating import order: " + error.message);
@@ -157,6 +289,10 @@ const deleteImportOrder = async (id) => {
     const importOrder = await ImportOrder.findByPk(id);
     if (!importOrder) {
       throw new Error("Import order not found");
+    }
+
+    if (importOrder.status !== "pending") {
+      throw new Error("Chỉ có thể xóa đơn đang ở trạng thái pending");
     }
 
     await importOrder.destroy();
@@ -172,4 +308,6 @@ module.exports = {
   getImportOrderById,
   updateImportOrder,
   deleteImportOrder,
+  approveImportOrder,
+  rejectImportOrder,
 };

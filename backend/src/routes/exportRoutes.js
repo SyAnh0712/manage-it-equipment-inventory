@@ -2,7 +2,10 @@ const express = require("express");
 
 const router = express.Router();
 const exportOrderController = require("../controllers/exportOrderControllers");
-const { authMiddleware } = require("../middlewares/authMiddlewares");
+const {
+  authMiddleware,
+  roleMiddleware,
+} = require("../middlewares/authMiddlewares");
 const {
   validate,
   exportOrderSchema,
@@ -23,5 +26,15 @@ router.put(
   exportOrderController.updateExportOrder,
 );
 router.delete("/:id", exportOrderController.deleteExportOrder);
+router.post(
+  "/:id/approve",
+  roleMiddleware("admin"),
+  exportOrderController.approveExportOrder,
+);
+router.post(
+  "/:id/reject",
+  roleMiddleware("admin"),
+  exportOrderController.rejectExportOrder,
+);
 
 module.exports = router;

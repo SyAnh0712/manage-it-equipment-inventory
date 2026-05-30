@@ -62,7 +62,6 @@ const categorySchema = Joi.object({
 const importOrderSchema = Joi.object({
   code: Joi.string().trim().max(50).optional(),
   supplier_id: Joi.number().integer().positive().required(),
-  created_by: Joi.number().integer().positive().optional(),
   status: Joi.string()
     .valid("pending", "approved", "rejected")
     .default("pending"),
@@ -83,7 +82,6 @@ const exportOrderSchema = Joi.object({
   code: Joi.string().trim().max(50).optional(),
   department: Joi.string().trim().min(2).max(100).required(),
   receiver: Joi.string().trim().min(2).max(100).required(),
-  created_by: Joi.number().integer().positive().optional(),
   status: Joi.string()
     .valid("pending", "approved", "rejected")
     .default("pending"),

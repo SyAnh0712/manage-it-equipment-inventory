@@ -22,7 +22,10 @@ module.exports = function defineImportOrder(sequelize, DataTypes) {
       code: DataTypes.STRING,
       supplier_id: DataTypes.INTEGER,
       created_by: DataTypes.INTEGER,
-      status: DataTypes.ENUM("pending", "approved", "rejected"),
+      status: {
+        type: DataTypes.ENUM("pending", "approved", "rejected"),
+        defaultValue: "pending",
+      },
       note: DataTypes.TEXT,
       approved_at: DataTypes.DATE,
     },

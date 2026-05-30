@@ -19,7 +19,10 @@ module.exports = function defineExportOrder(sequelize, DataTypes) {
       department: DataTypes.STRING,
       receiver: DataTypes.STRING,
       created_by: DataTypes.INTEGER,
-      status: DataTypes.ENUM("pending", "approved", "rejected"),
+      status: {
+        type: DataTypes.ENUM("pending", "approved", "rejected"),
+        defaultValue: "pending",
+      },
       note: DataTypes.TEXT,
       approved_at: DataTypes.DATE,
     },

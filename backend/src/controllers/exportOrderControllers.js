@@ -2,7 +2,10 @@ const exportOrderService = require("../services/inventory/exportOrderServices");
 
 const createExportOrder = async (req, res, nextHandler) => {
   try {
-    const exportOrder = await exportOrderService.createExportOrder(req.body);
+    const exportOrder = await exportOrderService.createExportOrder(
+      req.body,
+      req.user?.id,
+    );
     res.status(201).json(exportOrder);
   } catch (error) {
     nextHandler(error);
@@ -57,10 +60,36 @@ const deleteExportOrder = async (req, res, nextHandler) => {
   }
 };
 
+const approveExportOrder = async (req, res, nextHandler) => {
+  try {
+    const exportOrder = await exportOrderService.approveExportOrder(
+      req.params.id,
+      req.user?.id,
+    );
+    res.json(exportOrder);
+  } catch (error) {
+    nextHandler(error);
+  }
+};
+
+const rejectExportOrder = async (req, res, nextHandler) => {
+  try {
+    const exportOrder = await exportOrderService.rejectExportOrder(
+      req.params.id,
+      req.user?.id,
+    );
+    res.json(exportOrder);
+  } catch (error) {
+    nextHandler(error);
+  }
+};
+
 module.exports = {
   createExportOrder,
   getAllExportOrders,
   getExportOrderById,
   updateExportOrder,
   deleteExportOrder,
+  approveExportOrder,
+  rejectExportOrder,
 };

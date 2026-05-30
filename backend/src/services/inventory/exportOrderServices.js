@@ -15,65 +15,61 @@ const generateExportCode = () => {
   return `EXP-${yyyy}${mm}${dd}-${random}`;
 };
 
-const createExportOrder = async (exportOrderData) => {
+const validateExportItems = async (detailList, transaction) => {
+  const validDetails = [];
+
+  for (const item of detailList) {
+    if (!item.equipment_id) {
+      throw new Error("Thiếu equipment_id trong chi tiết xuất kho");
+    }
+
+    const equipment = await Equipment.findByPk(item.equipment_id, {
+      transaction,
+    });
+    if (!equipment) {
+      throw new Error(`Thiếu thiết bị với id ${item.equipment_id}`);
+    }
+
+    const quantity = Number(item.quantity || 0);
+    if (quantity <= 0) {
+      throw new Error("Số lượng xuất phải lớn hơn 0");
+    }
+
+    validDetails.push({
+      equipment,
+      quantity,
+    });
+  }
+
+  return validDetails;
+};
+
+const createExportOrder = async (exportOrderData, userId) => {
   try {
     const { details, ...orderData } = exportOrderData;
     const payload = {
       ...orderData,
       code: exportOrderData?.code || generateExportCode(),
+      created_by: userId || null,
+      status: "pending",
     };
 
     const result = await db.sequelize.transaction(async (transaction) => {
       const exportOrder = await ExportOrder.create(payload, { transaction });
 
       const detailList = Array.isArray(details) ? details : [];
+      if (detailList.length === 0) {
+        throw new Error("Chi tiết đơn xuất không được để trống");
+      }
+
+      await validateExportItems(detailList, transaction);
 
       for (const item of detailList) {
-        if (!item.equipment_id) {
-          throw new Error("Thiếu equipment_id trong chi tiết xuất kho");
-        }
-
-        const equipment = await Equipment.findByPk(item.equipment_id, {
-          transaction,
-        });
-        if (!equipment) {
-          throw new Error(`Thiếu thiết bị với id ${item.equipment_id}`);
-        }
-
-        const quantity = Number(item.quantity || 0);
-        if (quantity <= 0) {
-          throw new Error("Số lượng xuất phải lớn hơn 0");
-        }
-
-        const quantityBefore = Number(equipment.quantity || 0);
-        if (quantityBefore < quantity) {
-          throw new Error(
-            `Không đủ số lượng tồn kho cho thiết bị ${equipment.name || item.equipment_id}`,
-          );
-        }
-
-        const quantityAfter = quantityBefore - quantity;
-
-        await equipment.update({ quantity: quantityAfter }, { transaction });
-
         await ExportOrderDetail.create(
           {
             export_order_id: exportOrder.id,
             equipment_id: item.equipment_id,
-            quantity,
-          },
-          { transaction },
-        );
-
-        await InventoryLog.create(
-          {
-            equipment_id: item.equipment_id,
-            action_type: "export",
-            quantity_before: quantityBefore,
-            quantity_changed: -quantity,
-            quantity_after: quantityAfter,
-            reference_code: exportOrder.code,
-            created_by: exportOrder.created_by || null,
+            quantity: item.quantity,
           },
           { transaction },
         );
@@ -85,6 +81,108 @@ const createExportOrder = async (exportOrderData) => {
     return result;
   } catch (error) {
     throw new Error("Error creating export order: " + error.message);
+  }
+};
+
+const applyExportOrder = async (exportOrder, approverId, transaction) => {
+  const details = await ExportOrderDetail.findAll({
+    where: { export_order_id: exportOrder.id },
+    transaction,
+  });
+
+  if (!details.length) {
+    throw new Error("Không có chi tiết đơn xuất để duyệt");
+  }
+
+  for (const item of details) {
+    const equipment = await Equipment.findByPk(item.equipment_id, {
+      transaction,
+    });
+    if (!equipment) {
+      throw new Error(`Thiếu thiết bị với id ${item.equipment_id}`);
+    }
+
+    const quantityBefore = Number(equipment.quantity || 0);
+    const quantity = Number(item.quantity);
+    if (quantityBefore < quantity) {
+      throw new Error(
+        `Không đủ số lượng tồn kho cho thiết bị ${equipment.name || item.equipment_id}`,
+      );
+    }
+
+    const quantityAfter = quantityBefore - quantity;
+
+    await equipment.update({ quantity: quantityAfter }, { transaction });
+
+    await InventoryLog.create(
+      {
+        equipment_id: item.equipment_id,
+        action_type: "export",
+        quantity_before: quantityBefore,
+        quantity_changed: -quantity,
+        quantity_after: quantityAfter,
+        reference_code: exportOrder.code,
+        created_by: approverId || exportOrder.created_by || null,
+      },
+      { transaction },
+    );
+  }
+};
+
+const approveExportOrder = async (id, approverId) => {
+  try {
+    const result = await db.sequelize.transaction(async (transaction) => {
+      const exportOrder = await ExportOrder.findByPk(id, {
+        include: [{ model: db.ExportOrderDetail, as: "details" }],
+        transaction,
+      });
+
+      if (!exportOrder) {
+        throw new Error("Export order not found");
+      }
+
+      if (exportOrder.status !== "pending") {
+        throw new Error("Chỉ có thể duyệt đơn ở trạng thái pending");
+      }
+
+      await applyExportOrder(exportOrder, approverId, transaction);
+
+      await exportOrder.update(
+        {
+          status: "approved",
+          approved_at: new Date(),
+        },
+        { transaction },
+      );
+
+      return exportOrder;
+    });
+
+    return result;
+  } catch (error) {
+    throw new Error("Error approving export order: " + error.message);
+  }
+};
+
+const rejectExportOrder = async (id, approverId) => {
+  try {
+    const exportOrder = await ExportOrder.findByPk(id);
+    if (!exportOrder) {
+      throw new Error("Export order not found");
+    }
+
+    if (exportOrder.status !== "pending") {
+      throw new Error("Chỉ có thể từ chối đơn ở trạng thái pending");
+    }
+
+    await exportOrder.update({
+      status: "rejected",
+      approved_at: new Date(),
+    });
+
+    return exportOrder;
+  } catch (error) {
+    throw new Error("Error rejecting export order: " + error.message);
   }
 };
 
@@ -147,7 +245,40 @@ const updateExportOrder = async (id, exportOrderData) => {
       throw new Error("Export order not found");
     }
 
-    await exportOrder.update(exportOrderData);
+    if (exportOrder.status !== "pending") {
+      throw new Error("Chỉ có thể cập nhật đơn đang ở trạng thái pending");
+    }
+
+    const { details, status, created_by, ...orderData } = exportOrderData;
+
+    await db.sequelize.transaction(async (transaction) => {
+      await exportOrder.update(orderData, { transaction });
+
+      if (Array.isArray(details)) {
+        await ExportOrderDetail.destroy({
+          where: { export_order_id: exportOrder.id },
+          transaction,
+        });
+
+        if (details.length === 0) {
+          throw new Error("Chi tiết đơn xuất không được để trống");
+        }
+
+        await validateExportItems(details, transaction);
+
+        for (const item of details) {
+          await ExportOrderDetail.create(
+            {
+              export_order_id: exportOrder.id,
+              equipment_id: item.equipment_id,
+              quantity: item.quantity,
+            },
+            { transaction },
+          );
+        }
+      }
+    });
+
     return exportOrder;
   } catch (error) {
     throw new Error("Error updating export order: " + error.message);
@@ -159,6 +290,10 @@ const deleteExportOrder = async (id) => {
     const exportOrder = await ExportOrder.findByPk(id);
     if (!exportOrder) {
       throw new Error("Export order not found");
+    }
+
+    if (exportOrder.status !== "pending") {
+      throw new Error("Chỉ có thể xóa đơn đang ở trạng thái pending");
     }
 
     await exportOrder.destroy();
@@ -174,4 +309,6 @@ module.exports = {
   getExportOrderById,
   updateExportOrder,
   deleteExportOrder,
+  approveExportOrder,
+  rejectExportOrder,
 };
