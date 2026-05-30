@@ -42,6 +42,14 @@ const Sidebar = () => {
           <i className="bi bi-truck me-2"></i> Suppliers
         </Nav.Link>
 
+        <Nav.Link as={Link} to="/imports" className="text-light nav-item">
+          <i className="bi bi-box-arrow-in-down me-2"></i> Import Orders
+        </Nav.Link>
+
+        <Nav.Link as={Link} to="/exports" className="text-light nav-item">
+          <i className="bi bi-box-arrow-up me-2"></i> Export Orders
+        </Nav.Link>
+
         <Nav.Link
           as={Link}
           to="/inventory-logs"
