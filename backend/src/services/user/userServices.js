@@ -1,13 +1,29 @@
 const db = require("../../models");
 const { Op } = require("sequelize");
+const { hashPassword } = require("../../utils/passwordHelper");
 
 const User = db.User;
 
+const removePasswordField = (user) => {
+  if (!user) {
+    return user;
+  }
+
+  const sanitized = user.toJSON ? user.toJSON() : { ...user };
+  delete sanitized.password;
+  return sanitized;
+};
+
 const createUser = async (userData) => {
   try {
-    const newUser = await User.create(userData);
+    const payload = { ...userData };
+    if (payload.password) {
+      payload.password = await hashPassword(payload.password);
+    }
 
-    return newUser;
+    const newUser = await User.create(payload);
+
+    return removePasswordField(newUser);
   } catch (error) {
     throw new Error("Error creating user: " + error.message);
   }
@@ -34,6 +50,7 @@ const getAllUsers = async (query = {}) => {
       limit,
       offset: (page - 1) * limit,
       order: [["created_at", "DESC"]],
+      attributes: { exclude: ["password"] },
     });
 
     return {
@@ -52,7 +69,9 @@ const getAllUsers = async (query = {}) => {
 
 const getUserById = async (id) => {
   try {
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id, {
+      attributes: { exclude: ["password"] },
+    });
 
     return user;
   } catch (error) {
@@ -68,9 +87,16 @@ const updateUser = async (id, userData) => {
       throw new Error("User not found");
     }
 
-    await user.update(userData);
+    const payload = { ...userData };
+    if (payload.password) {
+      payload.password = await hashPassword(payload.password);
+    } else {
+      delete payload.password;
+    }
 
-    return user;
+    await user.update(payload);
+
+    return removePasswordField(user);
   } catch (error) {
     throw new Error("Error updating user: " + error.message);
   }
