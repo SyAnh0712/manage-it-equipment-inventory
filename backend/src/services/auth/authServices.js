@@ -34,7 +34,8 @@ const loginService = async (data) => {
 
     user: {
       id: user.id,
-      fullname: user.fullname,
+      username: user.username,
+      full_name: user.full_name,
       email: user.email,
       role: user.role,
     },

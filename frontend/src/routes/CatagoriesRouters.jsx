@@ -8,7 +8,7 @@ const categoriesRoutes = [
   {
     path: "/categories",
     element: (
-      <AdminRoute adminOnly={true}>
+      <AdminRoute>
         <CategoriesList />
       </AdminRoute>
     ),

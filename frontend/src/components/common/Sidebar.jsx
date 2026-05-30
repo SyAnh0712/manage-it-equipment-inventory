@@ -23,6 +23,10 @@ const Sidebar = () => {
           <i className="bi bi-speedometer2 me-2"></i> Dashboard
         </Nav.Link>
 
+        <Nav.Link as={Link} to="/profile" className="text-light nav-item">
+          <i className="bi bi-person-circle me-2"></i> Profile
+        </Nav.Link>
+
         <hr className="bg-secondary" />
         <div className="text-muted small px-2 mb-2">QUẢN LÝ</div>
 

@@ -32,7 +32,13 @@ axiosClient.interceptors.response.use(
       localStorage.removeItem("user");
       window.location.href = "/login";
     }
-    return Promise.reject(error.response?.data || error.message);
+
+    const apiError = error.response?.data;
+    if (apiError && apiError.message) {
+      return Promise.reject(new Error(apiError.message));
+    }
+
+    return Promise.reject(new Error(error.message));
   },
 );
 

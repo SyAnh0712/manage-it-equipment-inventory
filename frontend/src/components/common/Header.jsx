@@ -17,11 +17,17 @@ const Header = () => {
         <div>
           <h1 className="h5 mb-0">Equipment Inventory Management</h1>
         </div>
-        <div className="d-flex align-items-center gap-3">
+        <div className="d-flex align-items-center gap-2">
           <div>
             <span className="me-2">Welcome,</span>
             <strong>{user?.full_name}</strong>
           </div>
+          <button
+            className="btn btn-outline-primary btn-sm"
+            onClick={() => navigate("/profile")}
+          >
+            Profile
+          </button>
           <button
             className="btn btn-outline-danger btn-sm"
             onClick={handleLogout}

@@ -42,7 +42,10 @@ const Login = () => {
       await login(data);
       navigate("/dashboard");
     } catch (err) {
-      setError(err?.message || "Login failed. Please try again.");
+      setError(
+        err?.message ||
+          (typeof err === "string" ? err : "Login failed. Please try again."),
+      );
     } finally {
       setIsLoading(false);
     }

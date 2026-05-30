@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { useAuth } from "../../hooks/useAuth";
 import axiosClient from "../../services/axiosClient";
-import toast from "../../utils/toast";
+import { showToast } from "../../utils/toast";
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -47,10 +47,10 @@ const Profile = () => {
     try {
       setLoading(true);
       setIsUpdatingProfile(true);
-      await axiosClient.put(`/api/users/${user?.id}`, profileData);
-      toast.success("Cập nhật thông tin thành công");
+      await axiosClient.put(`/users/${user?.id}`, profileData);
+      showToast.success("Cập nhật thông tin thành công");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Cập nhật thất bại");
+      showToast.error(error?.message || "Cập nhật thất bại");
     } finally {
       setLoading(false);
       setIsUpdatingProfile(false);
@@ -62,31 +62,31 @@ const Profile = () => {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("Mật khẩu mới không khớp");
+      showToast.error("Mật khẩu mới không khớp");
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error("Mật khẩu phải có ít nhất 6 ký tự");
+      showToast.error("Mật khẩu phải có ít nhất 6 ký tự");
       return;
     }
 
     try {
       setLoading(true);
       setIsChangingPassword(true);
-      await axiosClient.put("/api/users/profile/change-password", {
+      await axiosClient.put("/users/profile/change-password", {
         oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword,
       });
 
-      toast.success("Thay đổi mật khẩu thành công");
+      showToast.success("Thay đổi mật khẩu thành công");
       setPasswordData({
         oldPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
     } catch (error) {
-      toast.error(
+      showToast.error(
         error.response?.data?.message || "Thay đổi mật khẩu thất bại",
       );
     } finally {

@@ -6,34 +6,16 @@ const authService = {
       email: credentials.email || credentials.username,
       password: credentials.password,
     });
-    const authData = response.data;
 
-    return {
-      token: authData.token,
-      user: {
-        id: authData.user.id,
-        username: authData.user.username,
-        full_name: authData.user.full_name || authData.user.fullname,
-        email: authData.user.email,
-        role: authData.user.role,
-      },
-    };
+    return response.data;
   },
 
   register: async (data) => {
     const response = await axiosClient.post("/auth/register", data);
 
-    const userData = response.data;
-
     return {
-      token: userData.token,
-      user: {
-        id: userData.user.id,
-        username: userData.user.username,
-        full_name: userData.user.full_name,
-        email: userData.user.email,
-        role: userData.user.role,
-      },
+      token: response.data.token,
+      user: response.data.user,
     };
   },
 

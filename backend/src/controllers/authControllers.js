@@ -10,11 +10,14 @@ const login = async (req, res, nextHandler) => {
       data: result,
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 400).json({
+      success: false,
+      message: error.message || "Login failed",
+    });
   }
 };
 
-const register = async (req, res, nextHandler) => {
+const register = async (req, res, next) => {
   try {
     const result = await authService.registerService(req.body);
 
@@ -24,7 +27,10 @@ const register = async (req, res, nextHandler) => {
       data: result,
     });
   } catch (error) {
-    next(error);
+    return res.status(error.status || 400).json({
+      success: false,
+      message: error.message || "Register failed",
+    });
   }
 };
 module.exports = {

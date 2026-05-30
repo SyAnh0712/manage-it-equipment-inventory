@@ -3,32 +3,31 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    return queryInterface.bulkInsert("suppliers", [
+    return queryInterface.bulkInsert("export_order_details", [
       {
-        name: "FPT Distribution",
-        phone: "0901234567",
-        email: "fpt@gmail.com",
-        address: "Ho Chi Minh",
+        export_order_id: 1,
+        equipment_id: 1,
+        quantity: 2,
 
         created_at: new Date(),
         updated_at: new Date(),
         deleted_at: null,
       },
+
       {
-        name: "The Gioi Di Dong",
-        phone: "0912345678",
-        email: "tgdd@gmail.com",
-        address: "Da Nang",
+        export_order_id: 2,
+        equipment_id: 7,
+        quantity: 1,
 
         created_at: new Date(),
         updated_at: new Date(),
         deleted_at: null,
       },
+
       {
-        name: "Phong Vu",
-        phone: "0923456789",
-        email: "phongvu@gmail.com",
-        address: "Ha Noi",
+        export_order_id: 3,
+        equipment_id: 4,
+        quantity: 5,
 
         created_at: new Date(),
         updated_at: new Date(),
@@ -38,6 +37,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    return queryInterface.bulkDelete("suppliers", null, {});
+    return queryInterface.bulkDelete("export_order_details", null, {});
   },
 };

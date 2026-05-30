@@ -74,6 +74,24 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+const updateProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { full_name, email } = req.body;
+    const result = await userService.updateUser(userId, {
+      full_name,
+      email,
+    });
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const changePassword = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -153,6 +171,7 @@ module.exports = {
   getAllUsers,
   getUserById,
   updateUser,
+  updateProfile,
   deleteUser,
   changePassword,
   lockUser,

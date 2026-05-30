@@ -8,7 +8,7 @@ const roleMiddleware = require("../middlewares/roleMiddleware");
 router.use(authMiddleware);
 
 router.get("/profile/current", userController.getCurrentUser);
-
+router.put("/profile", userController.updateProfile);
 router.put("/profile/change-password", userController.changePassword);
 
 router.post("/", roleMiddleware("admin"), userController.createUser);

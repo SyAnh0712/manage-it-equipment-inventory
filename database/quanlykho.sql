@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE,
     role ENUM('admin', 'staff') DEFAULT 'staff',
+    is_locked BOOLEAN DEFAULT 0,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
