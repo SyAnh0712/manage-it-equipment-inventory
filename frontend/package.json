@@ -26,7 +26,9 @@
     "react-toastify": "^11.1.0",
     "redux-persist": "^6.0.0",
     "sass": "^1.100.0",
-    "yup": "^1.7.1"
+    "yup": "^1.7.1",
+    "jspdf": "^2.5.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

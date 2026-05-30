@@ -1,5 +1,6 @@
 import ExportOrdersList from "../pages/exports/ExportOrdersList";
 import AddExportOrder from "../pages/exports/AddExportOrder";
+import ExportOrderDetails from "../pages/exports/ExportOrderDetails";
 import EditExportOrder from "../pages/exports/EditExportOrder";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -17,6 +18,14 @@ const exportRoutes = [
     element: (
       <ProtectedRoute>
         <AddExportOrder />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/exports/:id",
+    element: (
+      <ProtectedRoute>
+        <ExportOrderDetails />
       </ProtectedRoute>
     ),
   },

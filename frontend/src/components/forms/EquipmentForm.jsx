@@ -43,6 +43,7 @@ const EquipmentForm = ({
   suppliers = [],
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(initialData?.image_url || "");
 
   const {
     control,
@@ -60,16 +61,28 @@ const EquipmentForm = ({
       unit: "",
       quantity: 1,
       price: 0,
+      image: null,
       image_url: "",
       description: "",
     },
   });
 
   const imageUrl = watch("image_url");
+  const imageFile = watch("image");
 
   useEffect(() => {
     setImageError(false);
-  }, [imageUrl]);
+  }, [imageUrl, imageFile]);
+
+  useEffect(() => {
+    if (imageFile instanceof File) {
+      const objectUrl = URL.createObjectURL(imageFile);
+      setPreviewUrl(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+
+    setPreviewUrl(imageUrl || "");
+  }, [imageFile, imageUrl]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
@@ -226,6 +239,25 @@ const EquipmentForm = ({
       </Form.Group>
 
       <Form.Group className="mb-3">
+        <Form.Label>Upload Image</Form.Label>
+
+        <Controller
+          name="image"
+          control={control}
+          defaultValue={null}
+          render={({ field }) => (
+            <Form.Control
+              type="file"
+              accept="image/*"
+              onChange={(event) =>
+                field.onChange(event.target.files?.[0] || null)
+              }
+            />
+          )}
+        />
+      </Form.Group>
+
+      <Form.Group className="mb-3">
         <Form.Label>Image URL</Form.Label>
 
         <Controller
@@ -244,11 +276,11 @@ const EquipmentForm = ({
       <Form.Group className="mb-3">
         <Form.Label>Preview</Form.Label>
 
-        {imageUrl ? (
+        {previewUrl ? (
           !imageError ? (
             <div className="border rounded p-2 text-center">
               <img
-                src={imageUrl}
+                src={previewUrl}
                 alt="Equipment Preview"
                 className="img-fluid"
                 style={{

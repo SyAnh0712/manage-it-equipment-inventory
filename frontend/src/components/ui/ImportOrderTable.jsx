@@ -47,7 +47,14 @@ const ImportOrderTable = ({
           return (
             <tr key={order.id || index}>
               <td>{index + 1}</td>
-              <td>{order.code}</td>
+              <td>
+                <Link
+                  to={`/imports/${order.id}`}
+                  className="text-decoration-none"
+                >
+                  {order.code}
+                </Link>
+              </td>
               <td>{order.supplier?.name || "-"}</td>
               <td>{order.status}</td>
               <td>{order.note || "-"}</td>
@@ -56,9 +63,14 @@ const ImportOrderTable = ({
               </td>
               <td>{new Date(order.created_at).toLocaleString()}</td>
               <td>
+                <Link to={`/imports/${order.id}`}>
+                  <BSButton variant="info" size="sm" className="me-2 mb-2">
+                    View
+                  </BSButton>
+                </Link>
                 {canEdit && (
                   <Link to={`/imports/${order.id}/edit`}>
-                    <BSButton variant="warning" size="sm" className="me-2">
+                    <BSButton variant="warning" size="sm" className="me-2 mb-2">
                       Edit
                     </BSButton>
                   </Link>

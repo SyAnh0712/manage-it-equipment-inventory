@@ -11,6 +11,10 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 
 import { useDebounce } from "../../hooks/useDebounce";
 import exportOrderService from "../../services/exportOrderService";
+import {
+  exportExportOrdersToExcel,
+  exportExportOrdersToPdf,
+} from "../../utils/reportExport";
 import { useAuth } from "../../hooks/useAuth";
 
 const ExportOrdersList = () => {
@@ -25,10 +29,6 @@ const ExportOrdersList = () => {
 
   const { user } = useAuth();
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-
-  useEffect(() => {
-    fetchOrders();
-  }, [debouncedSearchTerm, currentPage]);
 
   const fetchOrders = async () => {
     try {
@@ -46,6 +46,28 @@ const ExportOrdersList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [debouncedSearchTerm, currentPage]);
+
+  const handleDownloadExcel = () => {
+    if (!orders.length) {
+      toast.info("No export orders to export");
+      return;
+    }
+
+    exportExportOrdersToExcel(orders);
+  };
+
+  const handleDownloadPdf = () => {
+    if (!orders.length) {
+      toast.info("No export orders to export");
+      return;
+    }
+
+    exportExportOrdersToPdf(orders);
   };
 
   const handleAction = (order, type) => {
@@ -119,6 +141,22 @@ const ExportOrdersList = () => {
         </Col>
 
         <Col className="text-end">
+          <BSButton
+            variant="outline-secondary"
+            className="me-2"
+            onClick={handleDownloadExcel}
+          >
+            <i className="bi bi-file-earmark-spreadsheet me-2"></i>
+            Export Excel
+          </BSButton>
+          <BSButton
+            variant="outline-secondary"
+            className="me-2"
+            onClick={handleDownloadPdf}
+          >
+            <i className="bi bi-file-earmark-pdf me-2"></i>
+            Export PDF
+          </BSButton>
           <Link to="/exports/add">
             <BSButton variant="primary">
               <i className="bi bi-plus-circle me-2"></i>

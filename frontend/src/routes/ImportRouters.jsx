@@ -1,5 +1,6 @@
 import ImportOrdersList from "../pages/imports/ImportOrdersList";
 import AddImportOrder from "../pages/imports/AddImportOrder";
+import ImportOrderDetails from "../pages/imports/ImportOrderDetails";
 import EditImportOrder from "../pages/imports/EditImportOrder";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -17,6 +18,14 @@ const importRoutes = [
     element: (
       <ProtectedRoute>
         <AddImportOrder />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/imports/:id",
+    element: (
+      <ProtectedRoute>
+        <ImportOrderDetails />
       </ProtectedRoute>
     ),
   },

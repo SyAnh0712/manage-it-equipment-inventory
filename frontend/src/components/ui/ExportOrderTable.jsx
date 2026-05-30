@@ -48,7 +48,14 @@ const ExportOrderTable = ({
           return (
             <tr key={order.id || index}>
               <td>{index + 1}</td>
-              <td>{order.code}</td>
+              <td>
+                <Link
+                  to={`/exports/${order.id}`}
+                  className="text-decoration-none"
+                >
+                  {order.code}
+                </Link>
+              </td>
               <td>{order.department || "-"}</td>
               <td>{order.receiver || "-"}</td>
               <td>{order.status}</td>
@@ -58,9 +65,14 @@ const ExportOrderTable = ({
               </td>
               <td>{new Date(order.created_at).toLocaleString()}</td>
               <td>
+                <Link to={`/exports/${order.id}`}>
+                  <BSButton variant="info" size="sm" className="me-2 mb-2">
+                    View
+                  </BSButton>
+                </Link>
                 {canEdit && (
                   <Link to={`/exports/${order.id}/edit`}>
-                    <BSButton variant="warning" size="sm" className="me-2">
+                    <BSButton variant="warning" size="sm" className="me-2 mb-2">
                       Edit
                     </BSButton>
                   </Link>
