@@ -1,8 +1,11 @@
 import { Form, Button } from "react-bootstrap";
-import { useState, useEffect } from "react";
+import { useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+
+import useImagePreview from "../../hooks/useImagePreview";
+import ImagePreviewBox from "../common/ImagePreviewBox";
 
 const categoriesValidationSchema = yup.object().shape({
   name: yup
@@ -27,13 +30,13 @@ const CategoriesForm = ({
   initialData = null,
   isLoading = false,
 }) => {
-  const [imageError, setImageError] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(initialData?.image_url || "");
+  const fileInputRef = useRef(null);
 
   const {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(categoriesValidationSchema),
@@ -48,20 +51,20 @@ const CategoriesForm = ({
   const isNew = !initialData;
   const imageUrlValue = watch("image_url");
   const imageFile = watch("image");
+  const {
+    previewUrl,
+    previewSource,
+    imageError,
+    setImageError,
+    isLoading: previewLoading,
+  } = useImagePreview(imageFile, imageUrlValue, initialData?.image_url);
 
-  useEffect(() => {
-    setImageError(false);
-  }, [imageUrlValue, imageFile]);
-
-  useEffect(() => {
-    if (imageFile instanceof File) {
-      const objectUrl = URL.createObjectURL(imageFile);
-      setPreviewUrl(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
+  const handleClearUpload = () => {
+    setValue("image", null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
-
-    setPreviewUrl(imageUrlValue || initialData?.image_url || "");
-  }, [imageFile, imageUrlValue, initialData?.image_url]);
+  };
 
   return (
     <Form onSubmit={handleSubmit((data) => onSubmit(data))}>
@@ -118,16 +121,36 @@ const CategoriesForm = ({
           control={control}
           defaultValue={null}
           render={({ field }) => (
-            <Form.Control
-              type="file"
-              accept="image/*"
-              disabled={isLoading}
-              onChange={(event) =>
-                field.onChange(event.target.files?.[0] || null)
-              }
-            />
+            <>
+              <Form.Control
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                disabled={isLoading}
+                onChange={(event) =>
+                  field.onChange(event.target.files?.[0] || null)
+                }
+              />
+              {imageFile instanceof File && (
+                <div className="d-flex align-items-center gap-2 mt-2">
+                  <small className="text-muted">{imageFile.name}</small>
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    type="button"
+                    disabled={isLoading}
+                    onClick={handleClearUpload}
+                  >
+                    Remove file
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         />
+        <Form.Text className="text-muted">
+          Uploaded file takes priority over Image URL when both are provided.
+        </Form.Text>
       </Form.Group>
 
       <Form.Group className="mb-3">
@@ -155,27 +178,14 @@ const CategoriesForm = ({
       <Form.Group className="mb-3">
         <Form.Label>Preview</Form.Label>
 
-        {previewUrl ? (
-          !imageError ? (
-            <div className="border rounded p-2 text-center">
-              <img
-                src={previewUrl}
-                alt="Category preview"
-                style={{ maxWidth: "100%", height: "auto" }}
-                onLoad={() => setImageError(false)}
-                onError={() => setImageError(true)}
-              />
-            </div>
-          ) : (
-            <div className="alert alert-warning mb-0">
-              Cannot load image from this URL
-            </div>
-          )
-        ) : (
-          <div className="border rounded p-3 text-center text-muted">
-            No image selected
-          </div>
-        )}
+        <ImagePreviewBox
+          previewUrl={previewUrl}
+          previewSource={previewSource}
+          imageError={imageError}
+          setImageError={setImageError}
+          isLoading={previewLoading}
+          alt="Category preview"
+        />
       </Form.Group>
 
       <div className="d-grid gap-2">

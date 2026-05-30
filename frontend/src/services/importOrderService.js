@@ -2,38 +2,31 @@ import axiosClient from "./axiosClient";
 
 const importOrderService = {
   getAllImportOrders: async (params) => {
-    const response = await axiosClient.get("/imports", { params });
-    return response.data;
+    return axiosClient.get("/imports", { params });
   },
 
   getImportOrderById: async (id) => {
-    const response = await axiosClient.get(`/imports/${id}`);
-    return response.data;
+    return axiosClient.get(`/imports/${id}`);
   },
 
   createImportOrder: async (data) => {
-    const response = await axiosClient.post("/imports", data);
-    return response.data;
+    return axiosClient.post("/imports", data);
   },
 
   updateImportOrder: async (id, data) => {
-    const response = await axiosClient.put(`/imports/${id}`, data);
-    return response.data;
+    return axiosClient.put(`/imports/${id}`, data);
   },
 
   deleteImportOrder: async (id) => {
-    const response = await axiosClient.delete(`/imports/${id}`);
-    return response.data;
+    return axiosClient.delete(`/imports/${id}`);
   },
 
   approveImportOrder: async (id) => {
-    const response = await axiosClient.post(`/imports/${id}/approve`);
-    return response.data;
+    return axiosClient.post(`/imports/${id}/approve`);
   },
 
   rejectImportOrder: async (id) => {
-    const response = await axiosClient.post(`/imports/${id}/reject`);
-    return response.data;
+    return axiosClient.post(`/imports/${id}/reject`);
   },
 };
 

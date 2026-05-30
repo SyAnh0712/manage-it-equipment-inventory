@@ -2,38 +2,31 @@ import axiosClient from "./axiosClient";
 
 const exportOrderService = {
   getAllExportOrders: async (params) => {
-    const response = await axiosClient.get("/exports", { params });
-    return response.data;
+    return axiosClient.get("/exports", { params });
   },
 
   getExportOrderById: async (id) => {
-    const response = await axiosClient.get(`/exports/${id}`);
-    return response.data;
+    return axiosClient.get(`/exports/${id}`);
   },
 
   createExportOrder: async (data) => {
-    const response = await axiosClient.post("/exports", data);
-    return response.data;
+    return axiosClient.post("/exports", data);
   },
 
   updateExportOrder: async (id, data) => {
-    const response = await axiosClient.put(`/exports/${id}`, data);
-    return response.data;
+    return axiosClient.put(`/exports/${id}`, data);
   },
 
   deleteExportOrder: async (id) => {
-    const response = await axiosClient.delete(`/exports/${id}`);
-    return response.data;
+    return axiosClient.delete(`/exports/${id}`);
   },
 
   approveExportOrder: async (id) => {
-    const response = await axiosClient.post(`/exports/${id}/approve`);
-    return response.data;
+    return axiosClient.post(`/exports/${id}/approve`);
   },
 
   rejectExportOrder: async (id) => {
-    const response = await axiosClient.post(`/exports/${id}/reject`);
-    return response.data;
+    return axiosClient.post(`/exports/${id}/reject`);
   },
 };
 

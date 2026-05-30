@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
 import { Form } from "react-bootstrap";
+import { useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "../common/Button";
+import useImagePreview from "../../hooks/useImagePreview";
+import ImagePreviewBox from "../common/ImagePreviewBox";
 
 const equipmentValidationSchema = yup.object().shape({
   code: yup.string().required("Code is required"),
@@ -42,13 +44,13 @@ const EquipmentForm = ({
   categories = [],
   suppliers = [],
 }) => {
-  const [imageError, setImageError] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(initialData?.image_url || "");
+  const fileInputRef = useRef(null);
 
   const {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(equipmentValidationSchema),
@@ -69,20 +71,20 @@ const EquipmentForm = ({
 
   const imageUrl = watch("image_url");
   const imageFile = watch("image");
+  const {
+    previewUrl,
+    previewSource,
+    imageError,
+    setImageError,
+    isLoading: previewLoading,
+  } = useImagePreview(imageFile, imageUrl, initialData?.image_url);
 
-  useEffect(() => {
-    setImageError(false);
-  }, [imageUrl, imageFile]);
-
-  useEffect(() => {
-    if (imageFile instanceof File) {
-      const objectUrl = URL.createObjectURL(imageFile);
-      setPreviewUrl(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
+  const handleClearUpload = () => {
+    setValue("image", null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
-
-    setPreviewUrl(imageUrl || "");
-  }, [imageFile, imageUrl]);
+  };
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
@@ -246,15 +248,34 @@ const EquipmentForm = ({
           control={control}
           defaultValue={null}
           render={({ field }) => (
-            <Form.Control
-              type="file"
-              accept="image/*"
-              onChange={(event) =>
-                field.onChange(event.target.files?.[0] || null)
-              }
-            />
+            <>
+              <Form.Control
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(event) =>
+                  field.onChange(event.target.files?.[0] || null)
+                }
+              />
+              {imageFile instanceof File && (
+                <div className="d-flex align-items-center gap-2 mt-2">
+                  <small className="text-muted">{imageFile.name}</small>
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    type="button"
+                    onClick={handleClearUpload}
+                  >
+                    Remove file
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         />
+        <Form.Text className="text-muted">
+          Uploaded file takes priority over Image URL when both are provided.
+        </Form.Text>
       </Form.Group>
 
       <Form.Group className="mb-3">
@@ -276,31 +297,14 @@ const EquipmentForm = ({
       <Form.Group className="mb-3">
         <Form.Label>Preview</Form.Label>
 
-        {previewUrl ? (
-          !imageError ? (
-            <div className="border rounded p-2 text-center">
-              <img
-                src={previewUrl}
-                alt="Equipment Preview"
-                className="img-fluid"
-                style={{
-                  maxHeight: "250px",
-                  objectFit: "contain",
-                }}
-                onLoad={() => setImageError(false)}
-                onError={() => setImageError(true)}
-              />
-            </div>
-          ) : (
-            <div className="alert alert-warning mb-0">
-              Cannot load image from this URL
-            </div>
-          )
-        ) : (
-          <div className="border rounded p-3 text-center text-muted">
-            No image selected
-          </div>
-        )}
+        <ImagePreviewBox
+          previewUrl={previewUrl}
+          previewSource={previewSource}
+          imageError={imageError}
+          setImageError={setImageError}
+          isLoading={previewLoading}
+          alt="Equipment preview"
+        />
       </Form.Group>
 
       <Form.Group className="mb-3">
