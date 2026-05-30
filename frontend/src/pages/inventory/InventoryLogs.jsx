@@ -15,6 +15,7 @@ import SearchBox from "../../components/common/SearchBox";
 import Loading from "../../components/common/Loading";
 
 import { useDebounce } from "../../hooks/useDebounce";
+import { useAuth } from "../../hooks/useAuth";
 import inventoryLogService from "../../services/inventoryLogService";
 import equipmentService from "../../services/equipmentService";
 import {
@@ -23,6 +24,9 @@ import {
 } from "../../utils/reportExport";
 
 const InventoryLogs = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
   const [logs, setLogs] = useState([]);
   const [equipments, setEquipments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,11 +45,15 @@ const InventoryLogs = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
+    if (!isAdmin) {
+      return;
+    }
+
     equipmentService
       .getAllEquipments()
       .then((response) => setEquipments(response?.data || response || []))
       .catch(() => {});
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     fetchLogs();
@@ -149,56 +157,58 @@ const InventoryLogs = () => {
         </Col>
       </Row>
 
-      <Card className="mb-3">
-        <Card.Body>
-          <h5 className="mb-3">Điều chỉnh kho</h5>
-          <Form onSubmit={handleAdjustSubmit}>
-            <Row className="g-3 align-items-end">
-              <Col md={5}>
-                <Form.Group>
-                  <Form.Label>Thiết bị</Form.Label>
-                  <Form.Select
-                    value={adjustEquipmentId}
-                    onChange={(e) => setAdjustEquipmentId(e.target.value)}
+      {isAdmin && (
+        <Card className="mb-3">
+          <Card.Body>
+            <h5 className="mb-3">Điều chỉnh kho</h5>
+            <Form onSubmit={handleAdjustSubmit}>
+              <Row className="g-3 align-items-end">
+                <Col md={5}>
+                  <Form.Group>
+                    <Form.Label>Thiết bị</Form.Label>
+                    <Form.Select
+                      value={adjustEquipmentId}
+                      onChange={(e) => setAdjustEquipmentId(e.target.value)}
+                    >
+                      <option value="">Chọn thiết bị</option>
+                      {equipments.map((equipment) => (
+                        <option key={equipment.id} value={equipment.id}>
+                          {equipment.code} — {equipment.name} (Tồn:{" "}
+                          {equipment.quantity ?? 0})
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label>Số lượng thay đổi</Form.Label>
+                    <Form.Control
+                      type="number"
+                      placeholder="VD: +5 hoặc -3"
+                      value={adjustQuantity}
+                      onChange={(e) => setAdjustQuantity(e.target.value)}
+                    />
+                    <Form.Text className="text-muted">
+                      Số dương để tăng, số âm để giảm
+                    </Form.Text>
+                  </Form.Group>
+                </Col>
+                <Col md={3}>
+                  <BSButton
+                    type="submit"
+                    variant="primary"
+                    className="w-100"
+                    disabled={adjustSubmitting}
                   >
-                    <option value="">Chọn thiết bị</option>
-                    {equipments.map((equipment) => (
-                      <option key={equipment.id} value={equipment.id}>
-                        {equipment.code} — {equipment.name} (Tồn:{" "}
-                        {equipment.quantity ?? 0})
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group>
-                  <Form.Label>Số lượng thay đổi</Form.Label>
-                  <Form.Control
-                    type="number"
-                    placeholder="VD: +5 hoặc -3"
-                    value={adjustQuantity}
-                    onChange={(e) => setAdjustQuantity(e.target.value)}
-                  />
-                  <Form.Text className="text-muted">
-                    Số dương để tăng, số âm để giảm
-                  </Form.Text>
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <BSButton
-                  type="submit"
-                  variant="primary"
-                  className="w-100"
-                  disabled={adjustSubmitting}
-                >
-                  {adjustSubmitting ? "Đang xử lý..." : "Điều chỉnh"}
-                </BSButton>
-              </Col>
-            </Row>
-          </Form>
-        </Card.Body>
-      </Card>
+                    {adjustSubmitting ? "Đang xử lý..." : "Điều chỉnh"}
+                  </BSButton>
+                </Col>
+              </Row>
+            </Form>
+          </Card.Body>
+        </Card>
+      )}
 
       <Card className="mb-3">
         <Card.Body>

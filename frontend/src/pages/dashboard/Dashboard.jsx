@@ -21,19 +21,23 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [user?.role]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [statsRes, detailedRes] = await Promise.all([
-        axiosClient.get("/dashboard/statistics"),
-        axiosClient.get("/dashboard/statistics/detailed"),
-      ]);
-      console.log("statsRes =", statsRes.data);
-      console.log("detailedRes =", detailedRes.data);
-      setStatistics(statsRes.data);
-      setDetailedStats(detailedRes.data);
+      const isAdmin = user?.role === "admin";
+
+      const statsRes = await axiosClient.get("/dashboard/statistics");
+      setStatistics(statsRes?.data || statsRes);
+
+      if (isAdmin) {
+        const detailedRes = await axiosClient.get("/dashboard/statistics/detailed");
+        setDetailedStats(detailedRes?.data || detailedRes);
+      } else {
+        setDetailedStats(null);
+      }
+
       setError(null);
     } catch (err) {
       setError("Không thể tải dữ liệu dashboard");
@@ -256,6 +260,36 @@ const Dashboard = () => {
               <Card className="stat-card">
                 <Card.Body className="text-center">
                   <h3>
+                    <i className="bi bi-file-earmark text-primary"></i>
+                  </h3>
+                  <h6 className="text-muted">Phiếu Của Tôi</h6>
+                  <h2 className="text-primary">
+                    {summary.myOrders ?? 0}
+                  </h2>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col md={4} sm={6}>
+              <Card className="stat-card">
+                <Card.Body className="text-center">
+                  <h3>
+                    <i className="bi bi-hourglass-split text-warning"></i>
+                  </h3>
+                  <h6 className="text-muted">Phiếu Chờ Duyệt</h6>
+                  <h2 className="text-warning">
+                    {summary.myPendingOrders ?? 0}
+                  </h2>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row className="g-4 mb-4">
+            <Col md={4} sm={6}>
+              <Card className="stat-card">
+                <Card.Body className="text-center">
+                  <h3>
                     <i className="bi bi-box text-success"></i>
                   </h3>
                   <h6 className="text-muted">Thiết Bị Có Sẵn</h6>
@@ -275,20 +309,6 @@ const Dashboard = () => {
                 </Card.Body>
               </Card>
             </Col>
-
-            <Col md={4} sm={6}>
-              <Card className="stat-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-file-earmark text-primary"></i>
-                  </h3>
-                  <h6 className="text-muted">Phiếu Của Tôi</h6>
-                  <h2 className="text-primary">
-                    {(summary.importOrders || 0) + (summary.exportOrders || 0)}
-                  </h2>
-                </Card.Body>
-              </Card>
-            </Col>
           </Row>
 
           <Row className="mt-4">
@@ -302,7 +322,6 @@ const Dashboard = () => {
                   <ul>
                     <li>Tạo phiếu nhập kho</li>
                     <li>Tạo phiếu xuất kho</li>
-                    <li>Kiểm kê kho</li>
                     <li>Xem lịch sử nhập xuất</li>
                     <li>Quản lý tài khoản cá nhân</li>
                   </ul>

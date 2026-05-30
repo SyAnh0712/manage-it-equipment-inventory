@@ -32,7 +32,8 @@ const ImportOrderTable = ({
 
       <tbody>
         {orders.map((order, index) => {
-          const isOwner = currentUser?.id === order.created_by;
+          const isOwner =
+            String(currentUser?.id) === String(order.created_by);
           const canEdit =
             order.status === "pending" &&
             (currentUser?.role === "admin" || isOwner);

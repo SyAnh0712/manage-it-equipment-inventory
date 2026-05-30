@@ -16,6 +16,7 @@ import {
   exportExportOrdersToPdf,
 } from "../../utils/reportExport";
 import { useAuth } from "../../hooks/useAuth";
+import { extractPaginatedList } from "../../utils/apiResponse";
 
 const ExportOrdersList = () => {
   const [orders, setOrders] = useState([]);
@@ -44,8 +45,9 @@ const ExportOrdersList = () => {
         page: currentPage,
         limit: 10,
       });
-      setOrders(response?.data || []);
-      setTotalPages(response?.pagination?.totalPages || 1);
+      const { data, pagination } = extractPaginatedList(response);
+      setOrders(data);
+      setTotalPages(pagination?.totalPages || 1);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load export orders");

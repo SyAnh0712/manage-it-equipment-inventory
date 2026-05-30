@@ -10,11 +10,7 @@ const {
 } = require("../middlewares/validationMiddleware");
 
 router.use(authMiddleware);
-router.get(
-  "/",
-  roleMiddleware("admin"),
-  inventoryLogController.getAllInventoryLogs,
-);
+router.get("/", inventoryLogController.getAllInventoryLogs);
 router.post(
   "/adjust",
   roleMiddleware("admin"),

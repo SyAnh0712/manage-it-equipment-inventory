@@ -1,5 +1,6 @@
 const db = require("../../models");
 const { Op } = require("sequelize");
+const { createError, rethrowServiceError } = require("../../utils/httpError");
 
 const ImportOrder = db.ImportOrder;
 const ImportOrderDetail = db.ImportOrderDetail;
@@ -63,11 +64,11 @@ const validateImportItems = async (detailList, transaction) => {
 
 const verifyImportOrderOwnership = (order, user) => {
   if (!order) {
-    throw new Error("Import order not found");
+    throw createError("Import order not found", 404);
   }
 
   if (order.status !== "pending") {
-    throw new Error("Chỉ có thể cập nhật đơn đang ở trạng thái pending");
+    throw createError("Chỉ có thể cập nhật đơn đang ở trạng thái pending", 400);
   }
 
   if (user?.role === "admin") {
@@ -75,7 +76,7 @@ const verifyImportOrderOwnership = (order, user) => {
   }
 
   if (String(order.created_by) !== String(user?.id)) {
-    throw new Error("Bạn không có quyền cập nhật đơn hàng này");
+    throw createError("Bạn không có quyền cập nhật đơn hàng này", 403);
   }
 };
 
@@ -116,7 +117,7 @@ const createImportOrder = async (importOrderData, userId) => {
 
     return result;
   } catch (error) {
-    throw new Error("Error creating import order: " + error.message);
+    rethrowServiceError(error, "Error creating import order");
   }
 };
 
@@ -189,7 +190,7 @@ const approveImportOrder = async (id, approverId) => {
 
     return result;
   } catch (error) {
-    throw new Error("Error approving import order: " + error.message);
+    rethrowServiceError(error, "Error approving import order");
   }
 };
 
@@ -211,21 +212,13 @@ const rejectImportOrder = async (id, approverId) => {
 
     return importOrder;
   } catch (error) {
-    throw new Error("Error rejecting import order: " + error.message);
+    rethrowServiceError(error, "Error rejecting import order");
   }
 };
 
-const verifyImportOrderAccess = (order, user) => {
+const verifyImportOrderAccess = (order) => {
   if (!order) {
-    throw new Error("Import order not found");
-  }
-
-  if (user?.role === "admin") {
-    return;
-  }
-
-  if (String(order.created_by) !== String(user?.id)) {
-    throw new Error("Bạn không có quyền xem đơn hàng này");
+    throw createError("Import order not found", 404);
   }
 };
 
@@ -249,10 +242,10 @@ const getImportOrderById = async (id, user) => {
       ],
     });
 
-    verifyImportOrderAccess(importOrder, user);
+    verifyImportOrderAccess(importOrder);
     return importOrder;
   } catch (error) {
-    throw new Error("Error fetching import order: " + error.message);
+    rethrowServiceError(error, "Error fetching import order");
   }
 };
 
@@ -283,10 +276,6 @@ const getAllImportOrders = async (query, user) => {
       where.supplier_id = supplierId;
     }
 
-    if (user?.role !== "admin") {
-      where.created_by = user?.id;
-    }
-
     const { count, rows } = await ImportOrder.findAndCountAll({
       where,
       limit,
@@ -310,7 +299,7 @@ const getAllImportOrders = async (query, user) => {
       },
     };
   } catch (error) {
-    throw new Error("Error fetching import orders: " + error.message);
+    rethrowServiceError(error, "Error fetching import orders");
   }
 };
 
@@ -352,7 +341,7 @@ const updateImportOrder = async (id, importOrderData, user) => {
 
     return importOrder;
   } catch (error) {
-    throw new Error("Error updating import order: " + error.message);
+    rethrowServiceError(error, "Error updating import order");
   }
 };
 
@@ -364,7 +353,7 @@ const deleteImportOrder = async (id, user) => {
     await importOrder.destroy();
     return { message: "Import order deleted successfully" };
   } catch (error) {
-    throw new Error("Error deleting import order: " + error.message);
+    rethrowServiceError(error, "Error deleting import order");
   }
 };
 

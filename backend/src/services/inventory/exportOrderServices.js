@@ -1,5 +1,6 @@
 const db = require("../../models");
 const { Op } = require("sequelize");
+const { createError, rethrowServiceError } = require("../../utils/httpError");
 
 const ExportOrder = db.ExportOrder;
 const ExportOrderDetail = db.ExportOrderDetail;
@@ -81,11 +82,11 @@ const validateExportItems = async (detailList, transaction) => {
 
 const verifyExportOrderOwnership = (order, user) => {
   if (!order) {
-    throw new Error("Export order not found");
+    throw createError("Export order not found", 404);
   }
 
   if (order.status !== "pending") {
-    throw new Error("Chỉ có thể cập nhật đơn đang ở trạng thái pending");
+    throw createError("Chỉ có thể cập nhật đơn đang ở trạng thái pending", 400);
   }
 
   if (user?.role === "admin") {
@@ -93,7 +94,7 @@ const verifyExportOrderOwnership = (order, user) => {
   }
 
   if (String(order.created_by) !== String(user?.id)) {
-    throw new Error("Bạn không có quyền cập nhật đơn hàng này");
+    throw createError("Bạn không có quyền cập nhật đơn hàng này", 403);
   }
 };
 
@@ -133,7 +134,7 @@ const createExportOrder = async (exportOrderData, userId) => {
 
     return result;
   } catch (error) {
-    throw new Error("Error creating export order: " + error.message);
+    rethrowServiceError(error, "Error creating export order");
   }
 };
 
@@ -213,7 +214,7 @@ const approveExportOrder = async (id, approverId) => {
 
     return result;
   } catch (error) {
-    throw new Error("Error approving export order: " + error.message);
+    rethrowServiceError(error, "Error approving export order");
   }
 };
 
@@ -235,21 +236,13 @@ const rejectExportOrder = async (id, approverId) => {
 
     return exportOrder;
   } catch (error) {
-    throw new Error("Error rejecting export order: " + error.message);
+    rethrowServiceError(error, "Error rejecting export order");
   }
 };
 
-const verifyExportOrderAccess = (order, user) => {
+const verifyExportOrderAccess = (order) => {
   if (!order) {
-    throw new Error("Export order not found");
-  }
-
-  if (user?.role === "admin") {
-    return;
-  }
-
-  if (String(order.created_by) !== String(user?.id)) {
-    throw new Error("Bạn không có quyền xem đơn hàng này");
+    throw createError("Export order not found", 404);
   }
 };
 
@@ -272,10 +265,10 @@ const getExportOrderById = async (id, user) => {
       ],
     });
 
-    verifyExportOrderAccess(exportOrder, user);
+    verifyExportOrderAccess(exportOrder);
     return exportOrder;
   } catch (error) {
-    throw new Error("Error fetching export order: " + error.message);
+    rethrowServiceError(error, "Error fetching export order");
   }
 };
 
@@ -304,10 +297,6 @@ const getAllExportOrders = async (query, user) => {
       where.department = { [Op.like]: `%${department}%` };
     }
 
-    if (user?.role !== "admin") {
-      where.created_by = user?.id;
-    }
-
     const { count, rows } = await ExportOrder.findAndCountAll({
       where,
       limit,
@@ -326,7 +315,7 @@ const getAllExportOrders = async (query, user) => {
       },
     };
   } catch (error) {
-    throw new Error("Error fetching export orders: " + error.message);
+    rethrowServiceError(error, "Error fetching export orders");
   }
 };
 
@@ -367,7 +356,7 @@ const updateExportOrder = async (id, exportOrderData, user) => {
 
     return exportOrder;
   } catch (error) {
-    throw new Error("Error updating export order: " + error.message);
+    rethrowServiceError(error, "Error updating export order");
   }
 };
 
@@ -379,7 +368,7 @@ const deleteExportOrder = async (id, user) => {
     await exportOrder.destroy();
     return { message: "Export order deleted successfully" };
   } catch (error) {
-    throw new Error("Error deleting export order: " + error.message);
+    rethrowServiceError(error, "Error deleting export order");
   }
 };
 

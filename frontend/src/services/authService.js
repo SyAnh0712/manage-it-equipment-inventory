@@ -7,15 +7,16 @@ const authService = {
       password: credentials.password,
     });
 
-    return response.data;
+    return response?.data || response;
   },
 
   register: async (data) => {
     const response = await axiosClient.post("/auth/register", data);
+    const payload = response?.data || response;
 
     return {
-      token: response.data.token,
-      user: response.data.user,
+      token: payload.token,
+      user: payload.user,
     };
   },
 

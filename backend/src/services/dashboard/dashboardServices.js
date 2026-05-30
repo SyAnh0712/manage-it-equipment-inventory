@@ -2,39 +2,52 @@ const db = require("../../models");
 const { Op, Sequelize } = require("sequelize");
 
 const DashboardService = {
-  async getStatistics() {
+  async getStatistics(user) {
     try {
+      const isStaff = user?.role === "staff";
+      const ownOrdersWhere = isStaff ? { created_by: user.id } : {};
+
       const [equipmentCount, categoryCount, supplierCount, userCount] =
         await Promise.all([
           db.Equipment.count(),
           db.Category.count(),
           db.Supplier.count(),
-          db.User.count(),
+          isStaff ? Promise.resolve(0) : db.User.count(),
         ]);
 
       const [importCount, exportCount, pendingImportCount, pendingExportCount] =
         await Promise.all([
-          db.ImportOrder.count(),
-          db.ExportOrder.count(),
-          db.ImportOrder.count({ where: { status: "pending" } }),
-          db.ExportOrder.count({ where: { status: "pending" } }),
+          db.ImportOrder.count({ where: ownOrdersWhere }),
+          db.ExportOrder.count({ where: ownOrdersWhere }),
+          db.ImportOrder.count({
+            where: { ...ownOrdersWhere, status: "pending" },
+          }),
+          db.ExportOrder.count({
+            where: { ...ownOrdersWhere, status: "pending" },
+          }),
         ]);
 
       const totalQuantity = (await db.Equipment.sum("quantity")) || 0;
 
-      return {
-        summary: {
-          equipment: equipmentCount,
-          categories: categoryCount,
-          suppliers: supplierCount,
-          users: userCount,
-          importOrders: importCount,
-          exportOrders: exportCount,
-          pendingImportOrders: pendingImportCount,
-          pendingExportOrders: pendingExportCount,
-          totalQuantity,
-        },
+      const summary = {
+        equipment: equipmentCount,
+        categories: categoryCount,
+        suppliers: supplierCount,
+        users: userCount,
+        importOrders: importCount,
+        exportOrders: exportCount,
+        totalQuantity,
       };
+
+      if (isStaff) {
+        summary.myOrders = importCount + exportCount;
+        summary.myPendingOrders = pendingImportCount + pendingExportCount;
+      } else {
+        summary.pendingImportOrders = pendingImportCount;
+        summary.pendingExportOrders = pendingExportCount;
+      }
+
+      return { summary };
     } catch (error) {
       throw new Error("Error fetching dashboard statistics: " + error.message);
     }

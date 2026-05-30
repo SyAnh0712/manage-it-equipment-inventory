@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { useAuth } from "../../hooks/useAuth";
 import axiosClient from "../../services/axiosClient";
+import authService from "../../services/authService";
 import { showToast } from "../../utils/toast";
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser } = useAuth();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,7 +48,15 @@ const Profile = () => {
     try {
       setLoading(true);
       setIsUpdatingProfile(true);
-      await axiosClient.put(`/users/${user?.id}`, profileData);
+      await axiosClient.put("/users/profile", profileData);
+      const refreshed = await axiosClient.get("/users/profile/current");
+      const updatedUser = refreshed?.data || refreshed;
+      authService.setUser(updatedUser);
+      setUser(updatedUser);
+      setProfileData({
+        full_name: updatedUser?.full_name || "",
+        email: updatedUser?.email || "",
+      });
       showToast.success("Cập nhật thông tin thành công");
     } catch (error) {
       showToast.error(error?.message || "Cập nhật thất bại");
