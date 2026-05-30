@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Form } from "react-bootstrap";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
@@ -41,9 +42,12 @@ const EquipmentForm = ({
   categories = [],
   suppliers = [],
 }) => {
+  const [imageError, setImageError] = useState(false);
+
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(equipmentValidationSchema),
@@ -60,6 +64,12 @@ const EquipmentForm = ({
       description: "",
     },
   });
+
+  const imageUrl = watch("image_url");
+
+  useEffect(() => {
+    setImageError(false);
+  }, [imageUrl]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
@@ -229,6 +239,36 @@ const EquipmentForm = ({
             />
           )}
         />
+      </Form.Group>
+
+      <Form.Group className="mb-3">
+        <Form.Label>Preview</Form.Label>
+
+        {imageUrl ? (
+          !imageError ? (
+            <div className="border rounded p-2 text-center">
+              <img
+                src={imageUrl}
+                alt="Equipment Preview"
+                className="img-fluid"
+                style={{
+                  maxHeight: "250px",
+                  objectFit: "contain",
+                }}
+                onLoad={() => setImageError(false)}
+                onError={() => setImageError(true)}
+              />
+            </div>
+          ) : (
+            <div className="alert alert-warning mb-0">
+              Cannot load image from this URL
+            </div>
+          )
+        ) : (
+          <div className="border rounded p-3 text-center text-muted">
+            No image selected
+          </div>
+        )}
       </Form.Group>
 
       <Form.Group className="mb-3">

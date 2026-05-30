@@ -8,7 +8,10 @@ const equipmentService = {
 
   getEquipmentById: async (id) => {
     const response = await axiosClient.get(`/equipment/${id}`);
-    return response.data;
+
+    console.log("service response =", response);
+
+    return response;
   },
 
   createEquipment: async (data) => {

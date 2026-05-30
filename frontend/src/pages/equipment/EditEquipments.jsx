@@ -28,7 +28,7 @@ const EditEquipments = () => {
       setLoading(true);
 
       const response = await equipmentService.getEquipmentById(id);
-
+      console.log("Equipment:", response);
       setEquipment(response);
     } catch (error) {
       console.error(error);
