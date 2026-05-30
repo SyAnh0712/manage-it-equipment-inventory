@@ -30,7 +30,9 @@ const SuppliersList = () => {
     const email = supplier.email?.toLowerCase() || "";
     const query = debouncedSearchTerm.toLowerCase();
 
-    return name.includes(query) || contact.includes(query) || email.includes(query);
+    return (
+      name.includes(query) || contact.includes(query) || email.includes(query)
+    );
   });
 
   const pagination = usePagination(filteredSuppliers, 10);
@@ -43,7 +45,7 @@ const SuppliersList = () => {
     try {
       setLoading(true);
       const response = await suppliersService.getAllSuppliers();
-      setSuppliers(response || []);
+      setSuppliers(response?.data || response || []);
     } catch (error) {
       toast.error("Failed to fetch suppliers");
       console.error(error);

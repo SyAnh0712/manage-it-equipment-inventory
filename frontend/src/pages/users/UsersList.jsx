@@ -43,7 +43,7 @@ const UsersList = () => {
     try {
       setLoading(true);
       const response = await userService.getAllUsers();
-      setUsers(response || []);
+      setUsers(response?.data || response || []);
     } catch (error) {
       toast.error("Failed to fetch users");
       console.error(error);
@@ -81,8 +81,7 @@ const UsersList = () => {
         <Col className="text-end">
           <Link to="/users/add">
             <BSButton variant="primary">
-              <i className="bi bi-plus-circle me-2"></i>{" "}
-              Add New User
+              <i className="bi bi-plus-circle me-2"></i> Add New User
             </BSButton>
           </Link>
         </Col>

@@ -40,7 +40,7 @@ const CategoriesList = () => {
 
       const response = await categoriesService.getAllCategories();
 
-      setCategories(response || []);
+      setCategories(response?.data || response || []);
     } catch (error) {
       toast.error("Failed to fetch categories");
       console.error(error);

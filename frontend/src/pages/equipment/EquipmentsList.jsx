@@ -79,12 +79,12 @@ const EquipmentsList = () => {
     }
   };
 
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
   if (loading) {
     return <Loading />;
   }
-
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
 
   return (
     <Container fluid className="py-4">
