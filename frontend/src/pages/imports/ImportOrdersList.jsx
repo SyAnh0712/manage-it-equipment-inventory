@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Row, Col, Card, Button as BSButton } from "react-bootstrap";
+import { Container, Row, Col, Card, Button as BSButton, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -11,6 +11,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 
 import { useDebounce } from "../../hooks/useDebounce";
 import importOrderService from "../../services/importOrderService";
+import suppliersService from "../../services/suppliersService";
 import {
   exportImportOrdersToExcel,
   exportImportOrdersToPdf,
@@ -19,8 +20,12 @@ import { useAuth } from "../../hooks/useAuth";
 
 const ImportOrdersList = () => {
   const [orders, setOrders] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [supplierId, setSupplierId] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -30,11 +35,21 @@ const ImportOrdersList = () => {
   const { user } = useAuth();
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
+  useEffect(() => {
+    suppliersService
+      .getAllSuppliers()
+      .then((response) => setSuppliers(response?.data || response || []))
+      .catch(() => {});
+  }, []);
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
       const response = await importOrderService.getAllImportOrders({
         search: debouncedSearchTerm,
+        supplier_id: supplierId || undefined,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
         page: currentPage,
         limit: 10,
       });
@@ -50,7 +65,7 @@ const ImportOrdersList = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [debouncedSearchTerm, currentPage]);
+  }, [debouncedSearchTerm, supplierId, dateFrom, dateTo, currentPage]);
 
   const handleDownloadExcel = () => {
     if (!orders.length) {
@@ -168,17 +183,71 @@ const ImportOrdersList = () => {
 
       <Card className="mb-3">
         <Card.Body>
-          <Row className="g-3 align-items-center">
-            <Col md={6}>
+          <Row className="g-3 align-items-end">
+            <Col md={4}>
               <SearchBox
-                placeholder="Search by order code, supplier, status or note..."
+                placeholder="Tìm theo mã phiếu, nhà cung cấp, trạng thái..."
                 value={searchTerm}
-                onChange={setSearchTerm}
+                onChange={(value) => {
+                  setSearchTerm(value);
+                  setCurrentPage(1);
+                }}
               />
             </Col>
-            <Col md={6} className="text-end">
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label className="small text-muted mb-1">
+                  Nhà cung cấp
+                </Form.Label>
+                <Form.Select
+                  value={supplierId}
+                  onChange={(e) => {
+                    setSupplierId(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="">Tất cả nhà cung cấp</option>
+                  {suppliers.map((supplier) => (
+                    <option key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Form.Group>
+                <Form.Label className="small text-muted mb-1">
+                  Từ ngày
+                </Form.Label>
+                <Form.Control
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    setDateFrom(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Form.Group>
+                <Form.Label className="small text-muted mb-1">
+                  Đến ngày
+                </Form.Label>
+                <Form.Control
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => {
+                    setDateTo(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={1} className="text-end">
               <small className="text-muted">
-                Total orders: <strong>{orders.length}</strong>
+                Tổng: <strong>{orders.length}</strong>
               </small>
             </Col>
           </Row>

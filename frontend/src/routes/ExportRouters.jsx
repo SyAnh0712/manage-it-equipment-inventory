@@ -2,39 +2,39 @@ import ExportOrdersList from "../pages/exports/ExportOrdersList";
 import AddExportOrder from "../pages/exports/AddExportOrder";
 import ExportOrderDetails from "../pages/exports/ExportOrderDetails";
 import EditExportOrder from "../pages/exports/EditExportOrder";
-import ProtectedRoute from "./ProtectedRoute";
+import AdminRoute from "./AdminRouters";
 
 const exportRoutes = [
   {
     path: "/exports",
     element: (
-      <ProtectedRoute>
+      <AdminRoute>
         <ExportOrdersList />
-      </ProtectedRoute>
+      </AdminRoute>
     ),
   },
   {
     path: "/exports/add",
     element: (
-      <ProtectedRoute>
+      <AdminRoute>
         <AddExportOrder />
-      </ProtectedRoute>
+      </AdminRoute>
     ),
   },
   {
     path: "/exports/:id",
     element: (
-      <ProtectedRoute>
+      <AdminRoute>
         <ExportOrderDetails />
-      </ProtectedRoute>
+      </AdminRoute>
     ),
   },
   {
     path: "/exports/:id/edit",
     element: (
-      <ProtectedRoute>
+      <AdminRoute>
         <EditExportOrder />
-      </ProtectedRoute>
+      </AdminRoute>
     ),
   },
 ];

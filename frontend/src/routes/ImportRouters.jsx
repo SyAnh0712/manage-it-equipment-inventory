@@ -2,39 +2,39 @@ import ImportOrdersList from "../pages/imports/ImportOrdersList";
 import AddImportOrder from "../pages/imports/AddImportOrder";
 import ImportOrderDetails from "../pages/imports/ImportOrderDetails";
 import EditImportOrder from "../pages/imports/EditImportOrder";
-import ProtectedRoute from "./ProtectedRoute";
+import AdminRoute from "./AdminRouters";
 
 const importRoutes = [
   {
     path: "/imports",
     element: (
-      <ProtectedRoute>
+      <AdminRoute>
         <ImportOrdersList />
-      </ProtectedRoute>
+      </AdminRoute>
     ),
   },
   {
     path: "/imports/add",
     element: (
-      <ProtectedRoute>
+      <AdminRoute>
         <AddImportOrder />
-      </ProtectedRoute>
+      </AdminRoute>
     ),
   },
   {
     path: "/imports/:id",
     element: (
-      <ProtectedRoute>
+      <AdminRoute>
         <ImportOrderDetails />
-      </ProtectedRoute>
+      </AdminRoute>
     ),
   },
   {
     path: "/imports/:id/edit",
     element: (
-      <ProtectedRoute>
+      <AdminRoute>
         <EditImportOrder />
-      </ProtectedRoute>
+      </AdminRoute>
     ),
   },
 ];

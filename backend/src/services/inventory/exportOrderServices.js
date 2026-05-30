@@ -15,6 +15,22 @@ const generateExportCode = () => {
   return `EXP-${yyyy}${mm}${dd}-${random}`;
 };
 
+const buildDateRangeFilter = (dateFrom, dateTo) => {
+  if (!dateFrom && !dateTo) {
+    return {};
+  }
+
+  const range = {};
+  if (dateFrom) {
+    range[Op.gte] = new Date(`${dateFrom}T00:00:00`);
+  }
+  if (dateTo) {
+    range[Op.lte] = new Date(`${dateTo}T23:59:59`);
+  }
+
+  return { created_at: range };
+};
+
 const validateExportItems = async (detailList, transaction) => {
   const validDetails = [];
 
@@ -39,6 +55,25 @@ const validateExportItems = async (detailList, transaction) => {
       equipment,
       quantity,
     });
+  }
+
+  const aggregated = {};
+  for (const item of validDetails) {
+    const equipmentId = item.equipment.id;
+    aggregated[equipmentId] = (aggregated[equipmentId] || 0) + item.quantity;
+  }
+
+  for (const [equipmentId, totalQty] of Object.entries(aggregated)) {
+    const equipment = validDetails.find(
+      (item) => String(item.equipment.id) === String(equipmentId),
+    ).equipment;
+    const stockQty = Number(equipment.quantity || 0);
+
+    if (stockQty < totalQty) {
+      throw new Error(
+        `Không đủ số lượng tồn kho cho thiết bị ${equipment.name || equipmentId} (còn ${stockQty}, yêu cầu ${totalQty})`,
+      );
+    }
   }
 
   return validDetails;
@@ -223,7 +258,17 @@ const getExportOrderById = async (id, user) => {
     const exportOrder = await ExportOrder.findByPk(id, {
       include: [
         { model: db.User, as: "creator" },
-        { model: db.ExportOrderDetail, as: "details" },
+        {
+          model: db.ExportOrderDetail,
+          as: "details",
+          include: [
+            {
+              model: db.Equipment,
+              as: "equipment",
+              attributes: ["id", "code", "name", "unit", "quantity"],
+            },
+          ],
+        },
       ],
     });
 
@@ -240,17 +285,24 @@ const getAllExportOrders = async (query, user) => {
     const page = Math.max(1, Number(safeQuery.page) || 1);
     const limit = Math.max(1, Number(safeQuery.limit) || 10);
     const search = (safeQuery.search || "").trim();
+    const department = (safeQuery.department || "").trim();
 
-    const where = search
-      ? {
-          [Op.or]: [
-            { code: { [Op.like]: `%${search}%` } },
-            { status: { [Op.like]: `%${search}%` } },
-            { department: { [Op.like]: `%${search}%` } },
-            { receiver: { [Op.like]: `%${search}%` } },
-          ],
-        }
-      : {};
+    const where = {
+      ...buildDateRangeFilter(safeQuery.date_from, safeQuery.date_to),
+    };
+
+    if (search) {
+      where[Op.or] = [
+        { code: { [Op.like]: `%${search}%` } },
+        { status: { [Op.like]: `%${search}%` } },
+        { department: { [Op.like]: `%${search}%` } },
+        { receiver: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    if (department) {
+      where.department = { [Op.like]: `%${department}%` };
+    }
 
     if (user?.role !== "admin") {
       where.created_by = user?.id;

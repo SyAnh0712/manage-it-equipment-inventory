@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Row, Col, Card, Button as BSButton } from "react-bootstrap";
+import { Container, Row, Col, Card, Button as BSButton, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -21,6 +21,9 @@ const ExportOrdersList = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [department, setDepartment] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -35,6 +38,9 @@ const ExportOrdersList = () => {
       setLoading(true);
       const response = await exportOrderService.getAllExportOrders({
         search: debouncedSearchTerm,
+        department: department || undefined,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
         page: currentPage,
         limit: 10,
       });
@@ -50,7 +56,7 @@ const ExportOrdersList = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [debouncedSearchTerm, currentPage]);
+  }, [debouncedSearchTerm, department, dateFrom, dateTo, currentPage]);
 
   const handleDownloadExcel = () => {
     if (!orders.length) {
@@ -168,17 +174,66 @@ const ExportOrdersList = () => {
 
       <Card className="mb-3">
         <Card.Body>
-          <Row className="g-3 align-items-center">
-            <Col md={6}>
+          <Row className="g-3 align-items-end">
+            <Col md={4}>
               <SearchBox
-                placeholder="Search by order code, department, receiver or status..."
+                placeholder="Tìm theo mã phiếu, bộ phận, người nhận..."
                 value={searchTerm}
-                onChange={setSearchTerm}
+                onChange={(value) => {
+                  setSearchTerm(value);
+                  setCurrentPage(1);
+                }}
               />
             </Col>
-            <Col md={6} className="text-end">
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label className="small text-muted mb-1">
+                  Bộ phận nhận
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Lọc theo bộ phận"
+                  value={department}
+                  onChange={(e) => {
+                    setDepartment(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Form.Group>
+                <Form.Label className="small text-muted mb-1">
+                  Từ ngày
+                </Form.Label>
+                <Form.Control
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    setDateFrom(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Form.Group>
+                <Form.Label className="small text-muted mb-1">
+                  Đến ngày
+                </Form.Label>
+                <Form.Control
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => {
+                    setDateTo(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={1} className="text-end">
               <small className="text-muted">
-                Total orders: <strong>{orders.length}</strong>
+                Tổng: <strong>{orders.length}</strong>
               </small>
             </Col>
           </Row>

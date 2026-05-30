@@ -73,6 +73,13 @@ const EditExportOrder = () => {
     setDetails((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  const getEquipmentStock = (equipmentId) => {
+    const equipment = equipments.find(
+      (item) => String(item.id) === String(equipmentId),
+    );
+    return Number(equipment?.quantity || 0);
+  };
+
   const validate = () => {
     if (!department.trim()) {
       toast.error("Please enter a department");
@@ -87,6 +94,8 @@ const EditExportOrder = () => {
       return false;
     }
 
+    const aggregated = {};
+
     for (const item of details) {
       if (!item.equipment_id) {
         toast.error("Each detail item needs an equipment selection");
@@ -94,6 +103,23 @@ const EditExportOrder = () => {
       }
       if (!item.quantity || Number(item.quantity) <= 0) {
         toast.error("Quantity must be greater than zero");
+        return false;
+      }
+
+      const equipmentId = item.equipment_id;
+      aggregated[equipmentId] =
+        (aggregated[equipmentId] || 0) + Number(item.quantity);
+    }
+
+    for (const [equipmentId, totalQty] of Object.entries(aggregated)) {
+      const stockQty = getEquipmentStock(equipmentId);
+      if (totalQty > stockQty) {
+        const equipment = equipments.find(
+          (item) => String(item.id) === String(equipmentId),
+        );
+        toast.error(
+          `Không đủ tồn kho cho ${equipment?.name || equipmentId}: còn ${stockQty}, yêu cầu ${totalQty}`,
+        );
         return false;
       }
     }
@@ -216,7 +242,8 @@ const EditExportOrder = () => {
                             <option value="">Select equipment</option>
                             {equipments.map((equipment) => (
                               <option key={equipment.id} value={equipment.id}>
-                                {equipment.code} — {equipment.name}
+                                {equipment.code} — {equipment.name} (Tồn:{" "}
+                                {equipment.quantity ?? 0})
                               </option>
                             ))}
                           </Form.Select>
@@ -228,6 +255,11 @@ const EditExportOrder = () => {
                           <Form.Control
                             type="number"
                             min="1"
+                            max={
+                              item.equipment_id
+                                ? getEquipmentStock(item.equipment_id)
+                                : undefined
+                            }
                             value={item.quantity}
                             onChange={(e) =>
                               handleDetailChange(
@@ -237,6 +269,11 @@ const EditExportOrder = () => {
                               )
                             }
                           />
+                          {item.equipment_id && (
+                            <Form.Text className="text-muted">
+                              Tồn kho: {getEquipmentStock(item.equipment_id)}
+                            </Form.Text>
+                          )}
                         </Form.Group>
                       </Col>
                       <Col md={2}>

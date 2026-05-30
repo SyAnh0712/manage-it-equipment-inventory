@@ -158,8 +158,9 @@ const buildDetailRows = (order, items, includePrice = false) =>
   items.map((item) => {
     const equipment = item.equipment || item.equipment_id;
     return {
-      code: equipment?.code || item.equipment_id || "-",
-      name: equipment?.name || "-",
+      code:
+        equipment?.code || item.equipmentCode || item.equipment_id || "-",
+      name: equipment?.name || item.equipmentName || "-",
       quantity: item.quantity,
       unit_price: includePrice ? item.unit_price || 0 : undefined,
       total: includePrice
@@ -229,6 +230,67 @@ export const exportExportOrderDetailsToPdf = (order, items) => {
   downloadPdf(
     `export-order-${order.code || order.id}-details.pdf`,
     `Export Order ${order.code || order.id} Details`,
+    headers,
+    rows,
+  );
+};
+
+export const exportInventoryLogsToExcel = (logs) => {
+  const headers = [
+    { label: "Thời gian", key: "created_at" },
+    { label: "Loại", key: "action_type" },
+    { label: "Thiết bị", key: "equipment" },
+    { label: "Trước", key: "quantity_before" },
+    { label: "Thay đổi", key: "quantity_changed" },
+    { label: "Sau", key: "quantity_after" },
+    { label: "Mã tham chiếu", key: "reference_code" },
+    { label: "Người thao tác", key: "creator" },
+  ];
+
+  const rows = logs.map((log) => ({
+    created_at: new Date(log.created_at).toLocaleString(),
+    action_type: log.action_type,
+    equipment: log.equipment
+      ? `${log.equipment.code} - ${log.equipment.name}`
+      : "-",
+    quantity_before: log.quantity_before,
+    quantity_changed: log.quantity_changed,
+    quantity_after: log.quantity_after,
+    reference_code: log.reference_code || "-",
+    creator: log.creator?.full_name || log.creator?.username || "-",
+  }));
+
+  downloadExcel(`inventory-logs-${Date.now()}.xlsx`, rows, headers);
+};
+
+export const exportInventoryLogsToPdf = (logs) => {
+  const headers = [
+    { label: "Thời gian", key: "created_at" },
+    { label: "Loại", key: "action_type" },
+    { label: "Thiết bị", key: "equipment" },
+    { label: "Trước", key: "quantity_before" },
+    { label: "Thay đổi", key: "quantity_changed" },
+    { label: "Sau", key: "quantity_after" },
+    { label: "Mã tham chiếu", key: "reference_code" },
+    { label: "Người thao tác", key: "creator" },
+  ];
+
+  const rows = logs.map((log) => ({
+    created_at: new Date(log.created_at).toLocaleString(),
+    action_type: log.action_type,
+    equipment: log.equipment
+      ? `${log.equipment.code} - ${log.equipment.name}`
+      : "-",
+    quantity_before: log.quantity_before,
+    quantity_changed: log.quantity_changed,
+    quantity_after: log.quantity_after,
+    reference_code: log.reference_code || "-",
+    creator: log.creator?.full_name || log.creator?.username || "-",
+  }));
+
+  downloadPdf(
+    `inventory-logs-${Date.now()}.pdf`,
+    "Inventory History Report",
     headers,
     rows,
   );

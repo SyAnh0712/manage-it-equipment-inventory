@@ -1,4 +1,5 @@
 import { Form, Button } from "react-bootstrap";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -26,6 +27,9 @@ const CategoriesForm = ({
   initialData = null,
   isLoading = false,
 }) => {
+  const [imageError, setImageError] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(initialData?.image_url || "");
+
   const {
     control,
     handleSubmit,
@@ -36,13 +40,28 @@ const CategoriesForm = ({
     defaultValues: initialData || {
       name: "",
       description: "",
+      image: null,
       image_url: "",
     },
   });
 
   const isNew = !initialData;
-
   const imageUrlValue = watch("image_url");
+  const imageFile = watch("image");
+
+  useEffect(() => {
+    setImageError(false);
+  }, [imageUrlValue, imageFile]);
+
+  useEffect(() => {
+    if (imageFile instanceof File) {
+      const objectUrl = URL.createObjectURL(imageFile);
+      setPreviewUrl(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+
+    setPreviewUrl(imageUrlValue || initialData?.image_url || "");
+  }, [imageFile, imageUrlValue, initialData?.image_url]);
 
   return (
     <Form onSubmit={handleSubmit((data) => onSubmit(data))}>
@@ -92,6 +111,26 @@ const CategoriesForm = ({
       </Form.Group>
 
       <Form.Group className="mb-3">
+        <Form.Label>Upload Image</Form.Label>
+
+        <Controller
+          name="image"
+          control={control}
+          defaultValue={null}
+          render={({ field }) => (
+            <Form.Control
+              type="file"
+              accept="image/*"
+              disabled={isLoading}
+              onChange={(event) =>
+                field.onChange(event.target.files?.[0] || null)
+              }
+            />
+          )}
+        />
+      </Form.Group>
+
+      <Form.Group className="mb-3">
         <Form.Label>Image URL</Form.Label>
 
         <Controller
@@ -113,18 +152,31 @@ const CategoriesForm = ({
         </Form.Control.Feedback>
       </Form.Group>
 
-      {imageUrlValue && (
-        <div className="mb-3">
-          <div className="text-muted mb-1">Preview</div>
-          <div className="border rounded p-2 text-center">
-            <img
-              src={imageUrlValue}
-              alt="Category preview"
-              style={{ maxWidth: "100%", height: "auto" }}
-            />
+      <Form.Group className="mb-3">
+        <Form.Label>Preview</Form.Label>
+
+        {previewUrl ? (
+          !imageError ? (
+            <div className="border rounded p-2 text-center">
+              <img
+                src={previewUrl}
+                alt="Category preview"
+                style={{ maxWidth: "100%", height: "auto" }}
+                onLoad={() => setImageError(false)}
+                onError={() => setImageError(true)}
+              />
+            </div>
+          ) : (
+            <div className="alert alert-warning mb-0">
+              Cannot load image from this URL
+            </div>
+          )
+        ) : (
+          <div className="border rounded p-3 text-center text-muted">
+            No image selected
           </div>
-        </div>
-      )}
+        )}
+      </Form.Group>
 
       <div className="d-grid gap-2">
         <Button variant="primary" type="submit" disabled={isLoading}>

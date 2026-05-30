@@ -2,7 +2,12 @@ const catagoryService = require("../services/equipment/categoryServices");
 
 const createCategory = async (req, res, nextHandler) => {
   try {
-    const categoryData = req.body;
+    const categoryData = {
+      ...req.body,
+      image_url: req.file
+        ? `/uploads/${req.file.filename}`
+        : req.body.image_url,
+    };
     const category = await catagoryService.createCategory(categoryData);
     res.status(201).json(category);
   } catch (error) {
@@ -38,7 +43,12 @@ const getCategoryById = async (req, res, nextHandler) => {
 const updateCategory = async (req, res, nextHandler) => {
   try {
     const categoryId = req.params.id;
-    const categoryData = req.body;
+    const categoryData = {
+      ...req.body,
+      image_url: req.file
+        ? `/uploads/${req.file.filename}`
+        : req.body.image_url,
+    };
     const updatedCategory = await catagoryService.updateCategory(
       categoryId,
       categoryData,

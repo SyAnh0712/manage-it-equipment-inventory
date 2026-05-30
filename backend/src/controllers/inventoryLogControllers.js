@@ -9,6 +9,19 @@ const getAllInventoryLogs = async (req, res, next) => {
   }
 };
 
+const adjustInventory = async (req, res, next) => {
+  try {
+    const log = await inventoryLogService.adjustInventory(
+      req.body,
+      req.user?.id,
+    );
+    res.status(201).json(log);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAllInventoryLogs,
+  adjustInventory,
 };

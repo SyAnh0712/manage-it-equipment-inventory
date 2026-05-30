@@ -57,6 +57,13 @@ const supplierSchema = Joi.object({
 const categorySchema = Joi.object({
   name: Joi.string().trim().min(2).max(100).required(),
   description: Joi.string().allow("", null),
+  image_url: Joi.string().uri().allow("", null).optional(),
+});
+
+const adjustInventorySchema = Joi.object({
+  equipment_id: Joi.number().integer().positive().required(),
+  quantity_change: Joi.number().integer().invalid(0).required(),
+  reference_code: Joi.string().trim().max(50).optional(),
 });
 
 const importOrderSchema = Joi.object({
@@ -106,4 +113,5 @@ module.exports = {
   categorySchema,
   importOrderSchema,
   exportOrderSchema,
+  adjustInventorySchema,
 };

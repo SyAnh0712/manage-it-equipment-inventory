@@ -9,12 +9,14 @@ const {
   validate,
   categorySchema,
 } = require("../middlewares/validationMiddleware");
+const upload = require("../utils/uploadHelper");
 
 router.use(authMiddleware);
 
 router.post(
   "/",
   roleMiddleware("admin"),
+  upload.single("image"),
   validate(categorySchema),
   catagoryController.createCategory,
 );
@@ -23,6 +25,7 @@ router.get("/:id", catagoryController.getCategoryById);
 router.put(
   "/:id",
   roleMiddleware("admin"),
+  upload.single("image"),
   validate(categorySchema),
   catagoryController.updateCategory,
 );

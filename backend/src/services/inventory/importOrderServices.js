@@ -15,6 +15,22 @@ const generateImportCode = () => {
   return `IMP-${yyyy}${mm}${dd}-${random}`;
 };
 
+const buildDateRangeFilter = (dateFrom, dateTo) => {
+  if (!dateFrom && !dateTo) {
+    return {};
+  }
+
+  const range = {};
+  if (dateFrom) {
+    range[Op.gte] = new Date(`${dateFrom}T00:00:00`);
+  }
+  if (dateTo) {
+    range[Op.lte] = new Date(`${dateTo}T23:59:59`);
+  }
+
+  return { created_at: range };
+};
+
 const validateImportItems = async (detailList, transaction) => {
   const validDetails = [];
 
@@ -219,7 +235,17 @@ const getImportOrderById = async (id, user) => {
       include: [
         { model: db.Supplier, as: "supplier" },
         { model: db.User, as: "creator" },
-        { model: db.ImportOrderDetail, as: "details" },
+        {
+          model: db.ImportOrderDetail,
+          as: "details",
+          include: [
+            {
+              model: db.Equipment,
+              as: "equipment",
+              attributes: ["id", "code", "name", "unit"],
+            },
+          ],
+        },
       ],
     });
 
@@ -236,16 +262,26 @@ const getAllImportOrders = async (query, user) => {
     const page = Math.max(1, Number(safeQuery.page) || 1);
     const limit = Math.max(1, Number(safeQuery.limit) || 10);
     const search = (safeQuery.search || "").trim();
+    const supplierId = safeQuery.supplier_id
+      ? Number(safeQuery.supplier_id)
+      : null;
 
-    const where = search
-      ? {
-          [Op.or]: [
-            { code: { [Op.like]: `%${search}%` } },
-            { status: { [Op.like]: `%${search}%` } },
-            { note: { [Op.like]: `%${search}%` } },
-          ],
-        }
-      : {};
+    const where = {
+      ...buildDateRangeFilter(safeQuery.date_from, safeQuery.date_to),
+    };
+
+    if (search) {
+      where[Op.or] = [
+        { code: { [Op.like]: `%${search}%` } },
+        { status: { [Op.like]: `%${search}%` } },
+        { note: { [Op.like]: `%${search}%` } },
+        { "$supplier.name$": { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    if (supplierId) {
+      where.supplier_id = supplierId;
+    }
 
     if (user?.role !== "admin") {
       where.created_by = user?.id;
@@ -256,8 +292,10 @@ const getAllImportOrders = async (query, user) => {
       limit,
       offset: (page - 1) * limit,
       order: [["created_at", "DESC"]],
+      subQuery: false,
+      distinct: true,
       include: [
-        { model: db.Supplier, as: "supplier" },
+        { model: db.Supplier, as: "supplier", required: false },
         { model: db.User, as: "creator" },
       ],
     });
