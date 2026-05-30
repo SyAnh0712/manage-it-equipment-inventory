@@ -1,16 +1,124 @@
-# React + Vite
+# Frontend — EIM Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Giao diện web cho hệ thống Quản lý Nhập Xuất Kho Thiết bị CNTT, xây dựng bằng **React 19** và **Vite**.
 
-Currently, two official plugins are available:
+## Cấu trúc thư mục
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```
+frontend/
+├── public/              # Tài nguyên tĩnh
+├── src/
+│   ├── assets/          # CSS, hình ảnh
+│   ├── components/      # Component tái sử dụng (UI, form, layout)
+│   ├── hooks/           # Custom hooks (useAuth, usePagination, ...)
+│   ├── layouts/         # AdminLayout, AuthLayout
+│   ├── pages/           # Trang theo module
+│   ├── routes/          # Định nghĩa routing, ProtectedRoute
+│   ├── services/        # Gọi API (axios)
+│   ├── utils/           # Constants, format, export Excel/PDF
+│   ├── App.jsx
+│   └── main.jsx
+├── .env.example
+├── index.html
+├── vite.config.js
+└── package.json
+```
 
-## React Compiler
+## Yêu cầu
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js >= 18
+- Backend API đang chạy (xem [Backend README](../backend/README.md))
 
-## Expanding the ESLint configuration
+## Cài đặt
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+cd frontend
+npm install
+cp .env.example .env   # Windows: copy .env.example .env
+```
+
+Chỉnh sửa file `.env`:
+
+```env
+PORT=5173
+VITE_API_URL=http://localhost:6969/api
+```
+
+> `VITE_API_URL` phải trỏ đúng URL backend (mặc định backend chạy cổng `6969`).
+
+## Chạy ứng dụng
+
+```bash
+# Development
+npm run dev
+
+# Build production
+npm run build
+
+# Xem bản build local
+npm run preview
+
+# Kiểm tra lint
+npm run lint
+```
+
+Ứng dụng chạy tại: `http://localhost:5173`
+
+## Tính năng giao diện
+
+| Module            | Route             | Mô tả                            |
+| ----------------- | ----------------- | -------------------------------- |
+| Dashboard         | `/dashboard`      | Thống kê theo vai trò            |
+| Profile           | `/profile`        | Hồ sơ cá nhân, đổi mật khẩu      |
+| Equipment         | `/equipment`      | Danh sách thiết bị / kiểm kê kho |
+| Categories        | `/categories`     | Quản lý danh mục (Admin)         |
+| Suppliers         | `/suppliers`      | Quản lý nhà cung cấp (Admin)     |
+| Import Orders     | `/imports`        | Phiếu nhập kho                   |
+| Export Orders     | `/exports`        | Phiếu xuất kho                   |
+| Inventory History | `/inventory-logs` | Nhật ký kho (Admin)              |
+| Users             | `/users`          | Quản lý người dùng (Admin)       |
+
+## Phân quyền giao diện
+
+- Route bảo vệ qua `ProtectedRoute` — yêu cầu đăng nhập
+- Route `adminOnly` — chỉ Admin truy cập (Users, Categories, Suppliers, Inventory History, ...)
+- Sidebar và nút thao tác ẩn/hiện theo `user.role`
+
+### Staff thấy
+
+Dashboard, Profile, Kiểm kê kho (Equipment), Import/Export Orders
+
+### Admin thêm
+
+Users, Categories, Suppliers, Inventory History, nút duyệt phiếu, CRUD thiết bị
+
+## Công nghệ chính
+
+- **React 19** + **Vite 8**
+- **React Router** — routing
+- **Redux Toolkit** + **redux-persist** — state & auth
+- **React Bootstrap** — UI components
+- **Axios** — HTTP client (`src/services/axiosClient.js`)
+- **React Hook Form** + **Yup** — form validation
+- **react-toastify** — thông báo
+- **xlsx**, **jspdf** — xuất báo cáo Excel/PDF
+
+## Kết nối API
+
+Token JWT lưu trong `localStorage` (`authToken`). Axios interceptor tự gắn header:
+
+```
+Authorization: Bearer <token>
+```
+
+Khi API trả `401`, ứng dụng tự đăng xuất và chuyển về `/login`.
+
+## Build production
+
+```bash
+npm run build
+```
+
+Thư mục output: `dist/` — deploy lên Nginx, Vercel, Netlify hoặc serve tĩnh.
+
+Đảm bảo biến `VITE_API_URL` trỏ đúng URL API production trước khi build.

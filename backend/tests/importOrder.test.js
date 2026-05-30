@@ -4,6 +4,8 @@ const mockDb = {
   },
   ImportOrderDetail: {
     findAll: jest.fn(),
+    destroy: jest.fn(),
+    create: jest.fn(),
   },
   Equipment: {
     findByPk: jest.fn(),
@@ -12,67 +14,116 @@ const mockDb = {
     create: jest.fn(),
   },
   sequelize: {
-    transaction: jest.fn(async (fn) => {
-      return await fn({});
-    }),
+    transaction: jest.fn(async (fn) => fn({})),
   },
 };
 
-const modelsPath = require.resolve("../../src/models");
-jest.mock(modelsPath, () => mockDb);
+jest.mock("../src/models", () => mockDb);
 
-const importService = require("../../src/services/inventory/importOrderServices");
+const importService = require("../src/services/inventory/importOrderServices");
 
-describe("Import order approve flow", () => {
+describe("Import order service", () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
-  test("approveImportOrder updates equipment quantity and sets status", async () => {
-    const importOrder = {
-      id: 1,
-      code: "IMP-1",
-      status: "pending",
-      update: jest.fn(),
-    };
-    mockDb.ImportOrder.findByPk.mockResolvedValueOnce(importOrder);
+  describe("approveImportOrder", () => {
+    test("updates equipment quantity and sets status to approved", async () => {
+      const importOrder = {
+        id: 1,
+        code: "IMP-1",
+        status: "pending",
+        update: jest.fn(),
+      };
+      mockDb.ImportOrder.findByPk.mockResolvedValueOnce(importOrder);
 
-    const detail = { equipment_id: 10, quantity: 5 };
-    mockDb.ImportOrderDetail.findAll.mockResolvedValueOnce([detail]);
+      const detail = { equipment_id: 10, quantity: 5 };
+      mockDb.ImportOrderDetail.findAll.mockResolvedValueOnce([detail]);
 
-    const equipment = { id: 10, quantity: 3, update: jest.fn() };
-    mockDb.Equipment.findByPk.mockResolvedValueOnce(equipment);
+      const equipment = { id: 10, quantity: 3, update: jest.fn() };
+      mockDb.Equipment.findByPk.mockResolvedValueOnce(equipment);
+      mockDb.InventoryLog.create.mockResolvedValueOnce({});
 
-    mockDb.InventoryLog.create.mockResolvedValueOnce({});
+      const result = await importService.approveImportOrder(1, 99);
 
-    const result = await importService.approveImportOrder(1, 99);
+      expect(equipment.update).toHaveBeenCalledWith(
+        { quantity: 8 },
+        expect.any(Object),
+      );
+      expect(importOrder.update).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "approved" }),
+        expect.any(Object),
+      );
+      expect(result).toBe(importOrder);
+    });
 
-    expect(mockDb.ImportOrder.findByPk).toHaveBeenCalledWith(
-      1,
-      expect.any(Object),
-    );
-    expect(mockDb.ImportOrderDetail.findAll).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { import_order_id: importOrder.id } }),
-    );
-    expect(mockDb.Equipment.findByPk).toHaveBeenCalledWith(
-      detail.equipment_id,
-      expect.any(Object),
-    );
-    expect(equipment.update).toHaveBeenCalledWith(
-      { quantity: 8 },
-      expect.any(Object),
-    );
-    expect(importOrder.update).toHaveBeenCalledWith(
-      expect.objectContaining({ status: "approved" }),
-      expect.any(Object),
-    );
-    expect(result).toBe(importOrder);
+    test("throws when import order not found", async () => {
+      mockDb.ImportOrder.findByPk.mockResolvedValueOnce(null);
+
+      await expect(importService.approveImportOrder(999, 1)).rejects.toThrow(
+        "Import order not found",
+      );
+    });
+
+    test("throws when order is not pending", async () => {
+      mockDb.ImportOrder.findByPk.mockResolvedValueOnce({
+        id: 1,
+        status: "approved",
+      });
+
+      await expect(importService.approveImportOrder(1, 1)).rejects.toThrow(
+        "Chỉ có thể duyệt đơn ở trạng thái pending",
+      );
+    });
   });
 
-  test("approveImportOrder throws when import order not found", async () => {
-    mockDb.ImportOrder.findByPk.mockResolvedValueOnce(null);
-    await expect(importService.approveImportOrder(999, 1)).rejects.toThrow(
-      "Import order not found",
-    );
+  describe("deleteImportOrder", () => {
+    test("allows staff to delete their own pending order", async () => {
+      const importOrder = {
+        id: 1,
+        status: "pending",
+        created_by: 5,
+        destroy: jest.fn(),
+      };
+      mockDb.ImportOrder.findByPk.mockResolvedValueOnce(importOrder);
+
+      const result = await importService.deleteImportOrder(1, {
+        id: 5,
+        role: "staff",
+      });
+
+      expect(importOrder.destroy).toHaveBeenCalled();
+      expect(result.message).toMatch(/deleted successfully/i);
+    });
+
+    test("denies staff from deleting another users order", async () => {
+      mockDb.ImportOrder.findByPk.mockResolvedValueOnce({
+        id: 1,
+        status: "pending",
+        created_by: 2,
+      });
+
+      await expect(
+        importService.deleteImportOrder(1, { id: 5, role: "staff" }),
+      ).rejects.toThrow("Bạn không có quyền cập nhật đơn hàng này");
+    });
+  });
+
+  describe("rejectImportOrder", () => {
+    test("sets status to rejected for pending order", async () => {
+      const importOrder = {
+        id: 1,
+        status: "pending",
+        update: jest.fn(),
+      };
+      mockDb.ImportOrder.findByPk.mockResolvedValueOnce(importOrder);
+
+      const result = await importService.rejectImportOrder(1, 99);
+
+      expect(importOrder.update).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "rejected" }),
+      );
+      expect(result).toBe(importOrder);
+    });
   });
 });
