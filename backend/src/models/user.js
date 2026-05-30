@@ -36,7 +36,8 @@ module.exports = (sequelize, DataTypes) => {
       createdAt: "created_at",
 
       updatedAt: "updated_at",
-
+      paranoid: true,
+      deletedAt: "deleted_at",
       paranoid: false,
 
       deletedAt: "deleted_at",

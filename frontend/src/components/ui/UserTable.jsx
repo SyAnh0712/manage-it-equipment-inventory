@@ -57,8 +57,16 @@ const UserTable = ({ users, onDelete, onToggleLock, processingLockId }) => {
                   size="sm"
                   className="me-2"
                   onClick={() => onToggleLock && onToggleLock(user)}
-                  disabled={processingLockId === user.id}
-                  title={user.is_locked ? "Unlock user" : "Lock user"}
+                  disabled={
+                    processingLockId === user.id || currentUser?.id === user.id
+                  }
+                  title={
+                    currentUser?.id === user.id
+                      ? "Cannot lock your own account"
+                      : user.is_locked
+                        ? "Unlock user"
+                        : "Lock user"
+                  }
                 >
                   {processingLockId === user.id ? (
                     <span

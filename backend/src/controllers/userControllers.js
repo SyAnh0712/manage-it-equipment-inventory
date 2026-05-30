@@ -114,6 +114,14 @@ const changePassword = async (req, res, next) => {
 const lockUser = async (req, res, next) => {
   try {
     const userId = req.params.id;
+    // Prevent admin from locking themselves
+    if (String(req.user?.id) === String(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot lock your own account",
+      });
+    }
+
     const result = await userService.lockUser(userId);
     res.json({
       success: true,

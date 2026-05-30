@@ -18,6 +18,7 @@ const UsersList = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [processingLockId, setProcessingLockId] = useState(null);
+  const [confirmLock, setConfirmLock] = useState(null);
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -69,10 +70,19 @@ const UsersList = () => {
     }
   };
 
-  const handleToggleLock = async (user) => {
+  // open confirmation dialog for lock/unlock
+  const handleToggleLock = (user) => {
+    setConfirmLock({ user, action: user.is_locked ? "unlock" : "lock" });
+  };
+
+  const handleConfirmLock = async () => {
+    if (!confirmLock) return;
+
+    const { user, action } = confirmLock;
+
     try {
       setProcessingLockId(user.id);
-      if (user.is_locked) {
+      if (action === "unlock") {
         const response = await userService.unlockUser(user.id);
         const updated = response?.data || response;
         setUsers((prev) => prev.map((u) => (u.id === user.id ? updated : u)));
@@ -88,6 +98,7 @@ const UsersList = () => {
       toast.error(error?.message || "Failed to change lock status");
     } finally {
       setProcessingLockId(null);
+      setConfirmLock(null);
     }
   };
 
@@ -162,6 +173,18 @@ const UsersList = () => {
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
         loading={isDeleting}
+      />
+      <ConfirmDialog
+        show={!!confirmLock}
+        title={confirmLock?.action === "lock" ? "Lock User" : "Unlock User"}
+        message={
+          confirmLock?.action === "lock"
+            ? `Are you sure you want to lock user ${confirmLock?.user?.username}?`
+            : `Are you sure you want to unlock user ${confirmLock?.user?.username}?`
+        }
+        onConfirm={handleConfirmLock}
+        onCancel={() => setConfirmLock(null)}
+        loading={processingLockId === confirmLock?.user?.id}
       />
     </Container>
   );
