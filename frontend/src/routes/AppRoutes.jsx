@@ -8,6 +8,7 @@ import userRoutes from "./UsersRouters";
 import categoryRoutes from "./CatagoriesRouters";
 import supplierRoutes from "./SuppliersRouters";
 import equipmentRoutes from "./EquipmentRouters";
+import inventoryRoutes from "./InventoryRouters";
 
 import NotFound from "../pages/errors/NotFound";
 
@@ -21,6 +22,7 @@ const AppRoutes = () => {
     ...categoryRoutes,
     ...supplierRoutes,
     ...equipmentRoutes,
+    ...inventoryRoutes,
   ];
 
   return (

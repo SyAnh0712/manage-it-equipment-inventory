@@ -47,6 +47,14 @@ const Sidebar = () => {
             <Nav.Link as={Link} to="/suppliers" className="text-light nav-item">
               <i className="bi bi-truck me-2"></i> Suppliers
             </Nav.Link>
+
+            <Nav.Link
+              as={Link}
+              to="/inventory-logs"
+              className="text-light nav-item"
+            >
+              <i className="bi bi-journal-text me-2"></i> Inventory History
+            </Nav.Link>
           </>
         )}
       </Nav>

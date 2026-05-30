@@ -1,8 +1,17 @@
 "use strict";
 const { Model } = require("sequelize");
-module.exports = (sequelize, DataTypes) => {
+module.exports = function InventoryLog(sequelize, DataTypes) {
   class InventoryLog extends Model {
-    static associate(models) {}
+    static associate(models) {
+      InventoryLog.belongsTo(models.Equipment, {
+        foreignKey: "equipment_id",
+        as: "equipment",
+      });
+      InventoryLog.belongsTo(models.User, {
+        foreignKey: "created_by",
+        as: "creator",
+      });
+    }
   }
   InventoryLog.init(
     {
