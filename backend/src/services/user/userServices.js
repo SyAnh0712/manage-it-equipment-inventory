@@ -1,5 +1,5 @@
 const db = require("../../models");
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const { hashPassword, comparePassword } = require("../../utils/passwordHelper");
 
 const User = db.User;
@@ -88,6 +88,20 @@ const updateUser = async (id, userData) => {
     }
 
     const payload = { ...userData };
+
+    if (payload.email) {
+      const existingUser = await User.findOne({
+        where: {
+          email: payload.email,
+          id: { [Op.ne]: id },
+        },
+      });
+
+      if (existingUser) {
+        throw new Error("Email đã được sử dụng bởi người khác");
+      }
+    }
+
     if (payload.password) {
       payload.password = await hashPassword(payload.password);
     } else {
@@ -98,6 +112,18 @@ const updateUser = async (id, userData) => {
 
     return removePasswordField(user);
   } catch (error) {
+    if (
+      error instanceof Sequelize.UniqueConstraintError ||
+      error instanceof Sequelize.ValidationError
+    ) {
+      const message = error.errors.map((err) => err.message).join(", ");
+      throw new Error(message);
+    }
+
+    if (error.message === "Email đã được sử dụng bởi người khác") {
+      throw error;
+    }
+
     throw new Error("Error updating user: " + error.message);
   }
 };
