@@ -1,16 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button as BSButton } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import EquipmentForm from "../../components/forms/EquipmentForm";
+import Loading from "../../components/common/Loading";
 
+import categoriesService from "../../services/categoriesService";
+import suppliersService from "../../services/suppliersService";
 import equipmentService from "../../services/equipmentService";
 
 const AddEquipments = () => {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoadingData(true);
+
+        const [categoriesResponse, suppliersResponse] = await Promise.all([
+          categoriesService.getAllCategories(),
+          suppliersService.getAllSuppliers(),
+        ]);
+
+        setCategories(categoriesResponse?.data || categoriesResponse || []);
+        setSuppliers(suppliersResponse?.data || suppliersResponse || []);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load categories or suppliers");
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const handleSubmit = async (data) => {
     try {
@@ -28,6 +57,10 @@ const AddEquipments = () => {
       setIsLoading(false);
     }
   };
+
+  if (isLoadingData) {
+    return <Loading />;
+  }
 
   return (
     <Container fluid className="py-4">
@@ -51,7 +84,12 @@ const AddEquipments = () => {
         <Col md={8}>
           <Card>
             <Card.Body>
-              <EquipmentForm onSubmit={handleSubmit} isLoading={isLoading} />
+              <EquipmentForm
+                onSubmit={handleSubmit}
+                isLoading={isLoading}
+                categories={categories}
+                suppliers={suppliers}
+              />
             </Card.Body>
           </Card>
         </Col>

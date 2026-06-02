@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import EquipmentForm from "../../components/forms/EquipmentForm";
 import Loading from "../../components/common/Loading";
 
+import categoriesService from "../../services/categoriesService";
+import suppliersService from "../../services/suppliersService";
 import equipmentService from "../../services/equipmentService";
 
 const EditEquipments = () => {
@@ -14,26 +16,35 @@ const EditEquipments = () => {
   const { id } = useParams();
 
   const [equipment, setEquipment] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchEquipment();
+    fetchData();
   }, [id]);
 
-  const fetchEquipment = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
 
-      const response = await equipmentService.getEquipmentById(id);
-      console.log("Equipment:", response);
-      setEquipment(response);
+      const [equipmentResponse, categoriesResponse, suppliersResponse] =
+        await Promise.all([
+          equipmentService.getEquipmentById(id),
+          categoriesService.getAllCategories(),
+          suppliersService.getAllSuppliers(),
+        ]);
+
+      setEquipment(equipmentResponse);
+      setCategories(categoriesResponse?.data || categoriesResponse || []);
+      setSuppliers(suppliersResponse?.data || suppliersResponse || []);
     } catch (error) {
       console.error(error);
 
-      toast.error("Failed to fetch equipment");
+      toast.error("Failed to load equipment, categories or suppliers");
 
       navigate("/equipment");
     } finally {
@@ -89,6 +100,8 @@ const EditEquipments = () => {
                   initialData={equipment}
                   onSubmit={handleSubmit}
                   isLoading={isSubmitting}
+                  categories={categories}
+                  suppliers={suppliers}
                 />
               )}
             </Card.Body>
