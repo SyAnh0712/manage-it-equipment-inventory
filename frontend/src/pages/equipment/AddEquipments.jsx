@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import EquipmentForm from "../../components/forms/EquipmentForm";
-
 import equipmentService from "../../services/equipmentService";
 
 const AddEquipments = () => {
