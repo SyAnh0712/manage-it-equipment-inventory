@@ -3,7 +3,8 @@ const db = require("../models");
 
 const authMiddlewares = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token =
+      req.cookies?.access_token || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({
@@ -12,10 +13,14 @@ const authMiddlewares = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "your-secret-key",
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.purpose) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
 
     const user = await db.User.findByPk(decoded.id);
 

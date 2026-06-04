@@ -1,49 +1,44 @@
 import axiosClient from "./axiosClient";
 
 const authService = {
-  login: async (credentials) => {
-    const response = await axiosClient.post("/auth/login", {
-      email: credentials.email || credentials.username,
-      password: credentials.password,
-    });
-
-    return response?.data || response;
+  login(credentials) {
+    return axiosClient.post("/auth/login", credentials);
   },
 
-  register: async (data) => {
-    const response = await axiosClient.post("/auth/register", data);
-    const payload = response?.data || response;
-
-    return {
-      token: payload.token,
-      user: payload.user,
-    };
+  register(data) {
+    return axiosClient.post("/auth/register", data);
   },
 
-  getCurrentUser: () => {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
+  verifyOtp(email, otp) {
+    return axiosClient.post("/auth/verify-otp", { email, otp });
   },
 
-  logout: () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
+  resendOtp(email) {
+    return axiosClient.post("/auth/resend-otp", { email });
   },
 
-  setAuthToken: (token) => {
-    localStorage.setItem("authToken", token);
+  verify2fa(tempToken, code) {
+    return axiosClient.post("/auth/verify-2fa", { tempToken, code });
   },
 
-  setUser: (user) => {
-    localStorage.setItem("user", JSON.stringify(user));
+  setup2fa() {
+    return axiosClient.post("/auth/setup-2fa");
   },
 
-  getAuthToken: () => {
-    return localStorage.getItem("authToken");
+  confirm2faSetup(code, secret) {
+    return axiosClient.post("/auth/confirm-2fa-setup", { code, secret });
   },
 
-  isAuthenticated: () => {
-    return !!localStorage.getItem("authToken");
+  disable2fa(password) {
+    return axiosClient.post("/auth/disable-2fa", { password });
+  },
+
+  logout() {
+    return axiosClient.post("/auth/logout");
+  },
+
+  getMe() {
+    return axiosClient.get("/auth/me");
   },
 };
 

@@ -104,6 +104,29 @@ const exportOrderSchema = Joi.object({
     .required(),
 });
 
+const verifyOtpSchema = Joi.object({
+  email: Joi.string().email().required(),
+  otp: Joi.string().length(6).required(),
+});
+
+const resendOtpSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+const verify2faSchema = Joi.object({
+  tempToken: Joi.string().required(),
+  code: Joi.string().min(6).max(20).required(),
+});
+
+const confirm2faSetupSchema = Joi.object({
+  code: Joi.string().length(6).required(),
+  secret: Joi.string().required(),
+});
+
+const disable2faSchema = Joi.object({
+  password: Joi.string().required(),
+});
+
 module.exports = {
   validate,
   loginSchema,
@@ -114,4 +137,9 @@ module.exports = {
   importOrderSchema,
   exportOrderSchema,
   adjustInventorySchema,
+  verifyOtpSchema,
+  resendOtpSchema,
+  verify2faSchema,
+  confirm2faSetupSchema,
+  disable2faSchema,
 };

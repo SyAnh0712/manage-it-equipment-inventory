@@ -23,6 +23,15 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
+
+      two_factor_enabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+
+      two_factor_secret: DataTypes.STRING,
+
+      recovery_codes: DataTypes.TEXT,
     },
     {
       sequelize,
@@ -37,6 +46,9 @@ module.exports = (sequelize, DataTypes) => {
 
       updatedAt: "updated_at",
       paranoid: true,
+      deletedAt: "deleted_at",
+      paranoid: false,
+
       deletedAt: "deleted_at",
     },
   );

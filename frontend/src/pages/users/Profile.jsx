@@ -59,9 +59,7 @@ const Profile = () => {
       });
       showToast.success("Cập nhật thông tin thành công");
     } catch (error) {
-      showToast.error(
-        error.response?.data?.message || error?.message || "Cập nhật thất bại",
-      );
+      showToast.error(error?.message || "Cập nhật thất bại");
     } finally {
       setLoading(false);
       setIsUpdatingProfile(false);

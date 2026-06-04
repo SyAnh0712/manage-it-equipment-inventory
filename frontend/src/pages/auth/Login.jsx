@@ -39,7 +39,13 @@ const Login = () => {
     try {
       setIsLoading(true);
       setError("");
-      await login(data);
+      const result = await login(data);
+
+      if (result?.requires2FA) {
+        navigate("/verify-2fa", { state: { tempToken: result.tempToken } });
+        return;
+      }
+
       navigate("/dashboard");
     } catch (err) {
       setError(

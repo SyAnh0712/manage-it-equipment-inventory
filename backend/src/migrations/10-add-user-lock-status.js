@@ -2,13 +2,21 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn("users", "is_locked", {
-      type: Sequelize.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    });
+    const table = await queryInterface.describeTable("users");
+
+    if (!Object.prototype.hasOwnProperty.call(table, "is_locked")) {
+      await queryInterface.addColumn("users", "is_locked", {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      });
+    }
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn("users", "is_locked");
+    const table = await queryInterface.describeTable("users");
+
+    if (Object.prototype.hasOwnProperty.call(table, "is_locked")) {
+      await queryInterface.removeColumn("users", "is_locked");
+    }
   },
 };

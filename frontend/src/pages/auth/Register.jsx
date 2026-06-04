@@ -68,8 +68,10 @@ const Register = () => {
 
       const { confirmPassword, ...registrationData } = data;
 
-      await register(registrationData);
-      navigate("/dashboard");
+      const result = await register(registrationData);
+      navigate("/verify-otp", {
+        state: { email: data.email, otp: result?.otp },
+      });
     } catch (err) {
       setError(err?.message || "Registration failed. Please try again.");
     } finally {

@@ -30,7 +30,6 @@ module.exports = function InventoryLog(sequelize, DataTypes) {
       createdAt: "created_at",
       updatedAt: "updated_at",
       deletedAt: "deleted_at",
-      paranoid: true,
     },
   );
   return InventoryLog;
