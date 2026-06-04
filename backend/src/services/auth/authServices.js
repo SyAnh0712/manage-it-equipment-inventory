@@ -29,6 +29,10 @@ const loginService = async (data) => {
     throw new Error("Mật khẩu không đúng");
   }
 
+  if (user.is_locked) {
+    throw new Error("Tài khoản đã bị khóa");
+  }
+
   if (user.role === "admin" && user.two_factor_enabled) {
     const tempToken = jwt.sign(
       { id: user.id, purpose: "2fa" },

@@ -10,6 +10,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { usePagination } from "../../hooks/usePagination";
 import { useDebounce } from "../../hooks/useDebounce";
 import userService from "../../services/userService";
+import { listenToSocket } from "../../services/socketService";
 
 const UsersList = () => {
   const [users, setUsers] = useState([]);
@@ -39,6 +40,18 @@ const UsersList = () => {
 
   useEffect(() => {
     fetchUsers();
+
+    const removeLockedListener = listenToSocket("user:locked", () =>
+      fetchUsers(),
+    );
+    const removeUnlockedListener = listenToSocket("user:unlocked", () =>
+      fetchUsers(),
+    );
+
+    return () => {
+      removeLockedListener();
+      removeUnlockedListener();
+    };
   }, []);
 
   const fetchUsers = async () => {

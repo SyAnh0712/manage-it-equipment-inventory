@@ -1,6 +1,7 @@
 const db = require("../../models");
 const { Op } = require("sequelize");
 const { createError, rethrowServiceError } = require("../../utils/httpError");
+const { emitToAll } = require("../../utils/socket");
 
 const ImportOrder = db.ImportOrder;
 const ImportOrderDetail = db.ImportOrderDetail;
@@ -112,6 +113,12 @@ const createImportOrder = async (importOrderData, userId) => {
         );
       }
 
+      emitToAll("import:created", { order: importOrder });
+      emitToAll("notification", {
+        type: "import",
+        message: `Phiếu nhập ${importOrder.code} đã được tạo.`,
+      });
+
       return importOrder;
     });
 
@@ -184,6 +191,12 @@ const approveImportOrder = async (id, approverId) => {
         },
         { transaction },
       );
+
+      emitToAll("import:approved", { order: importOrder });
+      emitToAll("notification", {
+        type: "import",
+        message: `Phiếu nhập ${importOrder.code} đã được duyệt.`,
+      });
 
       return importOrder;
     });

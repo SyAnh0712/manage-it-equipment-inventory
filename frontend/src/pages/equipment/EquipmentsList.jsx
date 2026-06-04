@@ -14,6 +14,7 @@ import { usePagination } from "../../hooks/usePagination";
 import { useDebounce } from "../../hooks/useDebounce";
 
 import equipmentService from "../../services/equipmentService";
+import { listenToSocket } from "../../services/socketService";
 
 const EquipmentsList = () => {
   const [equipments, setEquipments] = useState([]);
@@ -41,6 +42,25 @@ const EquipmentsList = () => {
 
   useEffect(() => {
     fetchEquipments();
+
+    const removeEquipmentListener = listenToSocket(
+      "equipment:created",
+      fetchEquipments,
+    );
+    const removeEquipmentUpdatedListener = listenToSocket(
+      "equipment:updated",
+      fetchEquipments,
+    );
+    const removeEquipmentDeletedListener = listenToSocket(
+      "equipment:deleted",
+      fetchEquipments,
+    );
+
+    return () => {
+      removeEquipmentListener();
+      removeEquipmentUpdatedListener();
+      removeEquipmentDeletedListener();
+    };
   }, []);
 
   const fetchEquipments = async () => {

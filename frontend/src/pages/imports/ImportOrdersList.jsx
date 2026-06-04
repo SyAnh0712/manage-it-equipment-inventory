@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Container, Row, Col, Card, Button as BSButton, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button as BSButton,
+  Form,
+} from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -12,6 +19,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { useDebounce } from "../../hooks/useDebounce";
 import importOrderService from "../../services/importOrderService";
 import suppliersService from "../../services/suppliersService";
+import { listenToSocket } from "../../services/socketService";
 import {
   exportImportOrdersToExcel,
   exportImportOrdersToPdf,
@@ -68,6 +76,19 @@ const ImportOrdersList = () => {
   useEffect(() => {
     fetchOrders();
   }, [debouncedSearchTerm, supplierId, dateFrom, dateTo, currentPage]);
+
+  useEffect(() => {
+    const removeCreatedListener = listenToSocket("import:created", fetchOrders);
+    const removeApprovedListener = listenToSocket(
+      "import:approved",
+      fetchOrders,
+    );
+
+    return () => {
+      removeCreatedListener();
+      removeApprovedListener();
+    };
+  }, []);
 
   const handleDownloadExcel = () => {
     if (!orders.length) {

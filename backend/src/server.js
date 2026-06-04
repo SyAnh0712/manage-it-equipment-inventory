@@ -1,16 +1,17 @@
 require("dotenv").config();
 
-const app = require("./app");
+const server = require("./app");
 const sequelize = require("./config/sequelize");
 
 const PORT = process.env.PORT || 6969;
 
 sequelize
   .authenticate()
+  .then(() => sequelize.sync({ alter: true }))
   .then(() => {
-    console.log("Database connected");
+    console.log("Database connected and schema synced");
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });
   })

@@ -1,6 +1,7 @@
 const db = require("../../models");
 const { Op } = require("sequelize");
 const { createError, rethrowServiceError } = require("../../utils/httpError");
+const { emitToAll } = require("../../utils/socket");
 
 const ExportOrder = db.ExportOrder;
 const ExportOrderDetail = db.ExportOrderDetail;
@@ -129,6 +130,12 @@ const createExportOrder = async (exportOrderData, userId) => {
         );
       }
 
+      emitToAll("export:created", { order: exportOrder });
+      emitToAll("notification", {
+        type: "export",
+        message: `Yêu cầu xuất ${exportOrder.code} đã được tạo.`,
+      });
+
       return exportOrder;
     });
 
@@ -208,6 +215,12 @@ const approveExportOrder = async (id, approverId) => {
         },
         { transaction },
       );
+
+      emitToAll("export:approved", { order: exportOrder });
+      emitToAll("notification", {
+        type: "export",
+        message: `Yêu cầu xuất ${exportOrder.code} đã được duyệt.`,
+      });
 
       return exportOrder;
     });

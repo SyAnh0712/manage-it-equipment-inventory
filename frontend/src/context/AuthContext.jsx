@@ -1,5 +1,11 @@
 import { createContext, useState, useCallback, useEffect } from "react";
+import { toast } from "react-toastify";
 import authService from "../services/authService";
+import {
+  connectSocket,
+  disconnectSocket,
+  listenToSocket,
+} from "../services/socketService";
 
 export const AuthContext = createContext();
 
@@ -28,6 +34,53 @@ export const AuthProvider = ({ children }) => {
 
     checkSession();
   }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // ignore logout errors
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    connectSocket();
+
+    const removeLockedListener = listenToSocket("user:locked", (payload) => {
+      if (String(payload?.user?.id) === String(user?.id)) {
+        toast.error(payload?.message || "Tài khoản của bạn đã bị khóa.");
+        logout();
+      }
+    });
+
+    const removeUnlockedListener = listenToSocket(
+      "user:unlocked",
+      (payload) => {
+        if (String(payload?.user?.id) === String(user?.id)) {
+          toast.success(
+            payload?.message || "Tài khoản của bạn đã được mở khóa.",
+          );
+        }
+      },
+    );
+
+    const removeNotificationListener = listenToSocket(
+      "notification",
+      (payload) => {
+        toast.info(payload?.message || "Có cập nhật mới từ hệ thống");
+      },
+    );
+
+    return () => {
+      removeLockedListener();
+      removeUnlockedListener();
+      removeNotificationListener();
+      disconnectSocket();
+    };
+  }, [user, logout]);
 
   const login = useCallback(async (credentials) => {
     try {
@@ -104,17 +157,6 @@ export const AuthProvider = ({ children }) => {
       throw error;
     } finally {
       setLoading(false);
-    }
-  }, []);
-
-  const logout = useCallback(async () => {
-    try {
-      await authService.logout();
-    } catch {
-      // ignore logout errors
-    } finally {
-      setUser(null);
-      setIsAuthenticated(false);
     }
   }, []);
 

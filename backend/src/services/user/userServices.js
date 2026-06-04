@@ -1,6 +1,7 @@
 const db = require("../../models");
 const { Op } = require("sequelize");
 const { hashPassword, comparePassword } = require("../../utils/passwordHelper");
+const { emitToUser } = require("../../utils/socket");
 
 const User = db.User;
 
@@ -156,6 +157,10 @@ const lockUser = async (id) => {
     }
 
     await user.update({ is_locked: true });
+    emitToUser(user.id, "user:locked", {
+      user: { id: user.id, is_locked: true },
+      message: "Tài khoản của bạn đã bị khóa.",
+    });
 
     return removePasswordField(user);
   } catch (error) {
@@ -172,6 +177,10 @@ const unlockUser = async (id) => {
     }
 
     await user.update({ is_locked: false });
+    emitToUser(user.id, "user:unlocked", {
+      user: { id: user.id, is_locked: false },
+      message: "Tài khoản của bạn đã được mở khóa.",
+    });
 
     return removePasswordField(user);
   } catch (error) {
