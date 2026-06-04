@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Container,
   Row,
@@ -29,7 +29,8 @@ const InventoryLogs = () => {
 
   const [logs, setLogs] = useState([]);
   const [equipments, setEquipments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [actionType, setActionType] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -55,13 +56,9 @@ const InventoryLogs = () => {
       .catch(() => {});
   }, [isAdmin]);
 
-  useEffect(() => {
-    fetchLogs();
-  }, [debouncedSearchTerm, actionType, dateFrom, dateTo, currentPage]);
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsSearching(true);
       const response = await inventoryLogService.getAllInventoryLogs({
         search: debouncedSearchTerm,
         action_type: actionType || undefined,
@@ -79,9 +76,22 @@ const InventoryLogs = () => {
       console.error(error);
       toast.error("Failed to load inventory history");
     } finally {
-      setLoading(false);
+      setIsSearching(false);
+      setInitialLoading(false);
     }
-  };
+  }, [actionType, currentPage, dateFrom, dateTo, debouncedSearchTerm, limit]);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      void fetchLogs();
+    }, 0);
+
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [fetchLogs, isAdmin]);
 
   const handleAdjustSubmit = async (event) => {
     event.preventDefault();
@@ -130,7 +140,7 @@ const InventoryLogs = () => {
     exportInventoryLogsToPdf(logs);
   };
 
-  if (loading) {
+  if (initialLoading) {
     return <Loading />;
   }
 
@@ -283,6 +293,9 @@ const InventoryLogs = () => {
 
       <Card>
         <Card.Body>
+          {isSearching && (
+            <div className="text-muted small mb-2">Đang tìm kiếm...</div>
+          )}
           <InventoryLogTable logs={logs} />
           <div className="d-flex justify-content-center mt-4">
             <Pagination

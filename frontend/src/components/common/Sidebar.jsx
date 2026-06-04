@@ -32,12 +32,16 @@ const Sidebar = () => {
 
         <Nav.Link as={Link} to="/equipment" className="text-light nav-item">
           <i className="bi bi-inbox me-2"></i>{" "}
-          {isAdmin ? "Equipment" : "Kiểm kê kho"}
+          {isAdmin ? "Equipment" : "Inventory"}
         </Nav.Link>
 
         {isAdmin && (
           <>
-            <Nav.Link as={Link} to="/categories" className="text-light nav-item">
+            <Nav.Link
+              as={Link}
+              to="/categories"
+              className="text-light nav-item"
+            >
               <i className="bi bi-bookmark me-2"></i> Categories
             </Nav.Link>
 
