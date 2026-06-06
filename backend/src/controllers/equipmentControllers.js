@@ -55,7 +55,12 @@ const updateEquipment = async (req, res, nextHandler) => {
       equipmentData,
     );
     if (updatedEquipment) {
-      return sendSuccess(res, 200, "Equipment updated successfully", updatedEquipment);
+      return sendSuccess(
+        res,
+        200,
+        "Equipment updated successfully",
+        updatedEquipment,
+      );
     } else {
       const err = new Error("Equipment not found");
       err.status = 404;

@@ -6,7 +6,12 @@ const sendSuccess = (res, status = 200, message = "Success", data = null) => {
   });
 };
 
-const sendError = (res, status = 500, message = "Internal server error", errors = null) => {
+const sendError = (
+  res,
+  status = 500,
+  message = "Internal server error",
+  errors = null,
+) => {
   return res.status(status).json({
     success: false,
     message,

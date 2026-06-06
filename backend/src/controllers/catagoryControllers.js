@@ -55,7 +55,12 @@ const updateCategory = async (req, res, nextHandler) => {
       categoryData,
     );
     if (updatedCategory) {
-      return sendSuccess(res, 200, "Category updated successfully", updatedCategory);
+      return sendSuccess(
+        res,
+        200,
+        "Category updated successfully",
+        updatedCategory,
+      );
     } else {
       const err = new Error("Category not found");
       err.status = 404;

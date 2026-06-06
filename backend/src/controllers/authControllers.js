@@ -36,7 +36,11 @@ const register = async (req, res, next) => {
       otp: result.otp,
     });
   } catch (error) {
-    return sendError(res, error.status || 400, error.message || "Register failed");
+    return sendError(
+      res,
+      error.status || 400,
+      error.message || "Register failed",
+    );
   }
 };
 
@@ -47,9 +51,15 @@ const verifyOtp = async (req, res, next) => {
     setAuthCookie(res, result.token);
     setRefreshCookie(res, result.refreshToken);
 
-    return sendSuccess(res, 200, "Xác minh email thành công", { user: result.user });
+    return sendSuccess(res, 200, "Xác minh email thành công", {
+      user: result.user,
+    });
   } catch (error) {
-    return sendError(res, error.status || 400, error.message || "OTP verification failed");
+    return sendError(
+      res,
+      error.status || 400,
+      error.message || "OTP verification failed",
+    );
   }
 };
 
@@ -59,7 +69,11 @@ const resendOtp = async (req, res, next) => {
 
     return sendSuccess(res, 200, result.message, { otp: result.otp });
   } catch (error) {
-    return sendError(res, error.status || 400, error.message || "Resend OTP failed");
+    return sendError(
+      res,
+      error.status || 400,
+      error.message || "Resend OTP failed",
+    );
   }
 };
 
@@ -70,9 +84,15 @@ const verify2fa = async (req, res, next) => {
     setAuthCookie(res, result.token);
     setRefreshCookie(res, result.refreshToken);
 
-    return sendSuccess(res, 200, "Xác thực 2FA thành công", { user: result.user });
+    return sendSuccess(res, 200, "Xác thực 2FA thành công", {
+      user: result.user,
+    });
   } catch (error) {
-    return sendError(res, error.status || 400, error.message || "2FA verification failed");
+    return sendError(
+      res,
+      error.status || 400,
+      error.message || "2FA verification failed",
+    );
   }
 };
 
@@ -82,7 +102,11 @@ const setup2fa = async (req, res, next) => {
 
     return sendSuccess(res, 200, "Tạo mã 2FA thành công", result);
   } catch (error) {
-    return sendError(res, error.status || 400, error.message || "2FA setup failed");
+    return sendError(
+      res,
+      error.status || 400,
+      error.message || "2FA setup failed",
+    );
   }
 };
 
@@ -95,7 +119,11 @@ const confirm2faSetup = async (req, res, next) => {
 
     return sendSuccess(res, 200, "Bật 2FA thành công", result);
   } catch (error) {
-    return sendError(res, error.status || 400, error.message || "2FA confirmation failed");
+    return sendError(
+      res,
+      error.status || 400,
+      error.message || "2FA confirmation failed",
+    );
   }
 };
 
@@ -105,7 +133,11 @@ const disable2fa = async (req, res, next) => {
 
     return sendSuccess(res, 200, "Tắt 2FA thành công");
   } catch (error) {
-    return sendError(res, error.status || 400, error.message || "Disable 2FA failed");
+    return sendError(
+      res,
+      error.status || 400,
+      error.message || "Disable 2FA failed",
+    );
   }
 };
 
@@ -118,9 +150,15 @@ const refresh = async (req, res, next) => {
     setAuthCookie(res, result.token);
     setRefreshCookie(res, result.refreshToken);
 
-    return sendSuccess(res, 200, "Refresh token thành công", { user: result.user });
+    return sendSuccess(res, 200, "Refresh token thành công", {
+      user: result.user,
+    });
   } catch (error) {
-    return sendError(res, error.status || 400, error.message || "Refresh token failed");
+    return sendError(
+      res,
+      error.status || 400,
+      error.message || "Refresh token failed",
+    );
   }
 };
 
@@ -132,7 +170,9 @@ const logout = async (req, res, next) => {
 };
 
 const getMe = async (req, res, next) => {
-  return sendSuccess(res, 200, "User profile fetched successfully", { user: req.user });
+  return sendSuccess(res, 200, "User profile fetched successfully", {
+    user: req.user,
+  });
 };
 
 module.exports = {

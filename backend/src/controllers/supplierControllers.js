@@ -45,7 +45,12 @@ const updateSupplier = async (req, res, nextHandler) => {
       supplierData,
     );
     if (updatedSupplier) {
-      return sendSuccess(res, 200, "Supplier updated successfully", updatedSupplier);
+      return sendSuccess(
+        res,
+        200,
+        "Supplier updated successfully",
+        updatedSupplier,
+      );
     } else {
       const err = new Error("Supplier not found");
       err.status = 404;
