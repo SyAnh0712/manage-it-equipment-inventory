@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 
 const routes = require("./routes");
 const errorMiddleware = require("./middlewares/errorMiddleware");
+const logger = require("./utils/logger");
 const { initSocket } = require("./utils/socket");
 
 const app = express();
@@ -21,7 +22,7 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
-app.use(morgan("dev"));
+app.use(morgan("dev", { stream: logger.stream }));
 app.use("/uploads", express.static("uploads"));
 
 app.use("/api", routes);

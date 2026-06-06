@@ -1,4 +1,5 @@
 const equipmentService = require("../services/equipment/equipmentServices");
+const { sendSuccess } = require("../utils/responseHelper");
 
 const createEquipment = async (req, res, nextHandler) => {
   try {
@@ -9,7 +10,7 @@ const createEquipment = async (req, res, nextHandler) => {
         : req.body.image_url,
     };
     const equipment = await equipmentService.createEquipment(equipmentData);
-    res.status(201).json(equipment);
+    return sendSuccess(res, 201, "Equipment created successfully", equipment);
   } catch (error) {
     next(error);
   }
@@ -18,7 +19,7 @@ const createEquipment = async (req, res, nextHandler) => {
 const getAllEquipment = async (req, res, nextHandler) => {
   try {
     const equipment = await equipmentService.getAllEquipment(req.query);
-    res.json(equipment);
+    return sendSuccess(res, 200, "Equipment fetched successfully", equipment);
   } catch (error) {
     next(error);
   }
@@ -29,7 +30,7 @@ const getEquipmentById = async (req, res, nextHandler) => {
     const equipmentId = req.params.id;
     const equipment = await equipmentService.getEquipmentById(equipmentId);
     if (equipment) {
-      res.json(equipment);
+      return sendSuccess(res, 200, "Equipment fetched successfully", equipment);
     } else {
       const err = new Error("Equipment not found");
       err.status = 404;
@@ -54,7 +55,7 @@ const updateEquipment = async (req, res, nextHandler) => {
       equipmentData,
     );
     if (updatedEquipment) {
-      res.json(updatedEquipment);
+      return sendSuccess(res, 200, "Equipment updated successfully", updatedEquipment);
     } else {
       const err = new Error("Equipment not found");
       err.status = 404;
@@ -69,7 +70,7 @@ const deleteEquipment = async (req, res, nextHandler) => {
   try {
     const equipmentId = req.params.id;
     const result = await equipmentService.deleteEquipment(equipmentId);
-    res.json(result);
+    return sendSuccess(res, 200, "Equipment deleted successfully", result);
   } catch (error) {
     next(error);
   }

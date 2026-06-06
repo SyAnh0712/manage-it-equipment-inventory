@@ -1,4 +1,5 @@
 const catagoryService = require("../services/equipment/categoryServices");
+const { sendSuccess } = require("../utils/responseHelper");
 
 const createCategory = async (req, res, nextHandler) => {
   try {
@@ -9,7 +10,7 @@ const createCategory = async (req, res, nextHandler) => {
         : req.body.image_url,
     };
     const category = await catagoryService.createCategory(categoryData);
-    res.status(201).json(category);
+    return sendSuccess(res, 201, "Category created successfully", category);
   } catch (error) {
     next(error);
   }
@@ -18,7 +19,7 @@ const createCategory = async (req, res, nextHandler) => {
 const getAllCategories = async (req, res, nextHandler) => {
   try {
     const categories = await catagoryService.getAllCategories(req.query);
-    res.json(categories);
+    return sendSuccess(res, 200, "Categories fetched successfully", categories);
   } catch (error) {
     next(error);
   }
@@ -29,7 +30,7 @@ const getCategoryById = async (req, res, nextHandler) => {
     const categoryId = req.params.id;
     const category = await catagoryService.getCategoryById(categoryId);
     if (category) {
-      res.json(category);
+      return sendSuccess(res, 200, "Category fetched successfully", category);
     } else {
       const err = new Error("Category not found");
       err.status = 404;
@@ -54,7 +55,7 @@ const updateCategory = async (req, res, nextHandler) => {
       categoryData,
     );
     if (updatedCategory) {
-      res.json(updatedCategory);
+      return sendSuccess(res, 200, "Category updated successfully", updatedCategory);
     } else {
       const err = new Error("Category not found");
       err.status = 404;
@@ -69,7 +70,7 @@ const deleteCategory = async (req, res, nextHandler) => {
   try {
     const categoryId = req.params.id;
     const result = await catagoryService.deleteCategory(categoryId);
-    res.json(result);
+    return sendSuccess(res, 200, "Category deleted successfully", result);
   } catch (error) {
     next(error);
   }

@@ -1,9 +1,10 @@
 const inventoryLogService = require("../services/inventory/inventoryLogServices");
+const { sendSuccess } = require("../utils/responseHelper");
 
 const getAllInventoryLogs = async (req, res, next) => {
   try {
     const logs = await inventoryLogService.getAllInventoryLogs(req.query);
-    res.json(logs);
+    return sendSuccess(res, 200, "Inventory logs fetched successfully", logs);
   } catch (error) {
     next(error);
   }
@@ -15,7 +16,7 @@ const adjustInventory = async (req, res, next) => {
       req.body,
       req.user?.id,
     );
-    res.status(201).json(log);
+    return sendSuccess(res, 201, "Inventory adjusted successfully", log);
   } catch (error) {
     next(error);
   }

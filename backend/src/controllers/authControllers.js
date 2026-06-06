@@ -1,4 +1,5 @@
 const authService = require("../services/auth/authServices");
+const { sendSuccess, sendError } = require("../utils/responseHelper");
 const {
   setAuthCookie,
   setRefreshCookie,
@@ -11,29 +12,18 @@ const login = async (req, res, next) => {
     const result = await authService.loginService(req.body);
 
     if (result.requires2FA) {
-      return res.status(200).json({
-        success: true,
-        message: "Yêu cầu xác thực 2FA",
-        data: {
-          requires2FA: true,
-          tempToken: result.tempToken,
-        },
+      return sendSuccess(res, 200, "Yêu cầu xác thực 2FA", {
+        requires2FA: true,
+        tempToken: result.tempToken,
       });
     }
 
     setAuthCookie(res, result.token);
     setRefreshCookie(res, result.refreshToken);
 
-    return res.status(200).json({
-      success: true,
-      message: "Đăng nhập thành công",
-      data: { user: result.user },
-    });
+    return sendSuccess(res, 200, "Đăng nhập thành công", { user: result.user });
   } catch (error) {
-    return res.status(error.status || 400).json({
-      success: false,
-      message: error.message || "Login failed",
-    });
+    return sendError(res, error.status || 400, error.message || "Login failed");
   }
 };
 
@@ -41,16 +31,12 @@ const register = async (req, res, next) => {
   try {
     const result = await authService.registerService(req.body);
 
-    return res.status(201).json({
-      success: true,
-      message: result.message,
-      data: { email: result.email, otp: result.otp },
+    return sendSuccess(res, 201, result.message, {
+      email: result.email,
+      otp: result.otp,
     });
   } catch (error) {
-    return res.status(error.status || 400).json({
-      success: false,
-      message: error.message || "Register failed",
-    });
+    return sendError(res, error.status || 400, error.message || "Register failed");
   }
 };
 
@@ -61,16 +47,9 @@ const verifyOtp = async (req, res, next) => {
     setAuthCookie(res, result.token);
     setRefreshCookie(res, result.refreshToken);
 
-    return res.status(200).json({
-      success: true,
-      message: "Xác minh email thành công",
-      data: { user: result.user },
-    });
+    return sendSuccess(res, 200, "Xác minh email thành công", { user: result.user });
   } catch (error) {
-    return res.status(error.status || 400).json({
-      success: false,
-      message: error.message || "OTP verification failed",
-    });
+    return sendError(res, error.status || 400, error.message || "OTP verification failed");
   }
 };
 
@@ -78,16 +57,9 @@ const resendOtp = async (req, res, next) => {
   try {
     const result = await authService.resendOtpService(req.body);
 
-    return res.status(200).json({
-      success: true,
-      message: result.message,
-      data: { otp: result.otp },
-    });
+    return sendSuccess(res, 200, result.message, { otp: result.otp });
   } catch (error) {
-    return res.status(error.status || 400).json({
-      success: false,
-      message: error.message || "Resend OTP failed",
-    });
+    return sendError(res, error.status || 400, error.message || "Resend OTP failed");
   }
 };
 
@@ -98,16 +70,9 @@ const verify2fa = async (req, res, next) => {
     setAuthCookie(res, result.token);
     setRefreshCookie(res, result.refreshToken);
 
-    return res.status(200).json({
-      success: true,
-      message: "Xác thực 2FA thành công",
-      data: { user: result.user },
-    });
+    return sendSuccess(res, 200, "Xác thực 2FA thành công", { user: result.user });
   } catch (error) {
-    return res.status(error.status || 400).json({
-      success: false,
-      message: error.message || "2FA verification failed",
-    });
+    return sendError(res, error.status || 400, error.message || "2FA verification failed");
   }
 };
 
@@ -115,16 +80,9 @@ const setup2fa = async (req, res, next) => {
   try {
     const result = await authService.setup2faService(req.user.id);
 
-    return res.status(200).json({
-      success: true,
-      message: "Tạo mã 2FA thành công",
-      data: result,
-    });
+    return sendSuccess(res, 200, "Tạo mã 2FA thành công", result);
   } catch (error) {
-    return res.status(error.status || 400).json({
-      success: false,
-      message: error.message || "2FA setup failed",
-    });
+    return sendError(res, error.status || 400, error.message || "2FA setup failed");
   }
 };
 
@@ -135,16 +93,9 @@ const confirm2faSetup = async (req, res, next) => {
       req.body,
     );
 
-    return res.status(200).json({
-      success: true,
-      message: "Bật 2FA thành công",
-      data: result,
-    });
+    return sendSuccess(res, 200, "Bật 2FA thành công", result);
   } catch (error) {
-    return res.status(error.status || 400).json({
-      success: false,
-      message: error.message || "2FA confirmation failed",
-    });
+    return sendError(res, error.status || 400, error.message || "2FA confirmation failed");
   }
 };
 
@@ -152,15 +103,9 @@ const disable2fa = async (req, res, next) => {
   try {
     await authService.disable2faService(req.user.id, req.body);
 
-    return res.status(200).json({
-      success: true,
-      message: "Tắt 2FA thành công",
-    });
+    return sendSuccess(res, 200, "Tắt 2FA thành công");
   } catch (error) {
-    return res.status(error.status || 400).json({
-      success: false,
-      message: error.message || "Disable 2FA failed",
-    });
+    return sendError(res, error.status || 400, error.message || "Disable 2FA failed");
   }
 };
 
@@ -173,16 +118,9 @@ const refresh = async (req, res, next) => {
     setAuthCookie(res, result.token);
     setRefreshCookie(res, result.refreshToken);
 
-    return res.status(200).json({
-      success: true,
-      message: "Refresh token thành công",
-      data: { user: result.user },
-    });
+    return sendSuccess(res, 200, "Refresh token thành công", { user: result.user });
   } catch (error) {
-    return res.status(error.status || 400).json({
-      success: false,
-      message: error.message || "Refresh token failed",
-    });
+    return sendError(res, error.status || 400, error.message || "Refresh token failed");
   }
 };
 
@@ -190,17 +128,11 @@ const logout = async (req, res, next) => {
   clearAuthCookie(res);
   clearRefreshCookie(res);
 
-  return res.status(200).json({
-    success: true,
-    message: "Đăng xuất thành công",
-  });
+  return sendSuccess(res, 200, "Đăng xuất thành công");
 };
 
 const getMe = async (req, res, next) => {
-  return res.status(200).json({
-    success: true,
-    data: { user: req.user },
-  });
+  return sendSuccess(res, 200, "User profile fetched successfully", { user: req.user });
 };
 
 module.exports = {

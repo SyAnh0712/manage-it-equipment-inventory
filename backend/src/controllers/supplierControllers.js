@@ -1,10 +1,11 @@
 const supplierService = require("../services/supplier/supplierServices");
+const { sendSuccess } = require("../utils/responseHelper");
 
 const createSupplier = async (req, res, nextHandler) => {
   try {
     const supplierData = req.body;
     const supplier = await supplierService.createSupplier(supplierData);
-    res.status(201).json(supplier);
+    return sendSuccess(res, 201, "Supplier created successfully", supplier);
   } catch (error) {
     next(error);
   }
@@ -13,7 +14,7 @@ const createSupplier = async (req, res, nextHandler) => {
 const getAllSuppliers = async (req, res, nextHandler) => {
   try {
     const suppliers = await supplierService.getAllSuppliers(req.query);
-    res.json(suppliers);
+    return sendSuccess(res, 200, "Suppliers fetched successfully", suppliers);
   } catch (error) {
     next(error);
   }
@@ -24,7 +25,7 @@ const getSupplierById = async (req, res, nextHandler) => {
     const supplierId = req.params.id;
     const supplier = await supplierService.getSupplierById(supplierId);
     if (supplier) {
-      res.json(supplier);
+      return sendSuccess(res, 200, "Supplier fetched successfully", supplier);
     } else {
       const err = new Error("Supplier not found");
       err.status = 404;
@@ -44,7 +45,7 @@ const updateSupplier = async (req, res, nextHandler) => {
       supplierData,
     );
     if (updatedSupplier) {
-      res.json(updatedSupplier);
+      return sendSuccess(res, 200, "Supplier updated successfully", updatedSupplier);
     } else {
       const err = new Error("Supplier not found");
       err.status = 404;
@@ -59,7 +60,7 @@ const deleteSupplier = async (req, res, nextHandler) => {
   try {
     const supplierId = req.params.id;
     const result = await supplierService.deleteSupplier(supplierId);
-    res.json(result);
+    return sendSuccess(res, 200, "Supplier deleted successfully", result);
   } catch (error) {
     next(error);
   }
