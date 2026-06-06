@@ -1,6 +1,9 @@
 const db = require("../../models");
 const { comparePassword, hashPassword } = require("../../utils/passwordHelper");
-const { generateAccessToken } = require("../../utils/tokenHelper");
+const {
+  generateAccessToken,
+  generateRefreshToken,
+} = require("../../utils/tokenHelper");
 const { generateOtp, hashOtp, isOtpExpired } = require("../../utils/otpHelper");
 const { sendOtpEmail } = require("../../utils/emailHelper");
 const {
@@ -13,7 +16,7 @@ const {
   hashRecoveryCode,
 } = require("../../utils/totpHelper");
 const jwt = require("jsonwebtoken");
-const { accessTokenSecret } = require("../../config/jwt");
+const { accessTokenSecret, refreshTokenSecret } = require("../../config/jwt");
 
 const loginService = async (data) => {
   const user = await db.User.findOne({
@@ -48,9 +51,15 @@ const loginService = async (data) => {
     email: user.email,
     role: user.role,
   });
+  const refreshToken = generateRefreshToken({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  });
 
   return {
     token,
+    refreshToken,
     user: {
       id: user.id,
       username: user.username,
@@ -81,7 +90,10 @@ const registerService = async (data) => {
   const hashedPassword = await hashPassword(data.password);
   const otp = generateOtp();
   const otpHash = hashOtp(otp);
-  const otpExpiresMinutes = parseInt(process.env.OTP_EXPIRES_MINUTES || "5");
+  const otpExpiresMinutes = Number.parseInt(
+    process.env.OTP_EXPIRES_MINUTES || "5",
+    10,
+  );
   const otpExpiresAt = new Date(Date.now() + otpExpiresMinutes * 60 * 1000);
 
   const existingPending = await db.PendingUser.findOne({
@@ -164,9 +176,15 @@ const verifyOtpService = async (data) => {
     email: newUser.email,
     role: newUser.role,
   });
+  const refreshToken = generateRefreshToken({
+    id: newUser.id,
+    email: newUser.email,
+    role: newUser.role,
+  });
 
   return {
     token,
+    refreshToken,
     user: {
       id: newUser.id,
       username: newUser.username,
@@ -196,7 +214,10 @@ const resendOtpService = async (data) => {
 
   const otp = generateOtp();
   const otpHash = hashOtp(otp);
-  const otpExpiresMinutes = parseInt(process.env.OTP_EXPIRES_MINUTES || "5");
+  const otpExpiresMinutes = Number.parseInt(
+    process.env.OTP_EXPIRES_MINUTES || "5",
+    10,
+  );
   const otpExpiresAt = new Date(Date.now() + otpExpiresMinutes * 60 * 1000);
 
   await pendingUser.update({
@@ -260,9 +281,15 @@ const verify2faService = async (data) => {
     email: user.email,
     role: user.role,
   });
+  const refreshToken = generateRefreshToken({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  });
 
   return {
     token,
+    refreshToken,
     user: {
       id: user.id,
       username: user.username,
@@ -313,6 +340,51 @@ const confirm2faSetupService = async (userId, data) => {
   return { recoveryCodes };
 };
 
+const refreshTokenService = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new Error("Refresh token không tồn tại");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, refreshTokenSecret);
+  } catch {
+    throw new Error("Refresh token không hợp lệ hoặc đã hết hạn");
+  }
+
+  const user = await db.User.findByPk(decoded.id);
+  if (!user) {
+    throw new Error("Người dùng không tồn tại");
+  }
+
+  if (user.is_locked) {
+    throw new Error("Tài khoản đã bị khóa");
+  }
+
+  const token = generateAccessToken({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  });
+  const newRefreshToken = generateRefreshToken({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  });
+
+  return {
+    token,
+    refreshToken: newRefreshToken,
+    user: {
+      id: user.id,
+      username: user.username,
+      full_name: user.full_name,
+      email: user.email,
+      role: user.role,
+    },
+  };
+};
+
 const disable2faService = async (userId, data) => {
   const { password } = data;
 
@@ -341,5 +413,6 @@ module.exports = {
   verify2faService,
   setup2faService,
   confirm2faSetupService,
+  refreshTokenService,
   disable2faService,
 };

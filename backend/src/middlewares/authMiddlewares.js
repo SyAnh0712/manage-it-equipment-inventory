@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const db = require("../models");
+const { accessTokenSecret } = require("../config/jwt");
 
 const authMiddlewares = async (req, res, next) => {
   try {
@@ -13,7 +14,7 @@ const authMiddlewares = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, accessTokenSecret);
 
     if (decoded.purpose) {
       return res.status(401).json({

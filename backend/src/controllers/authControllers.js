@@ -1,5 +1,10 @@
 const authService = require("../services/auth/authServices");
-const { setAuthCookie, clearAuthCookie } = require("../utils/cookieHelper");
+const {
+  setAuthCookie,
+  setRefreshCookie,
+  clearAuthCookie,
+  clearRefreshCookie,
+} = require("../utils/cookieHelper");
 
 const login = async (req, res, next) => {
   try {
@@ -17,6 +22,7 @@ const login = async (req, res, next) => {
     }
 
     setAuthCookie(res, result.token);
+    setRefreshCookie(res, result.refreshToken);
 
     return res.status(200).json({
       success: true,
@@ -53,6 +59,7 @@ const verifyOtp = async (req, res, next) => {
     const result = await authService.verifyOtpService(req.body);
 
     setAuthCookie(res, result.token);
+    setRefreshCookie(res, result.refreshToken);
 
     return res.status(200).json({
       success: true,
@@ -89,6 +96,7 @@ const verify2fa = async (req, res, next) => {
     const result = await authService.verify2faService(req.body);
 
     setAuthCookie(res, result.token);
+    setRefreshCookie(res, result.refreshToken);
 
     return res.status(200).json({
       success: true,
@@ -156,8 +164,31 @@ const disable2fa = async (req, res, next) => {
   }
 };
 
+const refresh = async (req, res, next) => {
+  try {
+    const result = await authService.refreshTokenService(
+      req.cookies?.refresh_token || req.body?.refreshToken,
+    );
+
+    setAuthCookie(res, result.token);
+    setRefreshCookie(res, result.refreshToken);
+
+    return res.status(200).json({
+      success: true,
+      message: "Refresh token thành công",
+      data: { user: result.user },
+    });
+  } catch (error) {
+    return res.status(error.status || 400).json({
+      success: false,
+      message: error.message || "Refresh token failed",
+    });
+  }
+};
+
 const logout = async (req, res, next) => {
   clearAuthCookie(res);
+  clearRefreshCookie(res);
 
   return res.status(200).json({
     success: true,
@@ -178,6 +209,7 @@ module.exports = {
   verifyOtp,
   resendOtp,
   verify2fa,
+  refresh,
   setup2fa,
   confirm2faSetup,
   disable2fa,
