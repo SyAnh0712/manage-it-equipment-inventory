@@ -20,13 +20,34 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE,
     role ENUM('admin', 'staff') DEFAULT 'staff',
-    is_locked BOOLEAN DEFAULT 0,
+    is_locked BOOLEAN NOT NULL DEFAULT 0,
+    two_factor_enabled BOOLEAN NOT NULL DEFAULT 0,
+    two_factor_secret VARCHAR(255) NULL,
+    recovery_codes TEXT NULL,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
     deleted_at DATETIME NULL
+);
+
+-- =============================================
+-- BẢNG ĐĂNG KÝ CHỜ XÁC THỰC OTP
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS pending_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    otp_hash VARCHAR(64) NOT NULL,
+    otp_expires_at DATETIME NOT NULL,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- =============================================
@@ -37,7 +58,7 @@ CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description VARCHAR(255),
-    image_url varchar(225) default 0,
+    image_url VARCHAR(255) NULL,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -83,7 +104,7 @@ CREATE TABLE IF NOT EXISTS equipment (
         CHECK (quantity >= 0),
 
     price DECIMAL(15,2) DEFAULT 0,
-	image_url varchar(225) default 0,
+    image_url VARCHAR(255) NULL,
     description TEXT,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -270,34 +291,34 @@ ON categories(name);
 -- =============================================
 -- MẪU DATABASE
 -- =============================================
+-- Mật khẩu mẫu: 123456 (bcrypt)
 INSERT INTO users (
     username,
     password,
     full_name,
     email,
-    role
+    role,
+    is_locked,
+    two_factor_enabled
 )
 VALUES
 (
     'admin',
-    '123456',
-    'Nguyen Van Admin',
+    '$2b$15$ApQUewfnd4Uoafty8NfrFuJJcWtGueRgCI/aXK0wTHr.1CKhAPITK',
+    'Administrator',
     'admin@gmail.com',
-    'admin'
+    'admin',
+    0,
+    0
 ),
 (
     'staff01',
-    '123456',
-    'Tran Thi Hoa',
-    'hoa@gmail.com',
-    'staff'
-),
-(
-    'staff02',
-    '123456',
-    'Le Minh Quan',
-    'quan@gmail.com',
-    'staff'
+    '$2b$15$ApQUewfnd4Uoafty8NfrFuJJcWtGueRgCI/aXK0wTHr.1CKhAPITK',
+    'Nguyen Van A',
+    'staff01@gmail.com',
+    'staff',
+    0,
+    0
 );
 
 -- =============================================

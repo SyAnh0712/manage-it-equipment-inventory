@@ -38,6 +38,28 @@ module.exports = {
         defaultValue: "staff",
       },
 
+      is_locked: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+
+      two_factor_enabled: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+
+      two_factor_secret: {
+        type: Sequelize.STRING(255),
+        allowNull: true,
+      },
+
+      recovery_codes: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

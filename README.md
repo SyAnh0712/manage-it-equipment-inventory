@@ -8,7 +8,7 @@
 manage-it-equipment-inventory/
 ├── backend/     # API REST (Node.js + Express + Sequelize)
 ├── frontend/    # Giao diện web (React + Vite)
-├── database/    # Script SQL khởi tạo cơ sở dữ liệu
+├── database/    # Script SQL khởi tạo cơ sở dữ liệu (đồng bộ với migrations)
 └── README.md
 ```
 
@@ -37,26 +37,30 @@ cd manage-it-equipment-inventory
 
 ### 2. Khởi tạo cơ sở dữ liệu
 
-**Cách 1 — Import file SQL (khuyến nghị cho demo):**
+Schema được quản lý tập trung qua **Sequelize migrations** (`backend/src/migrations/`). File `database/quanlykho.sql` là bản SQL tương đương để import nhanh.
+
+**Cách 1 — Migration + Seeder (khuyến nghị):**
+
+```bash
+cd backend
+npm install
+cp .env.example .env   # Windows: copy .env.example .env
+npx sequelize-cli db:migrate
+npx sequelize-cli db:seed:all
+```
+
+**Cách 2 — Import file SQL:**
 
 ```bash
 mysql -u root -p < database/quanlykho.sql
 ```
 
-**Cách 2 — Dùng Sequelize CLI:**
-
-```bash
-cd backend
-npm install
-npx sequelize-cli db:migrate
-npx sequelize-cli db:seed:all
-```
+> Cả hai cách đều tạo tài khoản mẫu với mật khẩu đã mã hóa bcrypt (`123456`).
 
 ### 3. Chạy Backend
 
 ```bash
 cd backend
-cp .env.example .env   # Windows: copy .env.example .env
 npm install
 npm start
 ```
@@ -83,7 +87,11 @@ Giao diện mặc định: `http://localhost:5173`
 | Admin   | admin@gmail.com   | 123456   |
 | Staff   | staff01@gmail.com | 123456   |
 
-> Nếu đăng nhập thất bại sau khi import SQL, hãy dùng chức năng **Đăng ký** để tạo tài khoản mới (mật khẩu sẽ được mã hóa bcrypt).
+## Tính năng xác thực
+
+- **Đăng ký có OTP**: Người dùng mới xác thực email qua mã OTP trước khi tài khoản được tạo (bảng `pending_users`).
+- **2FA cho Admin**: Admin có thể bật xác thực hai lớp (TOTP) tại `/setup-2fa`.
+- **Khóa tài khoản**: Admin có thể khóa/mở khóa tài khoản người dùng (`is_locked`).
 
 ## Phân quyền
 
@@ -102,7 +110,7 @@ Giao diện mặc định: `http://localhost:5173`
 
 ## Tài liệu chi tiết
 
-- [Backend README](./backend/README.md) — API, cấu hình, migration
+- [Backend README](./backend/README.md) — API, cấu hình, migrations
 - [Frontend README](./frontend/README.md) — Giao diện, biến môi trường, build
 
 ## Scripts hữu ích

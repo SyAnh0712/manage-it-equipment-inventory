@@ -10,6 +10,7 @@ frontend/
 ├── src/
 │   ├── assets/          # CSS, hình ảnh
 │   ├── components/      # Component tái sử dụng (UI, form, layout)
+│   ├── context/         # AuthContext
 │   ├── hooks/           # Custom hooks (useAuth, usePagination, ...)
 │   ├── layouts/         # AdminLayout, AuthLayout
 │   ├── pages/           # Trang theo module
@@ -78,6 +79,16 @@ npm run lint
 | Inventory History | `/inventory-logs` | Nhật ký kho (Admin)              |
 | Users             | `/users`          | Quản lý người dùng (Admin)       |
 
+### Xác thực
+
+| Route          | Mô tả                                      |
+| -------------- | ------------------------------------------ |
+| `/login`       | Đăng nhập                                  |
+| `/register`    | Đăng ký tài khoản mới                      |
+| `/verify-otp`  | Nhập mã OTP sau đăng ký                    |
+| `/verify-2fa`  | Nhập mã TOTP khi admin bật 2FA             |
+| `/setup-2fa`   | Thiết lập xác thực hai lớp (Admin)         |
+
 ## Phân quyền giao diện
 
 - Route bảo vệ qua `ProtectedRoute` — yêu cầu đăng nhập
@@ -90,7 +101,7 @@ Dashboard, Profile, Kiểm kê kho (Equipment), Import/Export Orders
 
 ### Admin thêm
 
-Users, Categories, Suppliers, Inventory History, nút duyệt phiếu, CRUD thiết bị
+Users, Categories, Suppliers, Inventory History, nút duyệt phiếu, CRUD thiết bị, thiết lập 2FA
 
 ## Công nghệ chính
 

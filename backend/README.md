@@ -10,12 +10,12 @@ backend/
 │   ├── config/          # Cấu hình DB, JWT, Sequelize
 │   ├── controllers/     # Xử lý request/response
 │   ├── middlewares/     # Auth, role, validation, error
-│   ├── migrations/      # Migration Sequelize
-│   ├── models/          # Model Sequelize
+│   ├── migrations/      # Migration Sequelize (nguồn schema chính)
+│   ├── models/          # Model Sequelize (ánh xạ bảng, không tự sửa DB)
 │   ├── routes/          # Định nghĩa API routes
 │   ├── seeders/         # Dữ liệu mẫu
 │   ├── services/        # Business logic
-│   ├── utils/           # Helper (password, token, upload)
+│   ├── utils/           # Helper (password, token, upload, OTP, 2FA)
 │   ├── app.js           # Cấu hình Express
 │   └── server.js        # Entry point
 ├── tests/               # Unit test (Jest)
@@ -23,6 +23,27 @@ backend/
 ├── .env.example
 └── package.json
 ```
+
+## Quản lý schema database
+
+Schema được định nghĩa **một lần** trong migrations, models chỉ ánh xạ cấu trúc đó:
+
+| Migration | Bảng |
+|-----------|------|
+| `01-migrations-user.js` | `users` (gồm `is_locked`, 2FA) |
+| `02-migrations-catagory.js` | `categories` |
+| `03-migrations-supplier.js` | `suppliers` |
+| `04-migrations-equipment.js` | `equipment` |
+| `05-migrations-importOrder.js` | `import_orders` |
+| `06-migrations-importOrderDetail.js` | `import_order_details` |
+| `07-migrations-exportOrder.js` | `export_orders` |
+| `08-migrations-exportOrderDetail.js` | `export_order_details` |
+| `09-migrations-inventoryLog.js` | `inventory_logs` |
+| `11-create-pending-users.js` | `pending_users` |
+
+Khi khởi động, server **chỉ kết nối** database (`sequelize.authenticate()`), không gọi `sync({ alter: true })`. Mọi thay đổi cột/bảng mới phải thêm migration tương ứng.
+
+File `database/quanlykho.sql` ở thư mục gốc là bản SQL đồng bộ với migrations, dùng cho import nhanh.
 
 ## Yêu cầu
 
@@ -53,21 +74,36 @@ DB_PASSWORD=your_password
 
 JWT_SECRET=your_jwt_secret_key
 JWT_EXPIRES=7d
+JWT_REFRESH_SECRET=your_refresh_secret
+JWT_REFRESH_EXPIRES=30d
+
+FRONTEND_URL=http://localhost:5173
+
+# Email (Nodemailer) — bỏ trống để hiện OTP trên màn hình (dev)
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USER=
+MAIL_PASSWORD=
+
+OTP_EXPIRES_MINUTES=5
+
+# Khóa mã hóa secret 2FA (32 ký tự hex)
+TWO_FACTOR_ENCRYPTION_KEY=
 ```
 
 ## Khởi tạo database
 
-**Cách 1 — Import SQL từ thư mục gốc:**
-
-```bash
-mysql -u root -p < ../database/quanlykho.sql
-```
-
-**Cách 2 — Migration + Seeder:**
+**Cách 1 — Migration + Seeder (khuyến nghị):**
 
 ```bash
 npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
+```
+
+**Cách 2 — Import SQL từ thư mục gốc:**
+
+```bash
+mysql -u root -p < ../database/quanlykho.sql
 ```
 
 ## Chạy ứng dụng
@@ -87,8 +123,8 @@ Base API: `http://localhost:6969/api`
 
 | Nhóm | Prefix | Mô tả |
 |------|--------|-------|
-| Auth | `/api/auth` | Đăng nhập, đăng ký |
-| Users | `/api/users` | Quản lý người dùng (Admin) |
+| Auth | `/api/auth` | Đăng nhập, đăng ký OTP, 2FA, refresh token |
+| Users | `/api/users` | Quản lý người dùng, khóa/mở khóa (Admin) |
 | Categories | `/api/categories` | Quản lý danh mục |
 | Suppliers | `/api/suppliers` | Quản lý nhà cung cấp |
 | Equipment | `/api/equipment` | Quản lý thiết bị |
@@ -96,6 +132,20 @@ Base API: `http://localhost:6969/api`
 | Exports | `/api/exports` | Phiếu xuất kho |
 | Inventory Logs | `/api/inventory-logs` | Nhật ký kho, điều chỉnh tồn |
 | Dashboard | `/api/dashboard` | Thống kê, báo cáo |
+
+### Auth — luồng chính
+
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/auth/login` | Đăng nhập (trả `requires2FA` nếu admin bật 2FA) |
+| POST | `/api/auth/register` | Gửi OTP đăng ký |
+| POST | `/api/auth/verify-otp` | Xác thực OTP, tạo tài khoản |
+| POST | `/api/auth/resend-otp` | Gửi lại OTP |
+| POST | `/api/auth/verify-2fa` | Xác thực mã TOTP sau đăng nhập |
+| POST | `/api/auth/setup-2fa` | Tạo QR code thiết lập 2FA |
+| POST | `/api/auth/confirm-2fa` | Xác nhận bật 2FA |
+| POST | `/api/auth/disable-2fa` | Tắt 2FA |
+| POST | `/api/auth/refresh-token` | Làm mới access token |
 
 ### Ví dụ
 
@@ -147,7 +197,6 @@ tests/
 ```
 
 Test dùng **Jest** với mock Sequelize models (`jest.mock("../src/models")`), không cần kết nối database thật khi chạy test.
-
 
 ## Scripts
 
