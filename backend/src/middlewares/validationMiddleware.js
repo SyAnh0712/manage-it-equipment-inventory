@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { sendError } = require("../utils/responseHelper");
 
 const validate = (schema, source = "body") => {
   return (req, res, next) => {
@@ -9,12 +10,12 @@ const validate = (schema, source = "body") => {
     });
 
     if (error) {
-      return res.status(400).json({
-        success: false,
-        message: "Dữ liệu không hợp lệ",
-        status: 400,
-        errors: error.details.map((item) => item.message),
-      });
+      return sendError(
+        res,
+        400,
+        "Dữ liệu không hợp lệ",
+        error.details.map((item) => item.message),
+      );
     }
 
     req[source] = value;

@@ -1,14 +1,11 @@
 const userService = require("../services/user/userServices.js");
+const { sendSuccess, sendError } = require("../utils/responseHelper");
 
 const createUser = async (req, res, next) => {
   try {
     const userData = req.body;
     const user = await userService.createUser(userData);
-    res.status(201).json({
-      success: true,
-      message: "User created successfully",
-      data: user,
-    });
+    return sendSuccess(res, 201, "User created successfully", user);
   } catch (error) {
     next(error);
   }
@@ -17,10 +14,7 @@ const createUser = async (req, res, next) => {
 const getAllUsers = async (req, res, next) => {
   try {
     const users = await userService.getAllUsers(req.query);
-    res.json({
-      success: true,
-      data: users,
-    });
+    return sendSuccess(res, 200, "Users fetched successfully", users);
   } catch (error) {
     next(error);
   }
@@ -31,10 +25,7 @@ const getUserById = async (req, res, next) => {
     const userId = req.params.id;
     const user = await userService.getUserById(userId);
     if (user) {
-      res.json({
-        success: true,
-        data: user,
-      });
+      return sendSuccess(res, 200, "User fetched successfully", user);
     } else {
       const err = new Error("User not found");
       err.status = 404;
@@ -50,11 +41,7 @@ const updateUser = async (req, res, next) => {
     const userId = req.params.id;
     const userData = req.body;
     const updatedUser = await userService.updateUser(userId, userData);
-    res.json({
-      success: true,
-      message: "User updated successfully",
-      data: updatedUser,
-    });
+    return sendSuccess(res, 200, "User updated successfully", updatedUser);
   } catch (error) {
     next(error);
   }
@@ -64,11 +51,7 @@ const deleteUser = async (req, res, next) => {
   try {
     const userId = req.params.id;
     const result = await userService.deleteUser(userId);
-    res.json({
-      success: true,
-      message: "User deleted successfully",
-      data: result,
-    });
+    return sendSuccess(res, 200, "User deleted successfully", result);
   } catch (error) {
     next(error);
   }
@@ -82,11 +65,7 @@ const updateProfile = async (req, res, next) => {
       full_name,
       email,
     });
-    res.json({
-      success: true,
-      message: "Profile updated successfully",
-      data: result,
-    });
+    return sendSuccess(res, 200, "Profile updated successfully", result);
   } catch (error) {
     next(error);
   }
@@ -101,11 +80,7 @@ const changePassword = async (req, res, next) => {
       oldPassword,
       newPassword,
     );
-    res.json({
-      success: true,
-      message: "Password changed successfully",
-      data: result,
-    });
+    return sendSuccess(res, 200, "Password changed successfully", result);
   } catch (error) {
     next(error);
   }
@@ -114,20 +89,12 @@ const changePassword = async (req, res, next) => {
 const lockUser = async (req, res, next) => {
   try {
     const userId = req.params.id;
-    // Prevent admin from locking themselves
     if (String(req.user?.id) === String(userId)) {
-      return res.status(400).json({
-        success: false,
-        message: "You cannot lock your own account",
-      });
+      return sendError(res, 400, "You cannot lock your own account");
     }
 
     const result = await userService.lockUser(userId);
-    res.json({
-      success: true,
-      message: "User locked successfully",
-      data: result,
-    });
+    return sendSuccess(res, 200, "User locked successfully", result);
   } catch (error) {
     next(error);
   }
@@ -137,11 +104,7 @@ const unlockUser = async (req, res, next) => {
   try {
     const userId = req.params.id;
     const result = await userService.unlockUser(userId);
-    res.json({
-      success: true,
-      message: "User unlocked successfully",
-      data: result,
-    });
+    return sendSuccess(res, 200, "User unlocked successfully", result);
   } catch (error) {
     next(error);
   }
@@ -152,11 +115,7 @@ const resetPassword = async (req, res, next) => {
     const userId = req.params.id;
     const { newPassword } = req.body;
     const result = await userService.resetPassword(userId, newPassword);
-    res.json({
-      success: true,
-      message: "Password reset successfully",
-      data: result,
-    });
+    return sendSuccess(res, 200, "Password reset successfully", result);
   } catch (error) {
     next(error);
   }
@@ -165,10 +124,7 @@ const resetPassword = async (req, res, next) => {
 const getCurrentUser = async (req, res, next) => {
   try {
     const user = req.user;
-    res.json({
-      success: true,
-      data: user,
-    });
+    return sendSuccess(res, 200, "Current user fetched successfully", user);
   } catch (error) {
     next(error);
   }

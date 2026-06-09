@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const db = require("../models");
 const { accessTokenSecret } = require("../config/jwt");
+const { sendError } = require("../utils/responseHelper");
 
 const authMiddlewares = async (req, res, next) => {
   try {
@@ -8,35 +9,23 @@ const authMiddlewares = async (req, res, next) => {
       req.cookies?.access_token || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized: No token provided",
-      });
+      return sendError(res, 401, "Unauthorized: No token provided");
     }
 
     const decoded = jwt.verify(token, accessTokenSecret);
 
     if (decoded.purpose) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid token",
-      });
+      return sendError(res, 401, "Invalid token");
     }
 
     const user = await db.User.findByPk(decoded.id);
 
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized: User not found",
-      });
+      return sendError(res, 401, "Unauthorized: User not found");
     }
 
     if (user.is_locked) {
-      return res.status(403).json({
-        success: false,
-        message: "Account is locked",
-      });
+      return sendError(res, 403, "Account is locked");
     }
 
     req.user = {
@@ -51,16 +40,10 @@ const authMiddlewares = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        success: false,
-        message: "Token expired",
-      });
+      return sendError(res, 401, "Token expired");
     }
 
-    return res.status(401).json({
-      success: false,
-      message: "Invalid token",
-    });
+    return sendError(res, 401, "Invalid token");
   }
 };
 

@@ -19,6 +19,7 @@ import {
   exportExportOrderDetailsToPdf,
 } from "../../utils/reportExport";
 import {
+  extractApiData,
   extractListData,
   LIST_FETCH_ALL_PARAMS,
 } from "../../utils/apiResponse";
@@ -40,7 +41,7 @@ const ExportOrderDetails = () => {
       ]);
 
       setEquipments(extractListData(equipmentResponse));
-      setOrder(orderResponse);
+      setOrder(extractApiData(orderResponse));
     } catch (error) {
       console.error(error);
       toast.error(error?.message || "Failed to load export order details");

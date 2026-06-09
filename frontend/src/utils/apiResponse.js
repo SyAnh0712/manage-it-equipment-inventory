@@ -1,3 +1,5 @@
+export const extractApiData = (response) => response?.data ?? response;
+
 export const extractPaginatedList = (response) => {
   if (!response) {
     return { data: [], pagination: { totalPages: 1 } };

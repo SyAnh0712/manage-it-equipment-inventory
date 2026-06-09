@@ -15,6 +15,7 @@ import suppliersService from "../../services/suppliersService";
 import equipmentService from "../../services/equipmentService";
 import importOrderService from "../../services/importOrderService";
 import {
+  extractApiData,
   extractListData,
   LIST_FETCH_ALL_PARAMS,
 } from "../../utils/apiResponse";
@@ -47,7 +48,7 @@ const EditImportOrder = () => {
 
       setSuppliers(extractListData(suppliersResponse));
       setEquipments(extractListData(equipmentsResponse));
-      const order = orderResponse || {};
+      const order = extractApiData(orderResponse) || {};
       setSupplierId(order.supplier_id || "");
       setNote(order.note || "");
       setDetails(

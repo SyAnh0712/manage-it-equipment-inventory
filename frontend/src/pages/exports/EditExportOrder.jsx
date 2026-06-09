@@ -14,6 +14,7 @@ import Loading from "../../components/common/Loading";
 import equipmentService from "../../services/equipmentService";
 import exportOrderService from "../../services/exportOrderService";
 import {
+  extractApiData,
   extractListData,
   LIST_FETCH_ALL_PARAMS,
 } from "../../utils/apiResponse";
@@ -43,7 +44,7 @@ const EditExportOrder = () => {
       ]);
 
       setEquipments(extractListData(equipmentsResponse));
-      const order = orderResponse || {};
+      const order = extractApiData(orderResponse) || {};
       setDepartment(order.department || "");
       setReceiver(order.receiver || "");
       setNote(order.note || "");

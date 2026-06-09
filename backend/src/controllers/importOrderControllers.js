@@ -1,4 +1,5 @@
 const importOrderService = require("../services/inventory/importOrderServices");
+const { sendSuccess } = require("../utils/responseHelper");
 
 const createImportOrder = async (req, res, nextHandler) => {
   try {
@@ -6,9 +7,14 @@ const createImportOrder = async (req, res, nextHandler) => {
       req.body,
       req.user?.id,
     );
-    res.status(201).json(importOrder);
+    return sendSuccess(
+      res,
+      201,
+      "Import order created successfully",
+      importOrder,
+    );
   } catch (error) {
-    next(error);
+    nextHandler(error);
   }
 };
 
@@ -18,9 +24,14 @@ const getAllImportOrders = async (req, res, nextHandler) => {
       req.query,
       req.user,
     );
-    res.json(importOrders);
+    return sendSuccess(
+      res,
+      200,
+      "Import orders fetched successfully",
+      importOrders,
+    );
   } catch (error) {
-    next(error);
+    nextHandler(error);
   }
 };
 
@@ -36,9 +47,14 @@ const getImportOrderById = async (req, res, nextHandler) => {
       throw err;
     }
 
-    res.json(importOrder);
+    return sendSuccess(
+      res,
+      200,
+      "Import order fetched successfully",
+      importOrder,
+    );
   } catch (error) {
-    next(error);
+    nextHandler(error);
   }
 };
 
@@ -50,9 +66,14 @@ const updateImportOrder = async (req, res, nextHandler) => {
       req.user,
     );
 
-    res.json(importOrder);
+    return sendSuccess(
+      res,
+      200,
+      "Import order updated successfully",
+      importOrder,
+    );
   } catch (error) {
-    next(error);
+    nextHandler(error);
   }
 };
 
@@ -62,9 +83,14 @@ const deleteImportOrder = async (req, res, nextHandler) => {
       req.params.id,
       req.user,
     );
-    res.json(result);
+    return sendSuccess(
+      res,
+      200,
+      "Import order deleted successfully",
+      result,
+    );
   } catch (error) {
-    next(error);
+    nextHandler(error);
   }
 };
 
@@ -74,9 +100,14 @@ const approveImportOrder = async (req, res, nextHandler) => {
       req.params.id,
       req.user?.id,
     );
-    res.json(importOrder);
+    return sendSuccess(
+      res,
+      200,
+      "Import order approved successfully",
+      importOrder,
+    );
   } catch (error) {
-    next(error);
+    nextHandler(error);
   }
 };
 
@@ -86,9 +117,14 @@ const rejectImportOrder = async (req, res, nextHandler) => {
       req.params.id,
       req.user?.id,
     );
-    res.json(importOrder);
+    return sendSuccess(
+      res,
+      200,
+      "Import order rejected successfully",
+      importOrder,
+    );
   } catch (error) {
-    next(error);
+    nextHandler(error);
   }
 };
 
