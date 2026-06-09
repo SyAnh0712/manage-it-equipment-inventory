@@ -32,6 +32,13 @@ module.exports = (sequelize, DataTypes) => {
       two_factor_secret: DataTypes.STRING,
 
       recovery_codes: DataTypes.TEXT,
+
+      token_version: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+      },
+
+      refresh_token_jti: DataTypes.STRING,
     },
     {
       sequelize,

@@ -3,6 +3,7 @@ const { comparePassword, hashPassword } = require("../../utils/passwordHelper");
 const {
   generateAccessToken,
   generateRefreshToken,
+  createRefreshJti,
 } = require("../../utils/tokenHelper");
 const { generateOtp, hashOtp, isOtpExpired } = require("../../utils/otpHelper");
 const { sendOtpEmail } = require("../../utils/emailHelper");
@@ -17,6 +18,55 @@ const {
 } = require("../../utils/totpHelper");
 const jwt = require("jsonwebtoken");
 const { accessTokenSecret, refreshTokenSecret } = require("../../config/jwt");
+
+const formatAuthUser = (user) => ({
+  id: user.id,
+  username: user.username,
+  full_name: user.full_name,
+  email: user.email,
+  role: user.role,
+});
+
+const issueAuthTokens = async (user) => {
+  const refreshJti = createRefreshJti();
+  const token = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user, refreshJti);
+
+  await user.update({ refresh_token_jti: refreshJti });
+
+  return {
+    token,
+    refreshToken,
+    user: formatAuthUser(user),
+  };
+};
+
+const revokeUserTokens = async (user) => {
+  await user.update({
+    token_version: (user.token_version ?? 0) + 1,
+    refresh_token_jti: null,
+  });
+};
+
+const logoutService = async (refreshToken) => {
+  if (!refreshToken) {
+    return;
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, refreshTokenSecret);
+  } catch {
+    return;
+  }
+
+  const user = await db.User.findByPk(decoded.id);
+  if (!user) {
+    return;
+  }
+
+  await revokeUserTokens(user);
+};
 
 const loginService = async (data) => {
   const user = await db.User.findOne({
@@ -46,28 +96,7 @@ const loginService = async (data) => {
     return { requires2FA: true, tempToken };
   }
 
-  const token = generateAccessToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
-  const refreshToken = generateRefreshToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
-
-  return {
-    token,
-    refreshToken,
-    user: {
-      id: user.id,
-      username: user.username,
-      full_name: user.full_name,
-      email: user.email,
-      role: user.role,
-    },
-  };
+  return issueAuthTokens(user);
 };
 
 const registerService = async (data) => {
@@ -171,28 +200,7 @@ const verifyOtpService = async (data) => {
     return user;
   });
 
-  const token = generateAccessToken({
-    id: newUser.id,
-    email: newUser.email,
-    role: newUser.role,
-  });
-  const refreshToken = generateRefreshToken({
-    id: newUser.id,
-    email: newUser.email,
-    role: newUser.role,
-  });
-
-  return {
-    token,
-    refreshToken,
-    user: {
-      id: newUser.id,
-      username: newUser.username,
-      full_name: newUser.full_name,
-      email: newUser.email,
-      role: newUser.role,
-    },
-  };
+  return issueAuthTokens(newUser);
 };
 
 const resendOtpService = async (data) => {
@@ -276,28 +284,7 @@ const verify2faService = async (data) => {
     throw new Error("Mã xác thực không hợp lệ");
   }
 
-  const token = generateAccessToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
-  const refreshToken = generateRefreshToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
-
-  return {
-    token,
-    refreshToken,
-    user: {
-      id: user.id,
-      username: user.username,
-      full_name: user.full_name,
-      email: user.email,
-      role: user.role,
-    },
-  };
+  return issueAuthTokens(user);
 };
 
 const setup2faService = async (userId) => {
@@ -361,28 +348,16 @@ const refreshTokenService = async (refreshToken) => {
     throw new Error("Tài khoản đã bị khóa");
   }
 
-  const token = generateAccessToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
-  const newRefreshToken = generateRefreshToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
+  if ((decoded.tokenVersion ?? 0) !== (user.token_version ?? 0)) {
+    throw new Error("Refresh token không hợp lệ hoặc đã bị thu hồi");
+  }
 
-  return {
-    token,
-    refreshToken: newRefreshToken,
-    user: {
-      id: user.id,
-      username: user.username,
-      full_name: user.full_name,
-      email: user.email,
-      role: user.role,
-    },
-  };
+  if (!decoded.jti || decoded.jti !== user.refresh_token_jti) {
+    await revokeUserTokens(user);
+    throw new Error("Refresh token không hợp lệ hoặc đã bị thu hồi");
+  }
+
+  return issueAuthTokens(user);
 };
 
 const disable2faService = async (userId, data) => {
@@ -415,4 +390,5 @@ module.exports = {
   confirm2faSetupService,
   refreshTokenService,
   disable2faService,
+  logoutService,
 };

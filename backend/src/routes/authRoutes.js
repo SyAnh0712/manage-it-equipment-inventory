@@ -13,12 +13,38 @@ const {
   confirm2faSetupSchema,
   disable2faSchema,
 } = require("../middlewares/validationMiddleware");
+const {
+  loginRateLimiter,
+  verifyOtpRateLimiter,
+  resendOtpRateLimiter,
+  verify2faRateLimiter,
+} = require("../middlewares/rateLimitMiddleware");
 
-router.post("/login", validate(loginSchema), authController.login);
+router.post(
+  "/login",
+  loginRateLimiter,
+  validate(loginSchema),
+  authController.login,
+);
 router.post("/register", validate(registerSchema), authController.register);
-router.post("/verify-otp", validate(verifyOtpSchema), authController.verifyOtp);
-router.post("/resend-otp", validate(resendOtpSchema), authController.resendOtp);
-router.post("/verify-2fa", validate(verify2faSchema), authController.verify2fa);
+router.post(
+  "/verify-otp",
+  verifyOtpRateLimiter,
+  validate(verifyOtpSchema),
+  authController.verifyOtp,
+);
+router.post(
+  "/resend-otp",
+  resendOtpRateLimiter,
+  validate(resendOtpSchema),
+  authController.resendOtp,
+);
+router.post(
+  "/verify-2fa",
+  verify2faRateLimiter,
+  validate(verify2faSchema),
+  authController.verify2fa,
+);
 router.post("/refresh", authController.refresh);
 router.post("/setup-2fa", authMiddlewares, authController.setup2fa);
 router.post(

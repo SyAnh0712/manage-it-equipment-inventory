@@ -28,6 +28,10 @@ const authMiddlewares = async (req, res, next) => {
       return sendError(res, 403, "Account is locked");
     }
 
+    if ((decoded.tokenVersion ?? 0) !== (user.token_version ?? 0)) {
+      return sendError(res, 401, "Token has been revoked");
+    }
+
     req.user = {
       id: user.id,
       username: user.username,
