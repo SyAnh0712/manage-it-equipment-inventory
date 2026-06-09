@@ -13,9 +13,9 @@ describe("Auth API integration", () => {
     jest.clearAllMocks();
   });
 
-  test("POST /api/auth/login returns 400 for invalid payload", async () => {
+  test("POST /api/v1/auth/login returns 400 for invalid payload", async () => {
     const response = await request(app)
-      .post("/api/auth/login")
+      .post("/api/v1/auth/login")
       .send({ email: "not-an-email", password: "123" });
 
     expect(response.status).toBe(400);
@@ -25,7 +25,7 @@ describe("Auth API integration", () => {
     });
   });
 
-  test("POST /api/auth/login returns 200 and sets auth cookies", async () => {
+  test("POST /api/v1/auth/login returns 200 and sets auth cookies", async () => {
     const password = "123456";
     const hashedPassword = await hashPassword(password);
     const user = {
@@ -44,7 +44,7 @@ describe("Auth API integration", () => {
     mockDb.User.findOne.mockResolvedValueOnce(user);
 
     const response = await request(app)
-      .post("/api/auth/login")
+      .post("/api/v1/auth/login")
       .send({ email: "admin@test.com", password });
 
     expect(response.status).toBe(200);
@@ -61,7 +61,7 @@ describe("Auth API integration", () => {
     });
   });
 
-  test("POST /api/auth/logout revokes refresh token", async () => {
+  test("POST /api/v1/auth/logout revokes refresh token", async () => {
     const user = {
       id: 1,
       token_version: 0,
@@ -86,7 +86,7 @@ describe("Auth API integration", () => {
     );
 
     const response = await request(app)
-      .post("/api/auth/logout")
+      .post("/api/v1/auth/logout")
       .set("Cookie", [`refresh_token=${refreshToken}`]);
 
     expect(response.status).toBe(200);

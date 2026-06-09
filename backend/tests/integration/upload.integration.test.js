@@ -40,7 +40,7 @@ describe("Upload API integration", () => {
 
     const token = generateAccessToken(adminUser);
     const response = await request(app)
-      .post("/api/categories")
+      .post("/api/v1/categories")
       .set("Authorization", `Bearer ${token}`)
       .field("name", "Network")
       .attach("image", tempFilePath);

@@ -117,21 +117,22 @@ npm start
 ```
 
 Server chạy tại: `http://localhost:6969`  
-Base API: `http://localhost:6969/api`
+Base API: `http://localhost:6969/api/v1` (alias tạm: `/api`)
 
 ## API Endpoints
 
 | Nhóm | Prefix | Mô tả |
 |------|--------|-------|
-| Auth | `/api/auth` | Đăng nhập, đăng ký OTP, 2FA, refresh token |
-| Users | `/api/users` | Quản lý người dùng, khóa/mở khóa (Admin) |
-| Categories | `/api/categories` | Quản lý danh mục |
-| Suppliers | `/api/suppliers` | Quản lý nhà cung cấp |
-| Equipment | `/api/equipment` | Quản lý thiết bị |
-| Imports | `/api/imports` | Phiếu nhập kho |
-| Exports | `/api/exports` | Phiếu xuất kho |
-| Inventory Logs | `/api/inventory-logs` | Nhật ký kho, điều chỉnh tồn |
-| Dashboard | `/api/dashboard` | Thống kê, báo cáo |
+| Health | `/api/v1/health` | Kiểm tra trạng thái service và database |
+| Auth | `/api/v1/auth` | Đăng nhập, đăng ký OTP, 2FA, refresh token |
+| Users | `/api/v1/users` | Quản lý người dùng, khóa/mở khóa (Admin) |
+| Categories | `/api/v1/categories` | Quản lý danh mục |
+| Suppliers | `/api/v1/suppliers` | Quản lý nhà cung cấp |
+| Equipment | `/api/v1/equipment` | Quản lý thiết bị |
+| Imports | `/api/v1/imports` | Phiếu nhập kho |
+| Exports | `/api/v1/exports` | Phiếu xuất kho |
+| Inventory Logs | `/api/v1/inventory-logs` | Nhật ký kho, điều chỉnh tồn |
+| Dashboard | `/api/v1/dashboard` | Thống kê, báo cáo |
 
 ### Auth — luồng chính
 

@@ -21,12 +21,12 @@ describe("Validation API integration", () => {
     jest.clearAllMocks();
   });
 
-  test("POST /api/users rejects invalid admin payload", async () => {
+  test("POST /api/v1/users rejects invalid admin payload", async () => {
     mockDb.User.findByPk.mockResolvedValueOnce(adminUser);
 
     const token = generateAccessToken(adminUser);
     const response = await request(app)
-      .post("/api/users")
+      .post("/api/v1/users")
       .set("Authorization", `Bearer ${token}`)
       .send({ username: "ab", email: "invalid-email" });
 
@@ -38,13 +38,13 @@ describe("Validation API integration", () => {
     expect(Array.isArray(response.body.errors)).toBe(true);
   });
 
-  test("POST /api/equipment rejects missing foreign keys", async () => {
+  test("POST /api/v1/equipment rejects missing foreign keys", async () => {
     mockDb.User.findByPk.mockResolvedValueOnce(adminUser);
     mockDb.Category.findByPk.mockResolvedValueOnce(null);
 
     const token = generateAccessToken(adminUser);
     const response = await request(app)
-      .post("/api/equipment")
+      .post("/api/v1/equipment")
       .set("Authorization", `Bearer ${token}`)
       .send({
         code: "EQ-001",

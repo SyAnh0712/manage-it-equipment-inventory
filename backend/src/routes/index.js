@@ -11,7 +11,9 @@ const importRoutes = require("./importRoutes");
 const exportRoutes = require("./exportRoutes");
 const dashboardRoutes = require("./dashboardRoutes");
 const inventoryLogRoutes = require("./inventoryLogRoutes");
+const healthRoutes = require("./healthRoutes");
 
+router.use("/health", healthRoutes);
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/categories", categoryRoutes);

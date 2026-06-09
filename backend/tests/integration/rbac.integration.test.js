@@ -26,7 +26,7 @@ describe("RBAC API integration", () => {
 
     const token = generateAccessToken(staffUser);
     const response = await request(app)
-      .get("/api/users")
+      .get("/api/v1/users")
       .set("Authorization", `Bearer ${token}`);
 
     expect(response.status).toBe(403);
@@ -38,7 +38,7 @@ describe("RBAC API integration", () => {
 
     const token = generateAccessToken(staffUser);
     const response = await request(app)
-      .get("/api/users/profile/current")
+      .get("/api/v1/users/profile/current")
       .set("Authorization", `Bearer ${token}`);
 
     expect(response.status).toBe(200);
