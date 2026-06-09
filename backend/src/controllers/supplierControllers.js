@@ -1,7 +1,7 @@
 const supplierService = require("../services/supplier/supplierServices");
 const { sendSuccess } = require("../utils/responseHelper");
 
-const createSupplier = async (req, res, nextHandler) => {
+const createSupplier = async (req, res, next) => {
   try {
     const supplierData = req.body;
     const supplier = await supplierService.createSupplier(supplierData);
@@ -11,7 +11,7 @@ const createSupplier = async (req, res, nextHandler) => {
   }
 };
 
-const getAllSuppliers = async (req, res, nextHandler) => {
+const getAllSuppliers = async (req, res, next) => {
   try {
     const suppliers = await supplierService.getAllSuppliers(req.query);
     return sendSuccess(res, 200, "Suppliers fetched successfully", suppliers);
@@ -20,7 +20,7 @@ const getAllSuppliers = async (req, res, nextHandler) => {
   }
 };
 
-const getSupplierById = async (req, res, nextHandler) => {
+const getSupplierById = async (req, res, next) => {
   try {
     const supplierId = req.params.id;
     const supplier = await supplierService.getSupplierById(supplierId);
@@ -36,7 +36,7 @@ const getSupplierById = async (req, res, nextHandler) => {
   }
 };
 
-const updateSupplier = async (req, res, nextHandler) => {
+const updateSupplier = async (req, res, next) => {
   try {
     const supplierId = req.params.id;
     const supplierData = req.body;
@@ -61,7 +61,7 @@ const updateSupplier = async (req, res, nextHandler) => {
   }
 };
 
-const deleteSupplier = async (req, res, nextHandler) => {
+const deleteSupplier = async (req, res, next) => {
   try {
     const supplierId = req.params.id;
     const result = await supplierService.deleteSupplier(supplierId);

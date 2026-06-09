@@ -1,6 +1,8 @@
-const jwt = require("jsonwebtoken");
 const { Server } = require("socket.io");
-const { accessTokenSecret } = require("../config/jwt");
+const {
+  extractSocketToken,
+  authenticateSocketToken,
+} = require("./socketAuth");
 
 let io;
 
@@ -12,22 +14,18 @@ const initSocket = (server) => {
     },
   });
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     try {
-      const token =
-        socket.handshake.auth?.token ||
-        socket.handshake.headers.cookie
-          ?.split(";")
-          .find((item) => item.trim().startsWith("access_token="))
-          ?.split("=")[1];
+      const token = extractSocketToken(socket);
+      const { decoded } = await authenticateSocketToken(token);
 
-      if (token) {
-        const decoded = jwt.verify(token, accessTokenSecret);
-        socket.join(`user:${decoded.id}`);
-        console.log(`Socket ${socket.id} joined user:${decoded.id}`);
-      }
+      socket.join(`user:${decoded.id}`);
+      console.log(`Socket ${socket.id} joined user:${decoded.id}`);
     } catch (error) {
-      console.warn("Socket auth skipped:", error.message);
+      console.warn("Socket auth rejected:", error.message);
+      socket.emit("error", { message: error.message });
+      socket.disconnect(true);
+      return;
     }
 
     socket.on("disconnect", () => {

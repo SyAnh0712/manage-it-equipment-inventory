@@ -23,4 +23,16 @@ const upload = multer({
   },
 });
 
+const handleUpload =
+  (fieldName = "image") =>
+  (req, res, next) => {
+    upload.single(fieldName)(req, res, (error) => {
+      if (error) {
+        return next(error);
+      }
+      next();
+    });
+  };
+
 module.exports = upload;
+module.exports.handleUpload = handleUpload;

@@ -1,15 +1,25 @@
 const Joi = require("joi");
 const { sendError } = require("../utils/responseHelper");
+const { deleteUploadIfExists } = require("../utils/fileHelper");
 
 const validate = (schema, source = "body") => {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     const { error, value } = schema.validate(req[source], {
       abortEarly: false,
       allowUnknown: false,
       stripUnknown: true,
+      convert: true,
     });
 
     if (error) {
+      if (req.file?.filename) {
+        try {
+          await deleteUploadIfExists(`/uploads/${req.file.filename}`);
+        } catch {
+          // Ignore cleanup errors so validation response still returns.
+        }
+      }
+
       return sendError(
         res,
         400,
@@ -44,8 +54,20 @@ const equipmentSchema = Joi.object({
   quantity: Joi.number().integer().min(0).required(),
   price: Joi.number().min(0).required(),
   description: Joi.string().allow("", null),
-  image_url: Joi.string().uri().optional(),
+  image_url: Joi.string().uri().allow("", null).optional(),
 });
+
+const equipmentUpdateSchema = Joi.object({
+  code: Joi.string().trim().max(50),
+  name: Joi.string().trim().min(2).max(150),
+  category_id: Joi.number().integer().positive(),
+  supplier_id: Joi.number().integer().positive(),
+  unit: Joi.string().trim().max(30),
+  quantity: Joi.number().integer().min(0),
+  price: Joi.number().min(0),
+  description: Joi.string().allow("", null),
+  image_url: Joi.string().uri().allow("", null),
+}).min(1);
 
 const supplierSchema = Joi.object({
   name: Joi.string().trim().min(2).max(150).required(),
@@ -59,6 +81,42 @@ const categorySchema = Joi.object({
   name: Joi.string().trim().min(2).max(100).required(),
   description: Joi.string().allow("", null),
   image_url: Joi.string().uri().allow("", null).optional(),
+});
+
+const categoryUpdateSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(100),
+  description: Joi.string().allow("", null),
+  image_url: Joi.string().uri().allow("", null),
+}).min(1);
+
+const createUserSchema = Joi.object({
+  username: Joi.string().trim().min(3).max(50).required(),
+  full_name: Joi.string().trim().min(2).max(100).required(),
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).max(100).required(),
+  role: Joi.string().valid("admin", "staff").default("staff"),
+});
+
+const updateUserSchema = Joi.object({
+  username: Joi.string().trim().min(3).max(50),
+  full_name: Joi.string().trim().min(2).max(100),
+  email: Joi.string().email(),
+  password: Joi.string().min(6).max(100),
+  role: Joi.string().valid("admin", "staff"),
+}).min(1);
+
+const updateProfileSchema = Joi.object({
+  full_name: Joi.string().trim().min(2).max(100).required(),
+  email: Joi.string().email().required(),
+});
+
+const changePasswordSchema = Joi.object({
+  oldPassword: Joi.string().min(6).max(100).required(),
+  newPassword: Joi.string().min(6).max(100).required(),
+});
+
+const resetPasswordSchema = Joi.object({
+  newPassword: Joi.string().min(6).max(100).required(),
 });
 
 const adjustInventorySchema = Joi.object({
@@ -133,8 +191,15 @@ module.exports = {
   loginSchema,
   registerSchema,
   equipmentSchema,
+  equipmentUpdateSchema,
   supplierSchema,
   categorySchema,
+  categoryUpdateSchema,
+  createUserSchema,
+  updateUserSchema,
+  updateProfileSchema,
+  changePasswordSchema,
+  resetPasswordSchema,
   importOrderSchema,
   exportOrderSchema,
   adjustInventorySchema,

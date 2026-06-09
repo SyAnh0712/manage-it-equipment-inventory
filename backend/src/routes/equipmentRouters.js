@@ -8,15 +8,16 @@ const roleMiddleware = require("../middlewares/roleMiddleware");
 const {
   validate,
   equipmentSchema,
+  equipmentUpdateSchema,
 } = require("../middlewares/validationMiddleware");
-const upload = require("../utils/uploadHelper");
+const { handleUpload } = require("../utils/uploadHelper");
 
 router.use(authMiddleware);
 
 router.post(
   "/",
   roleMiddleware("admin"),
-  upload.single("image"),
+  handleUpload("image"),
   validate(equipmentSchema),
   equipmentController.createEquipment,
 );
@@ -25,8 +26,8 @@ router.get("/:id", equipmentController.getEquipmentById);
 router.put(
   "/:id",
   roleMiddleware("admin"),
-  upload.single("image"),
-  validate(equipmentSchema),
+  handleUpload("image"),
+  validate(equipmentUpdateSchema),
   equipmentController.updateEquipment,
 );
 router.delete(

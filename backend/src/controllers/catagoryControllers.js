@@ -1,7 +1,7 @@
 const catagoryService = require("../services/equipment/categoryServices");
 const { sendSuccess } = require("../utils/responseHelper");
 
-const createCategory = async (req, res, nextHandler) => {
+const createCategory = async (req, res, next) => {
   try {
     const categoryData = {
       ...req.body,
@@ -16,7 +16,7 @@ const createCategory = async (req, res, nextHandler) => {
   }
 };
 
-const getAllCategories = async (req, res, nextHandler) => {
+const getAllCategories = async (req, res, next) => {
   try {
     const categories = await catagoryService.getAllCategories(req.query);
     return sendSuccess(res, 200, "Categories fetched successfully", categories);
@@ -25,7 +25,7 @@ const getAllCategories = async (req, res, nextHandler) => {
   }
 };
 
-const getCategoryById = async (req, res, nextHandler) => {
+const getCategoryById = async (req, res, next) => {
   try {
     const categoryId = req.params.id;
     const category = await catagoryService.getCategoryById(categoryId);
@@ -41,7 +41,7 @@ const getCategoryById = async (req, res, nextHandler) => {
   }
 };
 
-const updateCategory = async (req, res, nextHandler) => {
+const updateCategory = async (req, res, next) => {
   try {
     const categoryId = req.params.id;
     const categoryData = {
@@ -71,7 +71,7 @@ const updateCategory = async (req, res, nextHandler) => {
   }
 };
 
-const deleteCategory = async (req, res, nextHandler) => {
+const deleteCategory = async (req, res, next) => {
   try {
     const categoryId = req.params.id;
     const result = await catagoryService.deleteCategory(categoryId);

@@ -8,15 +8,16 @@ const roleMiddleware = require("../middlewares/roleMiddleware");
 const {
   validate,
   categorySchema,
+  categoryUpdateSchema,
 } = require("../middlewares/validationMiddleware");
-const upload = require("../utils/uploadHelper");
+const { handleUpload } = require("../utils/uploadHelper");
 
 router.use(authMiddleware);
 
 router.post(
   "/",
   roleMiddleware("admin"),
-  upload.single("image"),
+  handleUpload("image"),
   validate(categorySchema),
   catagoryController.createCategory,
 );
@@ -25,8 +26,8 @@ router.get("/:id", roleMiddleware("admin"), catagoryController.getCategoryById);
 router.put(
   "/:id",
   roleMiddleware("admin"),
-  upload.single("image"),
-  validate(categorySchema),
+  handleUpload("image"),
+  validate(categoryUpdateSchema),
   catagoryController.updateCategory,
 );
 router.delete(

@@ -1,5 +1,7 @@
 const db = require("../../models");
 const { Op } = require("sequelize");
+const { createError, rethrowServiceError } = require("../../utils/httpError");
+const { deleteUploadIfExists } = require("../../utils/fileHelper");
 
 const Category = db.Category;
 
@@ -61,12 +63,23 @@ const updateCategory = async (id, categoryData) => {
   try {
     const category = await Category.findByPk(id);
     if (!category) {
-      throw new Error("Category not found");
+      throw createError("Category not found", 404);
     }
+
+    const previousImageUrl = category.image_url;
     await category.update(categoryData);
+
+    if (
+      categoryData.image_url &&
+      previousImageUrl &&
+      previousImageUrl !== categoryData.image_url
+    ) {
+      await deleteUploadIfExists(previousImageUrl);
+    }
+
     return category;
   } catch (error) {
-    throw new Error("Error updating category: " + error.message);
+    rethrowServiceError(error, "Error updating category");
   }
 };
 
@@ -74,12 +87,19 @@ const deleteCategory = async (id) => {
   try {
     const category = await Category.findByPk(id);
     if (!category) {
-      throw new Error("Category not found");
+      throw createError("Category not found", 404);
     }
+
+    const previousImageUrl = category.image_url;
     await category.destroy();
+
+    if (previousImageUrl) {
+      await deleteUploadIfExists(previousImageUrl);
+    }
+
     return { message: "Category deleted successfully" };
   } catch (error) {
-    throw new Error("Error deleting category: " + error.message);
+    rethrowServiceError(error, "Error deleting category");
   }
 };
 

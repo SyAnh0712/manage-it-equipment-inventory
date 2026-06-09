@@ -1,7 +1,7 @@
 const equipmentService = require("../services/equipment/equipmentServices");
 const { sendSuccess } = require("../utils/responseHelper");
 
-const createEquipment = async (req, res, nextHandler) => {
+const createEquipment = async (req, res, next) => {
   try {
     const equipmentData = {
       ...req.body,
@@ -16,7 +16,7 @@ const createEquipment = async (req, res, nextHandler) => {
   }
 };
 
-const getAllEquipment = async (req, res, nextHandler) => {
+const getAllEquipment = async (req, res, next) => {
   try {
     const equipment = await equipmentService.getAllEquipment(req.query);
     return sendSuccess(res, 200, "Equipment fetched successfully", equipment);
@@ -25,7 +25,7 @@ const getAllEquipment = async (req, res, nextHandler) => {
   }
 };
 
-const getEquipmentById = async (req, res, nextHandler) => {
+const getEquipmentById = async (req, res, next) => {
   try {
     const equipmentId = req.params.id;
     const equipment = await equipmentService.getEquipmentById(equipmentId);
@@ -41,7 +41,7 @@ const getEquipmentById = async (req, res, nextHandler) => {
   }
 };
 
-const updateEquipment = async (req, res, nextHandler) => {
+const updateEquipment = async (req, res, next) => {
   try {
     const equipmentId = req.params.id;
     const equipmentData = {
@@ -71,7 +71,7 @@ const updateEquipment = async (req, res, nextHandler) => {
   }
 };
 
-const deleteEquipment = async (req, res, nextHandler) => {
+const deleteEquipment = async (req, res, next) => {
   try {
     const equipmentId = req.params.id;
     const result = await equipmentService.deleteEquipment(equipmentId);
