@@ -12,9 +12,8 @@ const buildFormData = (data) => {
 };
 
 const equipmentService = {
-  getAllEquipments: async () => {
-    const response = await axiosClient.get("/equipment");
-    return response.data;
+  getAllEquipments: (params) => {
+    return axiosClient.get("/equipment", { params });
   },
 
   getEquipmentById: async (id) => {

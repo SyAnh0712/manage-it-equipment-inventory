@@ -23,3 +23,9 @@ export const extractPaginatedList = (response) => {
 
   return { data: [], pagination: { totalPages: 1 } };
 };
+
+export const extractListData = (response) =>
+  extractPaginatedList(response).data;
+
+/** Use when loading full lists for dropdowns or client-side filters */
+export const LIST_FETCH_ALL_PARAMS = { page: 1, limit: 1000 };

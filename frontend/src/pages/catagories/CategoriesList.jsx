@@ -14,6 +14,10 @@ import { usePagination } from "../../hooks/usePagination";
 import { useDebounce } from "../../hooks/useDebounce";
 
 import categoriesService from "../../services/categoriesService";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const CategoriesList = () => {
   const [categories, setCategories] = useState([]);
@@ -38,9 +42,11 @@ const CategoriesList = () => {
     try {
       setLoading(true);
 
-      const response = await categoriesService.getAllCategories();
+      const response = await categoriesService.getAllCategories(
+        LIST_FETCH_ALL_PARAMS,
+      );
 
-      setCategories(response?.data || response || []);
+      setCategories(extractListData(response));
     } catch (error) {
       toast.error("Failed to fetch categories");
       console.error(error);

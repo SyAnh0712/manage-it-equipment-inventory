@@ -14,6 +14,10 @@ import Loading from "../../components/common/Loading";
 import suppliersService from "../../services/suppliersService";
 import equipmentService from "../../services/equipmentService";
 import importOrderService from "../../services/importOrderService";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const EditImportOrder = () => {
   const { id } = useParams();
@@ -36,13 +40,13 @@ const EditImportOrder = () => {
       setLoading(true);
       const [suppliersResponse, equipmentsResponse, orderResponse] =
         await Promise.all([
-          suppliersService.getAllSuppliers(),
-          equipmentService.getAllEquipments(),
+          suppliersService.getAllSuppliers(LIST_FETCH_ALL_PARAMS),
+          equipmentService.getAllEquipments(LIST_FETCH_ALL_PARAMS),
           importOrderService.getImportOrderById(id),
         ]);
 
-      setSuppliers(suppliersResponse?.data || suppliersResponse || []);
-      setEquipments(equipmentsResponse || []);
+      setSuppliers(extractListData(suppliersResponse));
+      setEquipments(extractListData(equipmentsResponse));
       const order = orderResponse || {};
       setSupplierId(order.supplier_id || "");
       setNote(order.note || "");

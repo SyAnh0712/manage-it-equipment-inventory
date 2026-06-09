@@ -13,6 +13,10 @@ import { toast } from "react-toastify";
 import Loading from "../../components/common/Loading";
 import equipmentService from "../../services/equipmentService";
 import exportOrderService from "../../services/exportOrderService";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const AddExportOrder = () => {
   const [equipments, setEquipments] = useState([]);
@@ -32,8 +36,10 @@ const AddExportOrder = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const equipmentsResponse = await equipmentService.getAllEquipments();
-      setEquipments(equipmentsResponse || []);
+      const equipmentsResponse = await equipmentService.getAllEquipments(
+        LIST_FETCH_ALL_PARAMS,
+      );
+      setEquipments(extractListData(equipmentsResponse));
     } catch (error) {
       console.error(error);
       toast.error("Failed to load equipment list");

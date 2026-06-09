@@ -1,8 +1,8 @@
 import axiosClient from "./axiosClient";
 
 const suppliersService = {
-  getAllSuppliers: () => {
-    return axiosClient.get("/suppliers");
+  getAllSuppliers: (params) => {
+    return axiosClient.get("/suppliers", { params });
   },
 
   getSupplierById: (id) => {

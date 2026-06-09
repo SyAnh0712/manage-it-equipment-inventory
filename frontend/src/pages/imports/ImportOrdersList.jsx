@@ -25,7 +25,11 @@ import {
   exportImportOrdersToPdf,
 } from "../../utils/reportExport";
 import { useAuth } from "../../hooks/useAuth";
-import { extractPaginatedList } from "../../utils/apiResponse";
+import {
+  extractPaginatedList,
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const ImportOrdersList = () => {
   const [orders, setOrders] = useState([]);
@@ -46,8 +50,8 @@ const ImportOrdersList = () => {
 
   useEffect(() => {
     suppliersService
-      .getAllSuppliers()
-      .then((response) => setSuppliers(response?.data || response || []))
+      .getAllSuppliers(LIST_FETCH_ALL_PARAMS)
+      .then((response) => setSuppliers(extractListData(response)))
       .catch(() => {});
   }, []);
 

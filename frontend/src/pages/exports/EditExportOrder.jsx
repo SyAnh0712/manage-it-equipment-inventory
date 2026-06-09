@@ -13,6 +13,10 @@ import { toast } from "react-toastify";
 import Loading from "../../components/common/Loading";
 import equipmentService from "../../services/equipmentService";
 import exportOrderService from "../../services/exportOrderService";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const EditExportOrder = () => {
   const { id } = useParams();
@@ -34,11 +38,11 @@ const EditExportOrder = () => {
     try {
       setLoading(true);
       const [equipmentsResponse, orderResponse] = await Promise.all([
-        equipmentService.getAllEquipments(),
+        equipmentService.getAllEquipments(LIST_FETCH_ALL_PARAMS),
         exportOrderService.getExportOrderById(id),
       ]);
 
-      setEquipments(equipmentsResponse || []);
+      setEquipments(extractListData(equipmentsResponse));
       const order = orderResponse || {};
       setDepartment(order.department || "");
       setReceiver(order.receiver || "");

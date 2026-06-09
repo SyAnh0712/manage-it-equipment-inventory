@@ -15,7 +15,7 @@ axiosClient.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !error.config?.skipAuthRedirect) {
       const currentPath = window.location.pathname;
       if (currentPath !== "/login" && currentPath !== "/verify-2fa") {
         window.location.href = "/login";

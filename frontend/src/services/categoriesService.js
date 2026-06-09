@@ -12,8 +12,8 @@ const buildFormData = (data) => {
 };
 
 const categoriesService = {
-  getAllCategories: () => {
-    return axiosClient.get("/categories");
+  getAllCategories: (params) => {
+    return axiosClient.get("/categories", { params });
   },
 
   getCategoryById: (id) => {

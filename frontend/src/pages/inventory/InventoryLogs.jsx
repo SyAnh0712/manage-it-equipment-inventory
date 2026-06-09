@@ -22,6 +22,11 @@ import {
   exportInventoryLogsToExcel,
   exportInventoryLogsToPdf,
 } from "../../utils/reportExport";
+import {
+  extractPaginatedList,
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const InventoryLogs = () => {
   const { user } = useAuth();
@@ -51,8 +56,8 @@ const InventoryLogs = () => {
     }
 
     equipmentService
-      .getAllEquipments()
-      .then((response) => setEquipments(response?.data || response || []))
+      .getAllEquipments(LIST_FETCH_ALL_PARAMS)
+      .then((response) => setEquipments(extractListData(response)))
       .catch(() => {});
   }, [isAdmin]);
 
@@ -68,10 +73,10 @@ const InventoryLogs = () => {
         limit,
       });
 
-      const logData = Array.isArray(response) ? response : response?.data || [];
+      const { data, pagination } = extractPaginatedList(response);
 
-      setLogs(logData);
-      setTotalPages(response?.pagination?.totalPages || 1);
+      setLogs(data);
+      setTotalPages(pagination?.totalPages || 1);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load inventory history");

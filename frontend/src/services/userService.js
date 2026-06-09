@@ -1,8 +1,8 @@
 import axiosClient from "./axiosClient";
 
 const userService = {
-  getAllUsers: () => {
-    return axiosClient.get("/users");
+  getAllUsers: (params) => {
+    return axiosClient.get("/users", { params });
   },
 
   getUserById: (id) => {

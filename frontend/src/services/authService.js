@@ -38,7 +38,7 @@ const authService = {
   },
 
   getMe() {
-    return axiosClient.get("/auth/me");
+    return axiosClient.get("/auth/me", { skipAuthRedirect: true });
   },
 };
 

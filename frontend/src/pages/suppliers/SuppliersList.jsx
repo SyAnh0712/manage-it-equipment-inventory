@@ -14,6 +14,10 @@ import { usePagination } from "../../hooks/usePagination";
 import { useDebounce } from "../../hooks/useDebounce";
 
 import suppliersService from "../../services/suppliersService";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const SuppliersList = () => {
   const [suppliers, setSuppliers] = useState([]);
@@ -44,8 +48,10 @@ const SuppliersList = () => {
   const fetchSuppliers = async () => {
     try {
       setLoading(true);
-      const response = await suppliersService.getAllSuppliers();
-      setSuppliers(response?.data || response || []);
+      const response = await suppliersService.getAllSuppliers(
+        LIST_FETCH_ALL_PARAMS,
+      );
+      setSuppliers(extractListData(response));
     } catch (error) {
       toast.error("Failed to fetch suppliers");
       console.error(error);

@@ -18,6 +18,10 @@ import {
   exportImportOrderDetailsToExcel,
   exportImportOrderDetailsToPdf,
 } from "../../utils/reportExport";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const ImportOrderDetails = () => {
   const { id } = useParams();
@@ -31,11 +35,11 @@ const ImportOrderDetails = () => {
     try {
       setLoading(true);
       const [equipmentResponse, orderResponse] = await Promise.all([
-        equipmentService.getAllEquipments(),
+        equipmentService.getAllEquipments(LIST_FETCH_ALL_PARAMS),
         importOrderService.getImportOrderById(id),
       ]);
 
-      setEquipments(equipmentResponse || []);
+      setEquipments(extractListData(equipmentResponse));
       setOrder(orderResponse);
     } catch (error) {
       console.error(error);

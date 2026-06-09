@@ -14,6 +14,10 @@ import { usePagination } from "../../hooks/usePagination";
 import { useDebounce } from "../../hooks/useDebounce";
 
 import equipmentService from "../../services/equipmentService";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 import { listenToSocket } from "../../services/socketService";
 
 const EquipmentsList = () => {
@@ -67,9 +71,11 @@ const EquipmentsList = () => {
     try {
       setLoading(true);
 
-      const response = await equipmentService.getAllEquipments();
+      const response = await equipmentService.getAllEquipments(
+        LIST_FETCH_ALL_PARAMS,
+      );
 
-      setEquipments(response || []);
+      setEquipments(extractListData(response));
     } catch (error) {
       toast.error("Failed to fetch equipments");
       console.error(error);

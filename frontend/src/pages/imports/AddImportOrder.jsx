@@ -14,6 +14,10 @@ import Loading from "../../components/common/Loading";
 import suppliersService from "../../services/suppliersService";
 import equipmentService from "../../services/equipmentService";
 import importOrderService from "../../services/importOrderService";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const AddImportOrder = () => {
   const [suppliers, setSuppliers] = useState([]);
@@ -35,10 +39,14 @@ const AddImportOrder = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const suppliersResponse = await suppliersService.getAllSuppliers();
-      const equipmentsResponse = await equipmentService.getAllEquipments();
-      setSuppliers(suppliersResponse?.data || suppliersResponse || []);
-      setEquipments(equipmentsResponse || []);
+      const suppliersResponse = await suppliersService.getAllSuppliers(
+        LIST_FETCH_ALL_PARAMS,
+      );
+      const equipmentsResponse = await equipmentService.getAllEquipments(
+        LIST_FETCH_ALL_PARAMS,
+      );
+      setSuppliers(extractListData(suppliersResponse));
+      setEquipments(extractListData(equipmentsResponse));
     } catch (error) {
       console.error(error);
       toast.error("Failed to load suppliers or equipment");

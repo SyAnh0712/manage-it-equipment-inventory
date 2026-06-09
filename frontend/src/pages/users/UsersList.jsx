@@ -10,6 +10,10 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { usePagination } from "../../hooks/usePagination";
 import { useDebounce } from "../../hooks/useDebounce";
 import userService from "../../services/userService";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 import { listenToSocket } from "../../services/socketService";
 
 const UsersList = () => {
@@ -57,8 +61,8 @@ const UsersList = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await userService.getAllUsers();
-      setUsers(response?.data?.data || []);
+      const response = await userService.getAllUsers(LIST_FETCH_ALL_PARAMS);
+      setUsers(extractListData(response));
     } catch (error) {
       toast.error("Failed to fetch users");
       console.error(error);
