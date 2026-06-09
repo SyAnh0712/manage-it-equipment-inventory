@@ -1,6 +1,7 @@
 const mockDb = {
   ImportOrder: {
     findByPk: jest.fn(),
+    findAndCountAll: jest.fn(),
   },
   ImportOrderDetail: {
     findAll: jest.fn(),
@@ -106,6 +107,63 @@ describe("Import order service", () => {
       await expect(
         importService.deleteImportOrder(1, { id: 5, role: "staff" }),
       ).rejects.toThrow("Bạn không có quyền cập nhật đơn hàng này");
+    });
+  });
+
+  describe("getAllImportOrders", () => {
+    test("scopes list to staff own orders", async () => {
+      mockDb.ImportOrder.findAndCountAll.mockResolvedValueOnce({
+        count: 0,
+        rows: [],
+      });
+
+      await importService.getAllImportOrders({}, { id: 5, role: "staff" });
+
+      expect(mockDb.ImportOrder.findAndCountAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ created_by: 5 }),
+        }),
+      );
+    });
+
+    test("does not scope list for admin", async () => {
+      mockDb.ImportOrder.findAndCountAll.mockResolvedValueOnce({
+        count: 0,
+        rows: [],
+      });
+
+      await importService.getAllImportOrders({}, { id: 1, role: "admin" });
+
+      expect(mockDb.ImportOrder.findAndCountAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.not.objectContaining({ created_by: 1 }),
+        }),
+      );
+    });
+  });
+
+  describe("getImportOrderById", () => {
+    test("allows staff to view own order", async () => {
+      const importOrder = { id: 1, created_by: 5 };
+      mockDb.ImportOrder.findByPk.mockResolvedValueOnce(importOrder);
+
+      const result = await importService.getImportOrderById(1, {
+        id: 5,
+        role: "staff",
+      });
+
+      expect(result).toBe(importOrder);
+    });
+
+    test("denies staff from viewing another users order", async () => {
+      mockDb.ImportOrder.findByPk.mockResolvedValueOnce({
+        id: 1,
+        created_by: 2,
+      });
+
+      await expect(
+        importService.getImportOrderById(1, { id: 5, role: "staff" }),
+      ).rejects.toThrow("Bạn không có quyền xem đơn hàng này");
     });
   });
 

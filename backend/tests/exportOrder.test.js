@@ -1,6 +1,7 @@
 const mockDb = {
   ExportOrder: {
     findByPk: jest.fn(),
+    findAndCountAll: jest.fn(),
   },
   ExportOrderDetail: {
     findAll: jest.fn(),
@@ -85,6 +86,36 @@ describe("Export order service", () => {
       await expect(exportService.approveExportOrder(1, 1)).rejects.toThrow(
         /Không đủ số lượng tồn kho/,
       );
+    });
+  });
+
+  describe("getAllExportOrders", () => {
+    test("scopes list to staff own orders", async () => {
+      mockDb.ExportOrder.findAndCountAll.mockResolvedValueOnce({
+        count: 0,
+        rows: [],
+      });
+
+      await exportService.getAllExportOrders({}, { id: 7, role: "staff" });
+
+      expect(mockDb.ExportOrder.findAndCountAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ created_by: 7 }),
+        }),
+      );
+    });
+  });
+
+  describe("getExportOrderById", () => {
+    test("denies staff from viewing another users order", async () => {
+      mockDb.ExportOrder.findByPk.mockResolvedValueOnce({
+        id: 1,
+        created_by: 2,
+      });
+
+      await expect(
+        exportService.getExportOrderById(1, { id: 5, role: "staff" }),
+      ).rejects.toThrow("Bạn không có quyền xem đơn hàng này");
     });
   });
 

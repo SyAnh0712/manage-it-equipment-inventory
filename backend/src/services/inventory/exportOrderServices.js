@@ -1,6 +1,10 @@
 const db = require("../../models");
 const { Op } = require("sequelize");
 const { createError, rethrowServiceError } = require("../../utils/httpError");
+const {
+  assertOrderReadAccess,
+  buildStaffOwnershipFilter,
+} = require("../../utils/orderAccessHelper");
 const { emitToAll } = require("../../utils/socket");
 
 const ExportOrder = db.ExportOrder;
@@ -253,12 +257,6 @@ const rejectExportOrder = async (id, approverId) => {
   }
 };
 
-const verifyExportOrderAccess = (order) => {
-  if (!order) {
-    throw createError("Export order not found", 404);
-  }
-};
-
 const getExportOrderById = async (id, user) => {
   try {
     const exportOrder = await ExportOrder.findByPk(id, {
@@ -278,7 +276,7 @@ const getExportOrderById = async (id, user) => {
       ],
     });
 
-    verifyExportOrderAccess(exportOrder);
+    assertOrderReadAccess(exportOrder, user, "Export order not found");
     return exportOrder;
   } catch (error) {
     rethrowServiceError(error, "Error fetching export order");
@@ -294,6 +292,7 @@ const getAllExportOrders = async (query, user) => {
     const department = (safeQuery.department || "").trim();
 
     const where = {
+      ...buildStaffOwnershipFilter(user),
       ...buildDateRangeFilter(safeQuery.date_from, safeQuery.date_to),
     };
 
