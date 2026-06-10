@@ -70,14 +70,70 @@ export const AuthProvider = ({ children }) => {
     const removeNotificationListener = listenToSocket(
       "notification",
       (payload) => {
+        // Skip generic import/export notifications as they are handled by specific listeners below
+        if (payload?.type === "import" || payload?.type === "export") {
+          return;
+        }
         toast.info(payload?.message || "Có cập nhật mới từ hệ thống");
       },
+    );
+
+    const removeImportCreatedListener = listenToSocket(
+      "import:created",
+      (payload) => {
+        if (user?.role === "admin") {
+          toast.warning(
+            `🔔 [Duyệt Phiếu] Phiếu nhập ${payload?.order?.code} mới đang chờ duyệt!`,
+            { autoClose: 5000 }
+          );
+        }
+      }
+    );
+
+    const removeExportCreatedListener = listenToSocket(
+      "export:created",
+      (payload) => {
+        if (user?.role === "admin") {
+          toast.warning(
+            `🔔 [Duyệt Phiếu] Phiếu xuất ${payload?.order?.code} mới đang chờ duyệt!`,
+            { autoClose: 5000 }
+          );
+        }
+      }
+    );
+
+    const removeImportApprovedListener = listenToSocket(
+      "import:approved",
+      (payload) => {
+        if (String(payload?.order?.created_by) === String(user?.id)) {
+          toast.success(
+            `✅ Phiếu nhập ${payload?.order?.code} của bạn đã được phê duyệt!`,
+            { autoClose: 5000 }
+          );
+        }
+      }
+    );
+
+    const removeExportApprovedListener = listenToSocket(
+      "export:approved",
+      (payload) => {
+        if (String(payload?.order?.created_by) === String(user?.id)) {
+          toast.success(
+            `✅ Phiếu xuất ${payload?.order?.code} của bạn đã được phê duyệt!`,
+            { autoClose: 5000 }
+          );
+        }
+      }
     );
 
     return () => {
       removeLockedListener();
       removeUnlockedListener();
       removeNotificationListener();
+      removeImportCreatedListener();
+      removeExportCreatedListener();
+      removeImportApprovedListener();
+      removeExportApprovedListener();
       disconnectSocket();
     };
   }, [user, logout]);
