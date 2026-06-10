@@ -1,4 +1,4 @@
-const catagoryService = require("../services/equipment/categoryServices");
+const categoryService = require("../services/equipment/categoryServices");
 const { sendSuccess } = require("../utils/responseHelper");
 
 const createCategory = async (req, res, next) => {
@@ -9,7 +9,7 @@ const createCategory = async (req, res, next) => {
         ? `/uploads/${req.file.filename}`
         : req.body.image_url,
     };
-    const category = await catagoryService.createCategory(categoryData);
+    const category = await categoryService.createCategory(categoryData);
     return sendSuccess(res, 201, "Category created successfully", category);
   } catch (error) {
     next(error);
@@ -18,7 +18,7 @@ const createCategory = async (req, res, next) => {
 
 const getAllCategories = async (req, res, next) => {
   try {
-    const categories = await catagoryService.getAllCategories(req.query);
+    const categories = await categoryService.getAllCategories(req.query);
     return sendSuccess(res, 200, "Categories fetched successfully", categories);
   } catch (error) {
     next(error);
@@ -28,7 +28,7 @@ const getAllCategories = async (req, res, next) => {
 const getCategoryById = async (req, res, next) => {
   try {
     const categoryId = req.params.id;
-    const category = await catagoryService.getCategoryById(categoryId);
+    const category = await categoryService.getCategoryById(categoryId);
     if (category) {
       return sendSuccess(res, 200, "Category fetched successfully", category);
     } else {
@@ -50,7 +50,7 @@ const updateCategory = async (req, res, next) => {
         ? `/uploads/${req.file.filename}`
         : req.body.image_url,
     };
-    const updatedCategory = await catagoryService.updateCategory(
+    const updatedCategory = await categoryService.updateCategory(
       categoryId,
       categoryData,
     );
@@ -74,7 +74,7 @@ const updateCategory = async (req, res, next) => {
 const deleteCategory = async (req, res, next) => {
   try {
     const categoryId = req.params.id;
-    const result = await catagoryService.deleteCategory(categoryId);
+    const result = await categoryService.deleteCategory(categoryId);
     return sendSuccess(res, 200, "Category deleted successfully", result);
   } catch (error) {
     next(error);

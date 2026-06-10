@@ -1,9 +1,9 @@
 import { lazy } from "react";
 import AdminRoute from "./AdminRouters";
 
-const CategoriesList = lazy(() => import("../pages/catagories/CategoriesList"));
-const AddCategories = lazy(() => import("../pages/catagories/AddCategories"));
-const EditCategories = lazy(() => import("../pages/catagories/EditCategories"));
+const CategoriesList = lazy(() => import("../pages/categories/CategoriesList"));
+const AddCategories = lazy(() => import("../pages/categories/AddCategories"));
+const EditCategories = lazy(() => import("../pages/categories/EditCategories"));
 
 const categoriesRoutes = [
   {

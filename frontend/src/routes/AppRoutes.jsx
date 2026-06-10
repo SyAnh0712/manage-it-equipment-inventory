@@ -6,7 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 import authRoutes from "./AuthRouters";
 import dashboardRoutes from "./DashBoardRouters";
 import userRoutes from "./UsersRouters";
-import categoryRoutes from "./CatagoriesRouters";
+import categoryRoutes from "./CategoriesRouters";
 import supplierRoutes from "./SuppliersRouters";
 import equipmentRoutes from "./EquipmentRouters";
 import importRoutes from "./ImportRouters";

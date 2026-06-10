@@ -4,7 +4,7 @@ const router = express.Router();
 
 const authRoutes = require("./authRoutes");
 const userRoutes = require("./userRoutes");
-const categoryRoutes = require("./catagoryRouters");
+const categoryRoutes = require("./categoryRouters");
 const supplierRoutes = require("./supplierRouters");
 const equipmentRoutes = require("./equipmentRouters");
 const importRoutes = require("./importRoutes");
