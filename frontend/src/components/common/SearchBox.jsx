@@ -7,7 +7,7 @@ const SearchBox = ({
   onSearch,
 }) => {
   return (
-    <InputGroup className="mb-3">
+    <InputGroup className="search-box mb-0">
       <InputGroup.Text>
         <i className="bi bi-search"></i>
       </InputGroup.Text>

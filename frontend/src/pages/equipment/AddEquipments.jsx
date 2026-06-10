@@ -29,8 +29,8 @@ const AddEquipments = () => {
   };
 
   return (
-    <Container fluid className="py-4">
-      <Row className="mb-4">
+    <Container fluid className="py-4 form-page">
+      <Row className="mb-4 form-page-header">
         <Col>
           <div className="d-flex align-items-center gap-2">
             <BSButton
@@ -46,9 +46,9 @@ const AddEquipments = () => {
         </Col>
       </Row>
 
-      <Row>
-        <Col md={8}>
-          <Card>
+      <Row className="form-page-grid">
+        <Col xs={12}>
+          <Card className="form-shell">
             <Card.Body>
               <EquipmentForm onSubmit={handleSubmit} isLoading={isLoading} />
             </Card.Body>

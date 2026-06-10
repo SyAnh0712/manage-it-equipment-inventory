@@ -1,16 +1,113 @@
-import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Alert,
-  Badge,
-  Spinner,
-} from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Alert, Badge, Card, Col, Container, Row } from "react-bootstrap";
+import { motion } from "motion/react";
+import { Link } from "react-router-dom";
+
+import EmptyState from "../../components/common/EmptyState";
+import Loading from "../../components/common/Loading";
 import { useAuth } from "../../hooks/useAuth";
 import axiosClient from "../../services/axiosClient";
 import "./Dashboard.css";
+
+const MotionCard = motion(Card);
+const MotionLink = motion(Link);
+
+const formatNumber = (value) => Number(value || 0).toLocaleString();
+
+const StatCardContent = ({ icon, label, value, hint }) => (
+  <Card.Body>
+    <div className="dashboard-stat-top">
+      <span className="dashboard-stat-icon">
+        <i className={`bi ${icon}`}></i>
+      </span>
+      <span className="dashboard-stat-label">{label}</span>
+    </div>
+    <div className="dashboard-stat-value">{formatNumber(value)}</div>
+    <div className="dashboard-stat-hint">{hint}</div>
+  </Card.Body>
+);
+
+const StatCard = ({
+  icon,
+  label,
+  value,
+  hint,
+  tone = "blue",
+  delay = 0,
+  to,
+}) => {
+  const className = `dashboard-stat dashboard-stat-${tone} ${
+    to ? "dashboard-stat-link" : ""
+  }`;
+
+  if (to) {
+    return (
+      <MotionLink
+        to={to}
+        className={className}
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.24, delay }}
+      >
+        <StatCardContent icon={icon} label={label} value={value} hint={hint} />
+      </MotionLink>
+    );
+  }
+
+  return (
+    <MotionCard
+      className={`dashboard-stat dashboard-stat-${tone}`}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.24, delay }}
+    >
+      <StatCardContent icon={icon} label={label} value={value} hint={hint} />
+    </MotionCard>
+  );
+};
+
+const CompactList = ({ title, icon, items = [], emptyTitle, renderMeta }) => (
+  <Card className="dashboard-panel h-100">
+    <Card.Header>
+      <span>
+        <i className={`bi ${icon} me-2`}></i>
+        {title}
+      </span>
+      <Badge bg="light" text="dark">
+        {items.length}
+      </Badge>
+    </Card.Header>
+    <Card.Body>
+      {items.length === 0 ? (
+        <EmptyState
+          icon={icon}
+          title={emptyTitle}
+          message="No attention needed right now."
+        />
+      ) : (
+        <div className="dashboard-list">
+          {items.map((item, index) => (
+            <motion.div
+              className="dashboard-list-item"
+              key={item.id || `${item.code}-${index}`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.18, delay: index * 0.03 }}
+            >
+              <div>
+                <strong>{item.code ? `${item.code} - ${item.name}` : item.name}</strong>
+                {item.status && <small>Status: {item.status}</small>}
+              </div>
+              <span>{renderMeta ? renderMeta(item) : item.quantity}</span>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </Card.Body>
+  </Card>
+);
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -20,41 +117,37 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchDashboardData();
+    const timeoutId = globalThis.setTimeout(async () => {
+      try {
+        setLoading(true);
+        const isAdmin = user?.role === "admin";
+
+        const statsRes = await axiosClient.get("/dashboard/statistics");
+        setStatistics(statsRes?.data || statsRes);
+
+        if (isAdmin) {
+          const detailedRes = await axiosClient.get(
+            "/dashboard/statistics/detailed",
+          );
+          setDetailedStats(detailedRes?.data || detailedRes);
+        } else {
+          setDetailedStats(null);
+        }
+
+        setError(null);
+      } catch (err) {
+        setError(err?.message || "Unable to load dashboard data");
+        console.error("Error fetching dashboard data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, 0);
+
+    return () => globalThis.clearTimeout(timeoutId);
   }, [user?.role]);
 
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const isAdmin = user?.role === "admin";
-
-      const statsRes = await axiosClient.get("/dashboard/statistics");
-      setStatistics(statsRes?.data || statsRes);
-
-      if (isAdmin) {
-        const detailedRes = await axiosClient.get("/dashboard/statistics/detailed");
-        setDetailedStats(detailedRes?.data || detailedRes);
-      } else {
-        setDetailedStats(null);
-      }
-
-      setError(null);
-    } catch (err) {
-      setError("Không thể tải dữ liệu dashboard");
-      console.error("Error fetching dashboard data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) {
-    return (
-      <Container fluid className="py-4 text-center">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Đang tải...</span>
-        </Spinner>
-      </Container>
-    );
+    return <Loading message="Loading dashboard..." />;
   }
 
   if (error) {
@@ -66,269 +159,257 @@ const Dashboard = () => {
   }
 
   const summary = statistics?.summary || {};
+  const isAdmin = user?.role === "admin";
+  const lowStock = detailedStats?.equipment?.lowStock || [];
+  const outOfStock = detailedStats?.equipment?.outOfStock || [];
+  const highStock = detailedStats?.equipment?.highStock || [];
+  const recentImports = detailedStats?.recentActivities?.imports || [];
+  const recentExports = detailedStats?.recentActivities?.exports || [];
+  const pendingTotal =
+    isAdmin
+      ? Number(summary.pendingImportOrders || 0) +
+        Number(summary.pendingExportOrders || 0)
+      : Number(summary.myPendingOrders || 0);
 
   return (
-    <Container fluid className="py-4">
-      <Row className="mb-4">
-        <Col>
-          <h1>
-            Bảng Điều Khiển
-            <Badge bg="info" className="ms-2">
-              {user?.role === "admin" ? "Quản Trị Viên" : "Nhân Viên"}
-            </Badge>
-          </h1>
-          <p className="text-muted">Xin chào, {user?.full_name}!</p>
-        </Col>
-      </Row>
+    <Container fluid className="py-4 dashboard-page">
+      <motion.section
+        className="dashboard-hero"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+      >
+        <div>
+          <Badge bg={isAdmin ? "primary" : "success"} className="mb-2">
+            {isAdmin ? "Admin workspace" : "Staff workspace"}
+          </Badge>
+          <h1>Inventory Overview</h1>
+          <p>
+            Welcome back, {user?.full_name || user?.username || "User"}. Track
+            stock, approvals, and operational activity from one place.
+          </p>
+        </div>
+        <div className="dashboard-hero-score">
+          <span>{formatNumber(pendingTotal)}</span>
+          <small>pending actions</small>
+        </div>
+      </motion.section>
 
-      {/* Admin Dashboard */}
-      {user?.role === "admin" && (
+      {isAdmin ? (
         <>
-          {/* Main Statistics Cards */}
-          <Row className="g-4 mb-4">
-            <Col md={3} sm={6}>
-              <Card className="stat-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-box text-success"></i>
-                  </h3>
-                  <h6 className="text-muted">Thiết Bị</h6>
-                  <h2 className="text-success">{summary.equipment || 0}</h2>
-                  <small className="text-muted">Tổng số thiết bị</small>
-                </Card.Body>
-              </Card>
+          <Row className="g-3 mb-4">
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-box-seam"
+                label="Equipment"
+                value={summary.equipment}
+                hint="Total managed assets"
+                tone="green"
+                delay={0.02}
+                to="/equipment"
+              />
             </Col>
-
-            <Col md={3} sm={6}>
-              <Card className="stat-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-people text-primary"></i>
-                  </h3>
-                  <h6 className="text-muted">Người Dùng</h6>
-                  <h2 className="text-primary">{summary.users || 0}</h2>
-                  <small className="text-muted">Tổng số người dùng</small>
-                </Card.Body>
-              </Card>
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-archive"
+                label="Inventory Qty"
+                value={summary.totalQuantity}
+                hint="Units currently in stock"
+                tone="cyan"
+                delay={0.04}
+                to="/equipment"
+              />
             </Col>
-
-            <Col md={3} sm={6}>
-              <Card className="stat-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-bookmark text-warning"></i>
-                  </h3>
-                  <h6 className="text-muted">Danh Mục</h6>
-                  <h2 className="text-warning">{summary.categories || 0}</h2>
-                  <small className="text-muted">Danh mục thiết bị</small>
-                </Card.Body>
-              </Card>
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-hourglass-split"
+                label="Pending Imports"
+                value={summary.pendingImportOrders}
+                hint="Waiting for approval"
+                tone="amber"
+                delay={0.06}
+                to="/imports"
+              />
             </Col>
-
-            <Col md={3} sm={6}>
-              <Card className="stat-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-truck text-info"></i>
-                  </h3>
-                  <h6 className="text-muted">Nhà Cung Cấp</h6>
-                  <h2 className="text-info">{summary.suppliers || 0}</h2>
-                  <small className="text-muted">Nhà cung cấp</small>
-                </Card.Body>
-              </Card>
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-box-arrow-up"
+                label="Pending Exports"
+                value={summary.pendingExportOrders}
+                hint="Waiting for approval"
+                tone="rose"
+                delay={0.08}
+                to="/exports"
+              />
             </Col>
           </Row>
 
-          {/* Pending Orders Alert */}
-          <Row className="g-4 mb-4">
-            <Col md={6}>
-              <Card
-                className={`stat-card ${(summary.pendingImportOrders || 0) > 0 ? "border-warning" : ""}`}
-              >
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-inbox text-warning"></i>
-                  </h3>
-                  <h6 className="text-muted">Phiếu Nhập Chờ Duyệt</h6>
-                  <h2 className="text-warning">
-                    {summary.pendingImportOrders || 0}
-                  </h2>
-                  <small className="text-muted">Cần xử lý</small>
-                </Card.Body>
-              </Card>
+          <Row className="g-3 mb-4">
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-people"
+                label="Users"
+                value={summary.users}
+                hint="Active system accounts"
+                tone="blue"
+                to="/users"
+              />
             </Col>
-
-            <Col md={6}>
-              <Card
-                className={`stat-card ${(summary.pendingExportOrders || 0) > 0 ? "border-danger" : ""}`}
-              >
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-box-seam text-danger"></i>
-                  </h3>
-                  <h6 className="text-muted">Phiếu Xuất Chờ Duyệt</h6>
-                  <h2 className="text-danger">
-                    {summary.pendingExportOrders || 0}
-                  </h2>
-                  <small className="text-muted">Cần xử lý</small>
-                </Card.Body>
-              </Card>
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-bookmark"
+                label="Categories"
+                value={summary.categories}
+                hint="Equipment groups"
+                tone="violet"
+                to="/categories"
+              />
             </Col>
-          </Row>
-
-          {/* Inventory Info */}
-          <Row className="g-4 mb-4">
-            <Col md={12}>
-              <Card className="stat-card info-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-archive text-info"></i>
-                  </h3>
-                  <h6 className="text-muted">Tồn Kho Hiện Tại</h6>
-                  <h2 className="text-info">{summary.totalQuantity || 0}</h2>
-                  <small className="text-muted">Tổng số lượng tồn kho</small>
-                </Card.Body>
-              </Card>
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-truck"
+                label="Suppliers"
+                value={summary.suppliers}
+                hint="Vendor records"
+                tone="slate"
+                to="/suppliers"
+              />
+            </Col>
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-calendar-check"
+                label="This Month"
+                value={
+                  Number(detailedStats?.monthly?.imports || 0) +
+                  Number(detailedStats?.monthly?.exports || 0)
+                }
+                hint={`${formatNumber(detailedStats?.monthly?.imports)} imports, ${formatNumber(detailedStats?.monthly?.exports)} exports`}
+                tone="indigo"
+                to="/inventory-logs"
+              />
             </Col>
           </Row>
 
-          {/* Detailed Alerts */}
-          {detailedStats && (
-            <>
-              {/* Low Stock Warning */}
-              {detailedStats?.equipment?.lowStock?.length > 0 && (
-                <Row className="mb-4">
-                  <Col md={12}>
-                    <Alert
-                      variant="warning"
-                      className="d-flex align-items-start"
-                    >
-                      <i className="bi bi-exclamation-triangle me-2 mt-1"></i>
-                      <div>
-                        <h5>⚠️ Thiết Bị Sắp Hết Hàng</h5>
-                        <p className="mb-2">
-                          Những thiết bị dưới đây còn ít hàng, vui lòng nhập
-                          thêm:
-                        </p>
-                        <ul className="mb-0">
-                          {detailedStats.equipment.lowStock.map((item) => (
-                            <li key={item.id}>
-                              {item.name} - Còn lại: {item.quantity}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </Alert>
-                  </Col>
-                </Row>
-              )}
+          <Row className="g-3 mb-4">
+            <Col lg={4}>
+              <CompactList
+                title="Low Stock"
+                icon="bi-exclamation-triangle"
+                items={lowStock}
+                emptyTitle="Stock levels look healthy"
+                renderMeta={(item) => `${formatNumber(item.quantity)} left`}
+              />
+            </Col>
+            <Col lg={4}>
+              <CompactList
+                title="Out Of Stock"
+                icon="bi-x-circle"
+                items={outOfStock}
+                emptyTitle="No equipment is out of stock"
+                renderMeta={() => "0 left"}
+              />
+            </Col>
+            <Col lg={4}>
+              <CompactList
+                title="High Stock"
+                icon="bi-bar-chart"
+                items={highStock}
+                emptyTitle="No high-stock items yet"
+                renderMeta={(item) => `${formatNumber(item.quantity)} units`}
+              />
+            </Col>
+          </Row>
 
-              {/* Out of Stock */}
-              {detailedStats?.equipment?.outOfStock?.length > 0 && (
-                <Row className="mb-4">
-                  <Col md={12}>
-                    <Alert
-                      variant="danger"
-                      className="d-flex align-items-start"
-                    >
-                      <i className="bi bi-x-circle me-2 mt-1"></i>
-                      <div>
-                        <h5>❌ Thiết Bị Hết Hàng</h5>
-                        <p className="mb-2">
-                          Những thiết bị này hiện đã hết hàng:
-                        </p>
-                        <ul className="mb-0">
-                          {detailedStats.equipment.outOfStock.map((item) => (
-                            <li key={item.id}>{item.name}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </Alert>
-                  </Col>
-                </Row>
-              )}
-            </>
-          )}
+          <Row className="g-3">
+            <Col lg={6}>
+              <CompactList
+                title="Recent Import Orders"
+                icon="bi-box-arrow-in-down"
+                items={recentImports}
+                emptyTitle="No recent imports"
+                renderMeta={(item) => item.status || "-"}
+              />
+            </Col>
+            <Col lg={6}>
+              <CompactList
+                title="Recent Export Orders"
+                icon="bi-box-arrow-up"
+                items={recentExports}
+                emptyTitle="No recent exports"
+                renderMeta={(item) => item.status || "-"}
+              />
+            </Col>
+          </Row>
         </>
-      )}
-
-      {/* Staff Dashboard */}
-      {user?.role === "staff" && (
+      ) : (
         <>
-          <Row className="g-4 mb-4">
-            <Col md={4} sm={6}>
-              <Card className="stat-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-file-earmark text-primary"></i>
-                  </h3>
-                  <h6 className="text-muted">Phiếu Của Tôi</h6>
-                  <h2 className="text-primary">
-                    {summary.myOrders ?? 0}
-                  </h2>
-                </Card.Body>
-              </Card>
+          <Row className="g-3 mb-4">
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-file-earmark-text"
+                label="My Orders"
+                value={summary.myOrders}
+                hint="Import and export requests"
+                tone="blue"
+                to="/imports"
+              />
             </Col>
-
-            <Col md={4} sm={6}>
-              <Card className="stat-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-hourglass-split text-warning"></i>
-                  </h3>
-                  <h6 className="text-muted">Phiếu Chờ Duyệt</h6>
-                  <h2 className="text-warning">
-                    {summary.myPendingOrders ?? 0}
-                  </h2>
-                </Card.Body>
-              </Card>
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-hourglass-split"
+                label="Pending"
+                value={summary.myPendingOrders}
+                hint="Waiting for admin approval"
+                tone="amber"
+                to="/imports"
+              />
             </Col>
-          </Row>
-
-          <Row className="g-4 mb-4">
-            <Col md={4} sm={6}>
-              <Card className="stat-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-box text-success"></i>
-                  </h3>
-                  <h6 className="text-muted">Thiết Bị Có Sẵn</h6>
-                  <h2 className="text-success">{summary.equipment || 0}</h2>
-                </Card.Body>
-              </Card>
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-box-seam"
+                label="Equipment"
+                value={summary.equipment}
+                hint="Available inventory catalog"
+                tone="green"
+                to="/equipment"
+              />
             </Col>
-
-            <Col md={4} sm={6}>
-              <Card className="stat-card">
-                <Card.Body className="text-center">
-                  <h3>
-                    <i className="bi bi-archive text-info"></i>
-                  </h3>
-                  <h6 className="text-muted">Tồn Kho</h6>
-                  <h2 className="text-info">{summary.totalQuantity || 0}</h2>
-                </Card.Body>
-              </Card>
+            <Col xl={3} md={6}>
+              <StatCard
+                icon="bi-archive"
+                label="Inventory Qty"
+                value={summary.totalQuantity}
+                hint="Units currently in stock"
+                tone="cyan"
+                to="/equipment"
+              />
             </Col>
           </Row>
 
-          <Row className="mt-4">
-            <Col md={12}>
-              <Card>
-                <Card.Header>
-                  <h5 className="mb-0">Hướng Dẫn Nhanh</h5>
-                </Card.Header>
-                <Card.Body>
-                  <p>Các chức năng chính của bạn:</p>
-                  <ul>
-                    <li>Xem thiết bị và kiểm kê tồn kho</li>
-                    <li>Tạo phiếu nhập kho</li>
-                    <li>Tạo phiếu xuất kho</li>
-                    <li>Quản lý tài khoản cá nhân</li>
-                  </ul>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
+          <Card className="dashboard-panel">
+            <Card.Header>
+              <span>
+                <i className="bi bi-lightning-charge me-2"></i>
+                Quick Actions
+              </span>
+            </Card.Header>
+            <Card.Body>
+              <div className="dashboard-action-grid">
+                <div>
+                  <strong>Create import request</strong>
+                  <small>Record incoming equipment and send it for approval.</small>
+                </div>
+                <div>
+                  <strong>Create export request</strong>
+                  <small>Request stock for a department or receiver.</small>
+                </div>
+                <div>
+                  <strong>Review inventory</strong>
+                  <small>Check equipment details, quantity, and availability.</small>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
         </>
       )}
     </Container>

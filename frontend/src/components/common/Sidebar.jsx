@@ -12,23 +12,25 @@ const Sidebar = () => {
       className="sidebar bg-dark py-3"
       style={{ width: "250px", minHeight: "100vh" }}
     >
-      <div className="px-3 mb-4">
+      <div className="px-3 mb-3">
         <h5 className="text-white mb-0">
           <span className="badge bg-primary">EIM</span> System
         </h5>
       </div>
 
-      <Nav className="flex-column gap-2 px-2">
+      <Nav className="flex-column px-2 sidebar-nav">
         <Nav.Link as={Link} to="/dashboard" className="text-light nav-item">
           <i className="bi bi-speedometer2 me-2"></i> Dashboard
         </Nav.Link>
 
-        <Nav.Link as={Link} to="/profile" className="text-light nav-item">
-          <i className="bi bi-person-circle me-2"></i> Profile
-        </Nav.Link>
+        {isAdmin && (
+          <Nav.Link as={Link} to="/users" className="text-light nav-item">
+            <i className="bi bi-people me-2"></i> Users
+          </Nav.Link>
+        )}
 
-        <hr className="bg-secondary" />
-        <div className="text-muted small px-2 mb-2">QUẢN LÝ</div>
+        <hr className="bg-secondary my-2" />
+        <div className="sidebar-section-label">Management</div>
 
         <Nav.Link as={Link} to="/equipment" className="text-light nav-item">
           <i className="bi bi-inbox me-2"></i>{" "}
@@ -67,17 +69,6 @@ const Sidebar = () => {
           >
             <i className="bi bi-journal-text me-2"></i> Inventory History
           </Nav.Link>
-        )}
-
-        {isAdmin && (
-          <>
-            <hr className="bg-secondary" />
-            <div className="text-muted small px-2 mb-2">ADMIN</div>
-
-            <Nav.Link as={Link} to="/users" className="text-light nav-item">
-              <i className="bi bi-people me-2"></i> Users
-            </Nav.Link>
-          </>
         )}
       </Nav>
     </div>
