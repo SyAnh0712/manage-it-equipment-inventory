@@ -1,4 +1,3 @@
-import { Container } from "react-bootstrap";
 import Header from "../components/common/Header";
 import Sidebar from "../components/common/Sidebar";
 
@@ -8,9 +7,7 @@ const AdminLayout = ({ children }) => {
       <Sidebar />
       <div className="flex-grow-1">
         <Header />
-        <Container fluid className="py-4">
-          {children}
-        </Container>
+        <main className="app-content">{children}</main>
       </div>
     </div>
   );

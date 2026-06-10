@@ -1,3 +1,5 @@
+import { motion } from "motion/react";
+
 const Button = ({
   children,
   variant = "primary",
@@ -14,14 +16,17 @@ const Button = ({
   }[size];
 
   return (
-    <button
+    <motion.button
       className={`btn btn-${variant} ${sizeClass} ${className}`}
       onClick={onClick}
       disabled={disabled}
+      whileHover={disabled ? undefined : { y: -1 }}
+      whileTap={disabled ? undefined : { scale: 0.98 }}
+      transition={{ duration: 0.12 }}
       {...props}
     >
       {children}
-    </button>
+    </motion.button>
   );
 };
 

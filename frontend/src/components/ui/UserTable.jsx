@@ -1,13 +1,15 @@
 import { Table, Button as BSButton } from "react-bootstrap";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import StatusBadge from "../common/StatusBadge";
 import { useAuth } from "../../hooks/useAuth";
 import { formatDate } from "../../utils/formatDate";
+import EmptyState from "../common/EmptyState";
 
 const UserTable = ({ users, onDelete, onToggleLock, processingLockId }) => {
   const { user: currentUser } = useAuth();
   if (!users || users.length === 0) {
-    return <div className="alert alert-info text-center">No users found</div>;
+    return <EmptyState icon="bi-people" title="No users found" />;
   }
 
   return (
@@ -26,7 +28,12 @@ const UserTable = ({ users, onDelete, onToggleLock, processingLockId }) => {
       </thead>
       <tbody>
         {users.map((user, index) => (
-          <tr key={user.id}>
+          <motion.tr
+            key={user.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.025, duration: 0.18 }}
+          >
             <td>{index + 1}</td>
             <td>{user.username}</td>
             <td>{user.full_name}</td>
@@ -97,7 +104,7 @@ const UserTable = ({ users, onDelete, onToggleLock, processingLockId }) => {
                 <i className="bi bi-trash"></i> Delete
               </BSButton>
             </td>
-          </tr>
+          </motion.tr>
         ))}
       </tbody>
     </Table>

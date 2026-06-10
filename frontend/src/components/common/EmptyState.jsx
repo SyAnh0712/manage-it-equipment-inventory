@@ -1,16 +1,23 @@
-import { Alert } from "react-bootstrap";
+import { motion } from "motion/react";
 
 const EmptyState = ({
-  title = "No Data",
-  message = "No data found",
-  icon = "info-circle",
+  icon = "bi-inbox",
+  title = "No data found",
+  message = "Try changing your filters or adding a new record.",
 }) => {
   return (
-    <Alert variant="info" className="text-center py-5">
-      <i className={`bi bi-${icon} me-2`} style={{ fontSize: "2rem" }}></i>
-      <h4>{title}</h4>
-      <p className="mb-0 text-muted">{message}</p>
-    </Alert>
+    <motion.div
+      className="empty-state"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="empty-state-icon">
+        <i className={`bi ${icon}`}></i>
+      </div>
+      <div className="empty-state-title">{title}</div>
+      <div className="empty-state-message">{message}</div>
+    </motion.div>
   );
 };
 

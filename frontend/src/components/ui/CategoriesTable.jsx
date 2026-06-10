@@ -1,13 +1,13 @@
 import PropTypes from "prop-types";
 import { Table, Button as BSButton } from "react-bootstrap";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { formatDate } from "../../utils/formatDate";
+import EmptyState from "../common/EmptyState";
 
 const CategoriesTable = ({ categories, onDelete, isAdmin }) => {
   if (!categories || categories.length === 0) {
-    return (
-      <div className="alert alert-info text-center">No categories found</div>
-    );
+    return <EmptyState icon="bi-bookmark" title="No categories found" />;
   }
 
   return (
@@ -25,7 +25,12 @@ const CategoriesTable = ({ categories, onDelete, isAdmin }) => {
 
       <tbody>
         {categories.map((category, index) => (
-          <tr key={category.id}>
+          <motion.tr
+            key={category.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.025, duration: 0.18 }}
+          >
             <td>{index + 1}</td>
 
             <td>
@@ -63,7 +68,7 @@ const CategoriesTable = ({ categories, onDelete, isAdmin }) => {
                 </BSButton>
               </td>
             )}
-          </tr>
+          </motion.tr>
         ))}
       </tbody>
     </Table>

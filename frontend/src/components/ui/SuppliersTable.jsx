@@ -1,12 +1,12 @@
 import PropTypes from "prop-types";
 import { Table, Button as BSButton } from "react-bootstrap";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
+import EmptyState from "../common/EmptyState";
 
 const SuppliersTable = ({ suppliers, onDelete, isAdmin }) => {
   if (!suppliers || suppliers.length === 0) {
-    return (
-      <div className="alert alert-info text-center">No suppliers found</div>
-    );
+    return <EmptyState icon="bi-truck" title="No suppliers found" />;
   }
 
   return (
@@ -23,7 +23,12 @@ const SuppliersTable = ({ suppliers, onDelete, isAdmin }) => {
       </thead>
       <tbody>
         {suppliers.map((supplier, index) => (
-          <tr key={supplier.id}>
+          <motion.tr
+            key={supplier.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.025, duration: 0.18 }}
+          >
             <td>{index + 1}</td>
             <td>{supplier.name}</td>
             <td>{supplier.phone}</td>
@@ -45,7 +50,7 @@ const SuppliersTable = ({ suppliers, onDelete, isAdmin }) => {
                 </BSButton>
               </td>
             )}
-          </tr>
+          </motion.tr>
         ))}
       </tbody>
     </Table>

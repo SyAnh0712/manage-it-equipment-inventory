@@ -1,13 +1,17 @@
 import { Image, Table } from "react-bootstrap";
+import { motion } from "motion/react";
 
 import { resolveImageUrl } from "../../utils/imageUtils";
+import EmptyState from "../common/EmptyState";
 
 const InventoryLogTable = ({ logs, equipments = [] }) => {
   if (!logs || logs.length === 0) {
     return (
-      <div className="alert alert-info text-center">
-        No inventory logs found
-      </div>
+      <EmptyState
+        icon="bi-journal-text"
+        title="No inventory logs found"
+        message="Inventory activity will appear here after stock changes."
+      />
     );
   }
 
@@ -39,7 +43,12 @@ const InventoryLogTable = ({ logs, equipments = [] }) => {
             equipment.image_url || log.equipment?.image_url || "";
 
           return (
-            <tr key={log.id || index}>
+            <motion.tr
+              key={log.id || index}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.025, duration: 0.18 }}
+            >
               <td>{index + 1}</td>
               <td>{new Date(log.created_at).toLocaleString()}</td>
               <td>{log.action_type}</td>
@@ -68,7 +77,7 @@ const InventoryLogTable = ({ logs, equipments = [] }) => {
               <td>
                 {log.creator?.full_name || log.creator?.username || "System"}
               </td>
-            </tr>
+            </motion.tr>
           );
         })}
       </tbody>

@@ -1,6 +1,8 @@
 import PropTypes from "prop-types";
 import { Table, Button as BSButton } from "react-bootstrap";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
+import EmptyState from "../common/EmptyState";
 
 const ImportOrderTable = ({
   orders,
@@ -11,7 +13,11 @@ const ImportOrderTable = ({
 }) => {
   if (!orders || orders.length === 0) {
     return (
-      <div className="alert alert-info text-center">No import orders found</div>
+      <EmptyState
+        icon="bi-box-arrow-in-down"
+        title="No import orders found"
+        message="Import orders will appear here after they are created."
+      />
     );
   }
 
@@ -46,7 +52,12 @@ const ImportOrderTable = ({
             order.status === "pending" && currentUser?.role === "admin";
 
           return (
-            <tr key={order.id || index}>
+            <motion.tr
+              key={order.id || index}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.025, duration: 0.18 }}
+            >
               <td>{index + 1}</td>
               <td>
                 <Link
@@ -106,7 +117,7 @@ const ImportOrderTable = ({
                   </BSButton>
                 )}
               </td>
-            </tr>
+            </motion.tr>
           );
         })}
       </tbody>

@@ -1,5 +1,11 @@
 import { Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AnimatePresence } from "motion/react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -14,9 +20,12 @@ import exportRoutes from "./ExportRouters";
 import inventoryRoutes from "./InventoryRouters";
 
 import NotFound from "../pages/errors/NotFound";
+import AnimatedPage from "../components/common/AnimatedPage";
+import Loading from "../components/common/Loading";
 
-const AppRoutes = () => {
+const AnimatedRoutes = () => {
   const { isAuthenticated } = useAuth();
+  const location = useLocation();
 
   const routes = [
     ...authRoutes(isAuthenticated),
@@ -30,25 +39,31 @@ const AppRoutes = () => {
     ...inventoryRoutes,
   ];
 
+  const withTransition = (element) => <AnimatedPage>{element}</AnimatedPage>;
+
   return (
-    <Router>
-      <Suspense
-        fallback={
-          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "100vh" }}>
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        }
-      >
-        <Routes>
+    <Suspense fallback={<Loading message="Preparing page..." />}>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
           {routes.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
+            <Route
+              key={route.path}
+              path={route.path}
+              element={withTransition(route.element)}
+            />
           ))}
 
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={withTransition(<NotFound />)} />
         </Routes>
-      </Suspense>
+      </AnimatePresence>
+    </Suspense>
+  );
+};
+
+const AppRoutes = () => {
+  return (
+    <Router>
+      <AnimatedRoutes />
     </Router>
   );
 };

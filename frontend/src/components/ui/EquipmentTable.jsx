@@ -1,12 +1,12 @@
 import PropTypes from "prop-types";
 import { Table, Button as BSButton, Image } from "react-bootstrap";
+import { motion } from "motion/react";
 import { Link } from "react-router-dom";
+import EmptyState from "../common/EmptyState";
 
 const EquipmentTable = ({ equipments, onDelete, isAdmin }) => {
   if (!equipments || equipments.length === 0) {
-    return (
-      <div className="alert alert-info text-center">No equipment found</div>
-    );
+    return <EmptyState title="No equipment found" />;
   }
 
   return (
@@ -26,7 +26,12 @@ const EquipmentTable = ({ equipments, onDelete, isAdmin }) => {
 
       <tbody>
         {equipments.map((item, index) => (
-          <tr key={item.id}>
+          <motion.tr
+            key={item.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.025, duration: 0.18 }}
+          >
             <td>{index + 1}</td>
 
             <td>
@@ -70,7 +75,7 @@ const EquipmentTable = ({ equipments, onDelete, isAdmin }) => {
                 </BSButton>
               </td>
             )}
-          </tr>
+          </motion.tr>
         ))}
       </tbody>
     </Table>

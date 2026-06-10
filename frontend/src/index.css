@@ -206,3 +206,252 @@ body,
 .min-vh-100 {
   min-height: 100vh;
 }
+
+/* Modern admin UI layer */
+body {
+  background: #f6f7fb;
+  color: #1f2937;
+}
+
+#root {
+  text-align: left;
+  background: #f6f7fb;
+}
+
+h1 {
+  font-size: clamp(1.6rem, 1.2rem + 0.8vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: 0;
+  margin: 0;
+  font-weight: 700;
+  color: #111827;
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: 0;
+  color: #111827;
+}
+
+p {
+  margin-bottom: 0;
+}
+
+.page-transition {
+  min-height: 100%;
+}
+
+.flex-grow-1 {
+  background: #f6f7fb;
+  min-height: 100vh;
+}
+
+.container-fluid.py-4 {
+  padding: 1.5rem !important;
+}
+
+.card {
+  border: 1px solid #e8ecf3;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  animation: card-in 0.22s ease-out both;
+}
+
+.card:hover {
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.075);
+}
+
+.card-header {
+  background: #fff;
+  border-bottom-color: #eef2f7;
+  font-weight: 600;
+}
+
+.table-responsive {
+  border-radius: 8px;
+}
+
+.table {
+  margin-bottom: 0;
+  vertical-align: middle;
+  --bs-table-striped-bg: #fafbfe;
+  --bs-table-hover-bg: #f1f5fb;
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.8rem 0.9rem;
+  border-color: #edf1f7;
+}
+
+.table thead th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  color: #334155;
+}
+
+.btn {
+  border-radius: 6px;
+  font-weight: 600;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.form-control,
+.form-select {
+  border-radius: 6px;
+  border-color: #dbe3ef;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  gap: 0.45rem;
+  padding: 2.25rem 1rem;
+  color: #64748b;
+  text-align: center;
+  border: 1px dashed #d9e1ee;
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.empty-state-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #eaf2ff;
+  color: #0d6efd;
+  font-size: 1.35rem;
+}
+
+.empty-state-title {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.empty-state-message {
+  max-width: 30rem;
+  font-size: 0.92rem;
+}
+
+.loading-state {
+  display: flex;
+  min-height: 280px;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.loading-skeleton {
+  display: grid;
+  gap: 0.6rem;
+  width: min(360px, 72vw);
+  margin-top: 1.25rem;
+}
+
+.loading-skeleton span {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e9eef6 25%, #f8fafc 37%, #e9eef6 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+.loading-skeleton span:nth-child(2) {
+  width: 82%;
+}
+
+.loading-skeleton span:nth-child(3) {
+  width: 64%;
+}
+
+.motion-modal .modal-content {
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+  animation: modal-in 0.18s ease-out both;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .container-fluid.py-4 {
+    padding: 1rem !important;
+  }
+
+  .table > :not(caption) > * > * {
+    padding: 0.65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
