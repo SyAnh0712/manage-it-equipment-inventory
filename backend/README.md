@@ -31,7 +31,7 @@ Schema được định nghĩa **một lần** trong migrations, models chỉ á
 | Migration | Bảng |
 |-----------|------|
 | `01-migrations-user.js` | `users` (gồm `is_locked`, 2FA) |
-| `02-migrations-catagory.js` | `categories` |
+| `02-migrations-category.js` | `categories` |
 | `03-migrations-supplier.js` | `suppliers` |
 | `04-migrations-equipment.js` | `equipment` |
 | `05-migrations-importOrder.js` | `import_orders` |
