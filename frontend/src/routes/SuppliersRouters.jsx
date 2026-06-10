@@ -1,8 +1,9 @@
-import SuppliersList from "../pages/suppliers/SuppliersList";
-import AddSupplier from "../pages/suppliers/AddSuppliers";
-import EditSupplier from "../pages/suppliers/EditSuppliers";
-
+import { lazy } from "react";
 import AdminRoute from "./AdminRouters";
+
+const SuppliersList = lazy(() => import("../pages/suppliers/SuppliersList"));
+const AddSupplier = lazy(() => import("../pages/suppliers/AddSuppliers"));
+const EditSupplier = lazy(() => import("../pages/suppliers/EditSuppliers"));
 
 const suppliersRoutes = [
   {

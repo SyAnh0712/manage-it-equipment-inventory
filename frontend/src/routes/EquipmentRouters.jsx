@@ -1,8 +1,9 @@
-import EditEquipments from "../pages/equipment/EditEquipments";
-import EquipmentsList from "../pages/equipment/EquipmentsList";
-import AddEquipments from "../pages/equipment/AddEquipments";
-
+import { lazy } from "react";
 import AdminRoute from "./AdminRouters";
+
+const EditEquipments = lazy(() => import("../pages/equipment/EditEquipments"));
+const EquipmentsList = lazy(() => import("../pages/equipment/EquipmentsList"));
+const AddEquipments = lazy(() => import("../pages/equipment/AddEquipments"));
 
 const equipmentRoutes = [
   {

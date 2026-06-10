@@ -1,10 +1,11 @@
+import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 
-import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
-import VerifyOtp from "../pages/auth/VerifyOtp";
-import Verify2fa from "../pages/auth/Verify2fa";
-import Setup2fa from "../pages/auth/Setup2fa";
+const Login = lazy(() => import("../pages/auth/Login"));
+const Register = lazy(() => import("../pages/auth/Register"));
+const VerifyOtp = lazy(() => import("../pages/auth/VerifyOtp"));
+const Verify2fa = lazy(() => import("../pages/auth/Verify2fa"));
+const Setup2fa = lazy(() => import("../pages/auth/Setup2fa"));
 
 const authRoutes = (isAuthenticated) => [
   {

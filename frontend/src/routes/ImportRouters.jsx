@@ -1,8 +1,10 @@
-import ImportOrdersList from "../pages/imports/ImportOrdersList";
-import AddImportOrder from "../pages/imports/AddImportOrder";
-import ImportOrderDetails from "../pages/imports/ImportOrderDetails";
-import EditImportOrder from "../pages/imports/EditImportOrder";
+import { lazy } from "react";
 import AdminRoute from "./AdminRouters";
+
+const ImportOrdersList = lazy(() => import("../pages/imports/ImportOrdersList"));
+const AddImportOrder = lazy(() => import("../pages/imports/AddImportOrder"));
+const ImportOrderDetails = lazy(() => import("../pages/imports/ImportOrderDetails"));
+const EditImportOrder = lazy(() => import("../pages/imports/EditImportOrder"));
 
 const importRoutes = [
   {

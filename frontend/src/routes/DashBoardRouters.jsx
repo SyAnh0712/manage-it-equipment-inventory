@@ -1,5 +1,7 @@
-import Dashboard from "../pages/dashboard/Dashboard";
+import { lazy } from "react";
 import AdminRoute from "./AdminRouters";
+
+const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 
 const dashboardRoutes = [
   {

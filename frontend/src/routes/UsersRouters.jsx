@@ -1,9 +1,10 @@
-import UsersList from "../pages/users/UsersList";
-import AddUsers from "../pages/users/AddUsers";
-import EditUsers from "../pages/users/EditUsers";
-import Profile from "../pages/users/Profile";
-
+import { lazy } from "react";
 import AdminRoute from "./AdminRouters";
+
+const UsersList = lazy(() => import("../pages/users/UsersList"));
+const AddUsers = lazy(() => import("../pages/users/AddUsers"));
+const EditUsers = lazy(() => import("../pages/users/EditUsers"));
+const Profile = lazy(() => import("../pages/users/Profile"));
 
 const userRoutes = [
   {

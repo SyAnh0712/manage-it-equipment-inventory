@@ -1,5 +1,7 @@
-import InventoryLogs from "../pages/inventory/InventoryLogs";
+import { lazy } from "react";
 import AdminRoute from "./AdminRouters";
+
+const InventoryLogs = lazy(() => import("../pages/inventory/InventoryLogs"));
 
 const inventoryRoutes = [
   {
