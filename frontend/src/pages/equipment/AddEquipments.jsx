@@ -1,15 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Button as BSButton } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import EquipmentForm from "../../components/forms/EquipmentForm";
+import categoriesService from "../../services/categoriesService";
 import equipmentService from "../../services/equipmentService";
+import suppliersService from "../../services/suppliersService";
+import {
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const AddEquipments = () => {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+
+  useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        const [categoriesResponse, suppliersResponse] = await Promise.all([
+          categoriesService.getAllCategories(LIST_FETCH_ALL_PARAMS),
+          suppliersService.getAllSuppliers(LIST_FETCH_ALL_PARAMS),
+        ]);
+
+        setCategories(extractListData(categoriesResponse));
+        setSuppliers(extractListData(suppliersResponse));
+      } catch (error) {
+        toast.error("Failed to load categories or suppliers");
+        console.error(error);
+      }
+    };
+
+    loadOptions();
+  }, []);
 
   const handleSubmit = async (data) => {
     try {
@@ -50,7 +77,12 @@ const AddEquipments = () => {
         <Col xs={12}>
           <Card className="form-shell">
             <Card.Body>
-              <EquipmentForm onSubmit={handleSubmit} isLoading={isLoading} />
+              <EquipmentForm
+                onSubmit={handleSubmit}
+                isLoading={isLoading}
+                categories={categories}
+                suppliers={suppliers}
+              />
             </Card.Body>
           </Card>
         </Col>

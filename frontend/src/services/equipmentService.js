@@ -17,11 +17,7 @@ const equipmentService = {
   },
 
   getEquipmentById: async (id) => {
-    const response = await axiosClient.get(`/equipment/${id}`);
-
-    console.log("service response =", response);
-
-    return response;
+    return axiosClient.get(`/equipment/${id}`);
   },
 
   createEquipment: async (data) => {

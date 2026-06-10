@@ -13,40 +13,162 @@ const downloadExcel = (fileName, rows, headers) => {
   writeFile(workbook, fileName);
 };
 
-const downloadPdf = (fileName, title, headers, rows) => {
-  const doc = new jsPDF({ unit: "pt", format: "letter" });
-  const leftMargin = 40;
-  const topMargin = 40;
-  const lineHeight = 18;
-  let y = topMargin;
+const PDF_FONT = "times";
+const PDF_MARGIN = 32;
+const PDF_HEADER_FILL = [241, 245, 249];
+const PDF_BORDER = [203, 213, 225];
+const PDF_TEXT = [15, 23, 42];
 
-  doc.setFontSize(16);
-  doc.text(title, leftMargin, y);
-  y += lineHeight * 1.5;
+const sanitizePdfText = (value) =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
 
-  const headerLabels = headers.map((header) => header.label).join(" | ");
-  doc.setFontSize(11);
-  doc.text(headerLabels, leftMargin, y);
-  y += lineHeight;
+const getColumnWidths = (headers, availableWidth) => {
+  const preferredWidths = {
+    code: 72,
+    supplier: 86,
+    department: 76,
+    receiver: 74,
+    status: 58,
+    note: 96,
+    creator: 82,
+    created_at: 92,
+    name: 130,
+    equipment: 126,
+    action_type: 58,
+    quantity: 54,
+    unit_price: 62,
+    total: 62,
+    quantity_before: 50,
+    quantity_changed: 54,
+    quantity_after: 50,
+    reference_code: 82,
+  };
 
-  rows.forEach((row, index) => {
-    const rowText = headers
-      .map((header) => String(row[header.key] ?? ""))
-      .join(" | ");
+  const widths = headers.map(
+    (header) => preferredWidths[header.key] || Math.max(56, header.label.length * 5),
+  );
+  const total = widths.reduce((sum, width) => sum + width, 0);
 
-    const splitText = doc.splitTextToSize(rowText, 520);
-    splitText.forEach((line) => {
-      if (y > 740) {
-        doc.addPage();
-        y = topMargin;
-      }
-      doc.text(line, leftMargin, y);
-      y += lineHeight;
-    });
+  if (total <= availableWidth) {
+    const extra = (availableWidth - total) / widths.length;
+    return widths.map((width) => width + extra);
+  }
 
-    if (index !== rows.length - 1) {
-      y += 4;
+  const scale = availableWidth / total;
+  return widths.map((width) => Math.max(42, width * scale));
+};
+
+const getRowHeight = (doc, cells, columnWidths, fontSize = 8, minHeight = 24, padding = 5) => {
+  doc.setFont(PDF_FONT, "normal");
+  doc.setFontSize(fontSize);
+
+  const wrappedCells = cells.map((cell, index) =>
+    doc.splitTextToSize(sanitizePdfText(cell), columnWidths[index] - padding * 2),
+  );
+
+  return Math.max(
+    minHeight,
+    ...wrappedCells.map((lines) => lines.length * (fontSize + 2) + padding * 2),
+  );
+};
+
+const drawTableRow = (doc, cells, columnWidths, y, options = {}) => {
+  const {
+    x = PDF_MARGIN,
+    fontSize = 8,
+    isHeader = false,
+    minHeight = 24,
+    padding = 5,
+  } = options;
+
+  doc.setFont(PDF_FONT, isHeader ? "bold" : "normal");
+  doc.setFontSize(fontSize);
+
+  const wrappedCells = cells.map((cell, index) =>
+    doc.splitTextToSize(sanitizePdfText(cell), columnWidths[index] - padding * 2),
+  );
+  const rowHeight = getRowHeight(
+    doc,
+    cells,
+    columnWidths,
+    fontSize,
+    minHeight,
+    padding,
+  );
+
+  let currentX = x;
+  wrappedCells.forEach((lines, index) => {
+    const width = columnWidths[index];
+
+    if (isHeader) {
+      doc.setFillColor(...PDF_HEADER_FILL);
+      doc.rect(currentX, y, width, rowHeight, "F");
     }
+
+    doc.setDrawColor(...PDF_BORDER);
+    doc.rect(currentX, y, width, rowHeight);
+    doc.setTextColor(...PDF_TEXT);
+    doc.text(lines, currentX + padding, y + padding + fontSize);
+    currentX += width;
+  });
+
+  return rowHeight;
+};
+
+const downloadPdf = (fileName, title, headers, rows) => {
+  const doc = new jsPDF({ unit: "pt", format: "letter", orientation: "landscape" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const availableWidth = pageWidth - PDF_MARGIN * 2;
+  const columnWidths = getColumnWidths(headers, availableWidth);
+  let y = PDF_MARGIN;
+
+  const drawHeader = () => {
+    doc.setFont(PDF_FONT, "bold");
+    doc.setFontSize(15);
+    doc.setTextColor(...PDF_TEXT);
+    doc.text(sanitizePdfText(title), PDF_MARGIN, y);
+    y += 24;
+
+    const headerHeight = drawTableRow(
+      doc,
+      headers.map((header) => header.label),
+      columnWidths,
+      y,
+      { isHeader: true, fontSize: 8, minHeight: 26 },
+    );
+    y += headerHeight;
+  };
+
+  drawHeader();
+
+  if (!rows.length) {
+    doc.setFont(PDF_FONT, "normal");
+    doc.setFontSize(10);
+    doc.text("No data available", PDF_MARGIN, y + 24);
+    doc.save(fileName);
+    return;
+  }
+
+  rows.forEach((row) => {
+    const cells = headers.map((header) => row[header.key] ?? "");
+    const rowHeight = getRowHeight(doc, cells, columnWidths, 7.5, 24);
+
+    if (y + rowHeight > pageHeight - PDF_MARGIN) {
+      doc.addPage();
+      y = PDF_MARGIN;
+      drawHeader();
+    }
+
+    drawTableRow(doc, cells, columnWidths, y, {
+      fontSize: 7.5,
+      minHeight: 24,
+    });
+    y += rowHeight;
   });
 
   doc.save(fileName);

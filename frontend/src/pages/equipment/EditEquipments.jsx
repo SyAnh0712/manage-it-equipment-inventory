@@ -6,7 +6,14 @@ import { toast } from "react-toastify";
 import EquipmentForm from "../../components/forms/EquipmentForm";
 import Loading from "../../components/common/Loading";
 
+import categoriesService from "../../services/categoriesService";
 import equipmentService from "../../services/equipmentService";
+import suppliersService from "../../services/suppliersService";
+import {
+  extractApiData,
+  extractListData,
+  LIST_FETCH_ALL_PARAMS,
+} from "../../utils/apiResponse";
 
 const EditEquipments = () => {
   const navigate = useNavigate();
@@ -14,32 +21,41 @@ const EditEquipments = () => {
   const { id } = useParams();
 
   const [equipment, setEquipment] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchEquipment();
-  }, [id]);
+    const timeoutId = globalThis.setTimeout(async () => {
+      try {
+        setLoading(true);
 
-  const fetchEquipment = async () => {
-    try {
-      setLoading(true);
+        const [equipmentResponse, categoriesResponse, suppliersResponse] =
+          await Promise.all([
+            equipmentService.getEquipmentById(id),
+            categoriesService.getAllCategories(LIST_FETCH_ALL_PARAMS),
+            suppliersService.getAllSuppliers(LIST_FETCH_ALL_PARAMS),
+          ]);
 
-      const response = await equipmentService.getEquipmentById(id);
-      console.log("Equipment:", response);
-      setEquipment(response);
-    } catch (error) {
-      console.error(error);
+        setEquipment(extractApiData(equipmentResponse));
+        setCategories(extractListData(categoriesResponse));
+        setSuppliers(extractListData(suppliersResponse));
+      } catch (error) {
+        console.error(error);
 
-      toast.error("Failed to fetch equipment");
+        toast.error("Failed to fetch equipment");
 
-      navigate("/equipment");
-    } finally {
-      setLoading(false);
-    }
-  };
+        navigate("/equipment");
+      } finally {
+        setLoading(false);
+      }
+    }, 0);
+
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [id, navigate]);
 
   const handleSubmit = async (data) => {
     try {
@@ -89,6 +105,8 @@ const EditEquipments = () => {
                   initialData={equipment}
                   onSubmit={handleSubmit}
                   isLoading={isSubmitting}
+                  categories={categories}
+                  suppliers={suppliers}
                 />
               )}
             </Card.Body>

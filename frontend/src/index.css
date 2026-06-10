@@ -407,6 +407,8 @@ p {
 
 .form-page-header .d-flex {
   flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .form-page-header .btn-link {
@@ -416,11 +418,16 @@ p {
   padding-inline: 0;
   color: #475569;
   font-weight: 700;
+  order: 2;
 }
 
 .form-page-header .btn-link:hover {
   color: #0d6efd;
   box-shadow: none;
+}
+
+.form-page-header h1 {
+  order: 1;
 }
 
 .form-page-grid {
@@ -468,6 +475,7 @@ p {
 
 .search-box {
   height: 100%;
+  flex-wrap: nowrap;
 }
 
 .search-box .input-group-text,
@@ -475,10 +483,24 @@ p {
   min-height: 43px;
 }
 
+.search-box .input-group-text {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.search-box .form-control {
+  flex: 1 1 auto;
+  width: 1%;
+}
+
+.card .row.align-items-end {
+  align-items: flex-start !important;
+}
+
 .card .row.align-items-end > [class*="col-"] {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .card .row.align-items-end .form-group,
@@ -492,6 +514,15 @@ p {
   min-height: 1.25rem;
 }
 
+.card .row.align-items-end > [class*="col-"]:has(.search-box) {
+  padding-top: 1.25rem;
+}
+
+.card .row.align-items-end > [class*="col-"]:has(> .btn),
+.card .row.align-items-end > [class*="col-"]:has(> button) {
+  padding-top: 1.75rem;
+}
+
 .card .row.align-items-end .input-group {
   margin-bottom: 0 !important;
 }
@@ -499,7 +530,8 @@ p {
 .card .row.align-items-end .text-end {
   min-height: 43px;
   align-items: flex-end;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  padding-top: 1.25rem;
 }
 
 .card .row.align-items-end .btn {

@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import SuppliersForm from "../../components/forms/SuppliersForm";
 import Loading from "../../components/common/Loading";
 import suppliersService from "../../services/suppliersService";
+import { extractApiData } from "../../utils/apiResponse";
 
 const EditSuppliers = () => {
   const navigate = useNavigate();
@@ -15,22 +16,22 @@ const EditSuppliers = () => {
   const [supplier, setSupplier] = useState(null);
 
   useEffect(() => {
-    fetchSupplier();
-  }, [id]);
+    const timeoutId = globalThis.setTimeout(async () => {
+      try {
+        setIsFetching(true);
+        const response = await suppliersService.getSupplierById(id);
+        setSupplier(extractApiData(response));
+      } catch (error) {
+        toast.error("Failed to fetch supplier");
+        console.error(error);
+        navigate("/suppliers");
+      } finally {
+        setIsFetching(false);
+      }
+    }, 0);
 
-  const fetchSupplier = async () => {
-    try {
-      setIsFetching(true);
-      const response = await suppliersService.getSupplierById(id);
-      setSupplier(response);
-    } catch (error) {
-      toast.error("Failed to fetch supplier");
-      console.error(error);
-      navigate("/suppliers");
-    } finally {
-      setIsFetching(false);
-    }
-  };
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [id, navigate]);
 
   const handleSubmit = async (data) => {
     try {

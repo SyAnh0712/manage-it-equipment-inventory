@@ -7,6 +7,7 @@ import CategoriesForm from "../../components/forms/CategoriesForm.jsx";
 import Loading from "../../components/common/Loading.jsx";
 
 import categoriesService from "../../services/categoriesService.js";
+import { extractApiData } from "../../utils/apiResponse.js";
 
 const EditCategories = () => {
   const navigate = useNavigate();
@@ -18,26 +19,26 @@ const EditCategories = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchCategory();
-  }, [id]);
+    const timeoutId = globalThis.setTimeout(async () => {
+      try {
+        setLoading(true);
 
-  const fetchCategory = async () => {
-    try {
-      setLoading(true);
+        const response = await categoriesService.getCategoryById(id);
 
-      const response = await categoriesService.getCategoryById(id);
+        setCategory(extractApiData(response));
+      } catch (error) {
+        console.error(error);
 
-      setCategory(response);
-    } catch (error) {
-      console.error(error);
+        toast.error("Failed to fetch category");
 
-      toast.error("Failed to fetch category");
+        navigate("/categories");
+      } finally {
+        setLoading(false);
+      }
+    }, 0);
 
-      navigate("/categories");
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [id, navigate]);
 
   const handleSubmit = async (data) => {
     try {
