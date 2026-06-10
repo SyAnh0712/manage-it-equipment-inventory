@@ -301,7 +301,7 @@ const InventoryLogs = () => {
           {isSearching && (
             <div className="text-muted small mb-2">Đang tìm kiếm...</div>
           )}
-          <InventoryLogTable logs={logs} />
+          <InventoryLogTable logs={logs} equipments={equipments} />
           <div className="d-flex justify-content-center mt-4">
             <Pagination
               currentPage={currentPage}

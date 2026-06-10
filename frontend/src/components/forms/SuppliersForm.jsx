@@ -9,10 +9,6 @@ const suppliersValidationSchema = yup.object().shape({
     .string()
     .min(2, "Supplier name must be at least 2 characters")
     .required("Supplier name is required"),
-  contact_person: yup
-    .string()
-    .min(2, "Contact person must be at least 2 characters")
-    .required("Contact person is required"),
   phone: yup
     .string()
     .required("Phone is required")
@@ -40,7 +36,6 @@ const SuppliersForm = ({
     resolver: yupResolver(suppliersValidationSchema),
     defaultValues: initialValues || {
       name: "",
-      contact_person: "",
       phone: "",
       email: "",
       address: "",
@@ -66,26 +61,6 @@ const SuppliersForm = ({
         />
         <Form.Control.Feedback type="invalid">
           {errors.name?.message}
-        </Form.Control.Feedback>
-      </Form.Group>
-
-      <Form.Group className="mb-3">
-        <Form.Label>Contact Person</Form.Label>
-        <Controller
-          name="contact_person"
-          control={control}
-          render={({ field }) => (
-            <Form.Control
-              {...field}
-              type="text"
-              placeholder="Enter contact person name"
-              isInvalid={!!errors.contact_person}
-              disabled={isLoading}
-            />
-          )}
-        />
-        <Form.Control.Feedback type="invalid">
-          {errors.contact_person?.message}
         </Form.Control.Feedback>
       </Form.Group>
 

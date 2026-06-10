@@ -30,13 +30,10 @@ const SuppliersList = () => {
 
   const filteredSuppliers = suppliers.filter((supplier) => {
     const name = supplier.name?.toLowerCase() || "";
-    const contact = supplier.contact_person?.toLowerCase() || "";
     const email = supplier.email?.toLowerCase() || "";
     const query = debouncedSearchTerm.toLowerCase();
 
-    return (
-      name.includes(query) || contact.includes(query) || email.includes(query)
-    );
+    return name.includes(query) || email.includes(query);
   });
 
   const pagination = usePagination(filteredSuppliers, 10);
@@ -105,7 +102,7 @@ const SuppliersList = () => {
           <Row className="g-3">
             <Col md={6}>
               <SearchBox
-                placeholder="Search by supplier name, contact or email..."
+                placeholder="Search by supplier name or email..."
                 value={searchTerm}
                 onChange={setSearchTerm}
               />

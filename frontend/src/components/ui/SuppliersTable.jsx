@@ -15,7 +15,6 @@ const SuppliersTable = ({ suppliers, onDelete, isAdmin }) => {
         <tr>
           <th>#</th>
           <th>Name</th>
-          <th>Contact Person</th>
           <th>Phone</th>
           <th>Email</th>
           <th>Address</th>
@@ -27,7 +26,6 @@ const SuppliersTable = ({ suppliers, onDelete, isAdmin }) => {
           <tr key={supplier.id}>
             <td>{index + 1}</td>
             <td>{supplier.name}</td>
-            <td>{supplier.contact_person}</td>
             <td>{supplier.phone}</td>
             <td>{supplier.email}</td>
             <td>{supplier.address}</td>

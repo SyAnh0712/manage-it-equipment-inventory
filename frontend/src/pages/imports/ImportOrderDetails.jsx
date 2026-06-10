@@ -8,6 +8,7 @@ import {
   Table,
   Button as BSButton,
   Badge,
+  Image,
 } from "react-bootstrap";
 import { toast } from "react-toastify";
 
@@ -23,6 +24,7 @@ import {
   extractListData,
   LIST_FETCH_ALL_PARAMS,
 } from "../../utils/apiResponse";
+import { resolveImageUrl } from "../../utils/imageUtils";
 
 const ImportOrderDetails = () => {
   const { id } = useParams();
@@ -70,11 +72,14 @@ const ImportOrderDetails = () => {
 
   const enrichedItems = items.map((item) => {
     const equipment =
-      equipments.find((eq) => eq.id === item.equipment_id) || {};
+      equipments.find((eq) => String(eq.id) === String(item.equipment_id)) ||
+      item.equipment ||
+      {};
     return {
       ...item,
       equipmentCode: equipment.code || item.equipment_id,
       equipmentName: equipment.name || "Unknown",
+      equipmentImageUrl: equipment.image_url || item.equipment?.image_url || "",
     };
   });
 
@@ -180,6 +185,7 @@ const ImportOrderDetails = () => {
                 <thead>
                   <tr>
                     <th>#</th>
+                    <th>Image</th>
                     <th>Equipment</th>
                     <th>Quantity</th>
                     <th>Unit Price</th>
@@ -190,6 +196,19 @@ const ImportOrderDetails = () => {
                   {enrichedItems.map((item, index) => (
                     <tr key={index}>
                       <td>{index + 1}</td>
+                      <td>
+                        {item.equipmentImageUrl ? (
+                          <Image
+                            src={resolveImageUrl(item.equipmentImageUrl)}
+                            width={56}
+                            height={56}
+                            rounded
+                            style={{ objectFit: "cover" }}
+                          />
+                        ) : (
+                          "No Image"
+                        )}
+                      </td>
                       <td>
                         <div>{item.equipmentCode}</div>
                         <small className="text-muted">
