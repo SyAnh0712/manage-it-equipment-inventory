@@ -160,6 +160,176 @@ const DashboardService = {
       throw new Error("Error fetching inventory trends: " + error.message);
     }
   },
+
+  async getMonthlyReport() {
+    try {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+      sixMonthsAgo.setDate(1);
+      sixMonthsAgo.setHours(0, 0, 0, 0);
+
+      const logs = await db.InventoryLog.findAll({
+        where: {
+          action_type: { [Op.in]: ["import", "export"] },
+          created_at: { [Op.gte]: sixMonthsAgo },
+        },
+        attributes: ["action_type", "quantity_changed", "created_at"],
+      });
+
+      const monthsList = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        const monthName = d.toLocaleString("en-US", { month: "short" });
+        const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        monthsList.push({ month: monthName, key: yearMonth, import: 0, export: 0 });
+      }
+
+      logs.forEach((log) => {
+        const logDate = new Date(log.created_at);
+        const logKey = `${logDate.getFullYear()}-${String(logDate.getMonth() + 1).padStart(2, "0")}`;
+        const monthObj = monthsList.find((m) => m.key === logKey);
+        if (monthObj) {
+          const val = Math.abs(log.quantity_changed);
+          if (log.action_type === "import") {
+            monthObj.import += val;
+          } else if (log.action_type === "export") {
+            monthObj.export += val;
+          }
+        }
+      });
+
+      return monthsList.map(({ month, import: imp, export: exp }) => ({
+        month,
+        import: imp,
+        export: exp,
+      }));
+    } catch (error) {
+      throw new Error("Error fetching monthly report: " + error.message);
+    }
+  },
+
+  async getCategoryDistribution() {
+    try {
+      const [categories, equipments] = await Promise.all([
+        db.Category.findAll({ attributes: ["id", "name"] }),
+        db.Equipment.findAll({ attributes: ["category_id", "quantity"] }),
+      ]);
+
+      const totalQuantityAll = equipments.reduce((sum, eq) => sum + (eq.quantity || 0), 0);
+      const catMap = {};
+      categories.forEach((c) => {
+        catMap[c.id] = { name: c.name, value: 0 };
+      });
+
+      equipments.forEach((eq) => {
+        if (catMap[eq.category_id]) {
+          catMap[eq.category_id].value += (eq.quantity || 0);
+        }
+      });
+
+      const distribution = Object.values(catMap)
+        .filter((item) => item.value > 0)
+        .map((item) => ({
+          name: item.name,
+          value: item.value,
+          percentage: totalQuantityAll > 0 ? Math.round((item.value / totalQuantityAll) * 100) : 0,
+        }));
+
+      return distribution;
+    } catch (error) {
+      throw new Error("Error fetching category distribution: " + error.message);
+    }
+  },
+
+  async getTopEquipment() {
+    try {
+      const topEquipment = await db.Equipment.findAll({
+        attributes: ["name", "quantity", "code"],
+        order: [["quantity", "DESC"]],
+        limit: 5,
+      });
+      return topEquipment;
+    } catch (error) {
+      throw new Error("Error fetching top equipment: " + error.message);
+    }
+  },
+
+  async getRecentActivities() {
+    try {
+      const [imports, exports, equipments] = await Promise.all([
+        db.ImportOrder.findAll({
+          limit: 5,
+          order: [["created_at", "DESC"]],
+          include: [{ model: db.User, as: "creator", attributes: ["full_name", "username", "role"] }],
+        }),
+        db.ExportOrder.findAll({
+          limit: 5,
+          order: [["created_at", "DESC"]],
+          include: [{ model: db.User, as: "creator", attributes: ["full_name", "username", "role"] }],
+        }),
+        db.Equipment.findAll({
+          limit: 5,
+          order: [["created_at", "DESC"]],
+        }),
+      ]);
+
+      const activities = [];
+
+      imports.forEach((imp) => {
+        const time = imp.created_at;
+        const creatorName = imp.creator ? (imp.creator.full_name || imp.creator.username) : "System";
+        let message = "";
+        if (imp.status === "approved") {
+          message = `${creatorName} approved Import #${imp.code}`;
+        } else if (imp.status === "rejected") {
+          message = `${creatorName} rejected Import #${imp.code}`;
+        } else {
+          message = `${creatorName} created Import #${imp.code}`;
+        }
+        activities.push({
+          time,
+          message,
+          type: "import",
+          status: imp.status,
+        });
+      });
+
+      exports.forEach((exp) => {
+        const time = exp.created_at;
+        const creatorName = exp.creator ? (exp.creator.full_name || exp.creator.username) : "System";
+        let message = "";
+        if (exp.status === "approved") {
+          message = `${creatorName} approved Export #${exp.code}`;
+        } else if (exp.status === "rejected") {
+          message = `${creatorName} rejected Export #${exp.code}`;
+        } else {
+          message = `${creatorName} created Export #${exp.code}`;
+        }
+        activities.push({
+          time,
+          message,
+          type: "export",
+          status: exp.status,
+        });
+      });
+
+      equipments.forEach((eq) => {
+        const time = eq.created_at;
+        const message = `Added Equipment ${eq.code} (${eq.name})`;
+        activities.push({
+          time,
+          message,
+          type: "equipment",
+        });
+      });
+
+      activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+      return activities.slice(0, 10);
+    } catch (error) {
+      throw new Error("Error fetching recent activities: " + error.message);
+    }
+  },
 };
 
 module.exports = DashboardService;

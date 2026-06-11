@@ -14,5 +14,9 @@ router.get(
   dashboardController.getDetailedStatistics,
 );
 router.get("/trends", roleMiddleware("admin"), dashboardController.getInventoryTrends);
+router.get("/monthly-report", dashboardController.getMonthlyReport);
+router.get("/category-distribution", dashboardController.getCategoryDistribution);
+router.get("/top-equipment", dashboardController.getTopEquipment);
+router.get("/recent-activities", dashboardController.getRecentActivities);
 
 module.exports = router;
