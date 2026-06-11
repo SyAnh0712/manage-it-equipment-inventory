@@ -95,6 +95,24 @@ const getRecentActivities = async (req, res, next) => {
   }
 };
 
+const getMyRecentOrders = async (req, res, next) => {
+  try {
+    const result = await dashboardService.getMyRecentOrders(req.user.id);
+    return sendSuccess(res, 200, "My recent orders fetched successfully", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getMyActivities = async (req, res, next) => {
+  try {
+    const result = await dashboardService.getMyActivities(req.user.id);
+    return sendSuccess(res, 200, "My activities fetched successfully", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getStatistics,
   getDetailedStatistics,
@@ -103,4 +121,6 @@ module.exports = {
   getCategoryDistribution,
   getTopEquipment,
   getRecentActivities,
+  getMyRecentOrders,
+  getMyActivities,
 };

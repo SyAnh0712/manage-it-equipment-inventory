@@ -25,6 +25,8 @@ import "./Dashboard.css";
 const MotionCard = motion(Card);
 const MotionLink = motion(Link);
 
+// ─── Admin Charts ────────────────────────────────────────────────────────────
+
 const MonthlyImportExportChart = ({ data }) => {
   return (
     <Card className="dashboard-panel h-100 shadow-sm border-0">
@@ -159,7 +161,9 @@ const TopEquipmentChart = ({ data }) => {
   );
 };
 
-const RecentActivitiesTimeline = ({ activities = [] }) => {
+// ─── Shared Timeline ─────────────────────────────────────────────────────────
+
+const RecentActivitiesTimeline = ({ activities = [], title = "Recent Operations Timeline" }) => {
   const getIcon = (type) => {
     switch (type) {
       case "import":
@@ -178,7 +182,7 @@ const RecentActivitiesTimeline = ({ activities = [] }) => {
       <Card.Header className="bg-white border-bottom-0 pt-3 pb-0">
         <span className="fw-bold text-secondary">
           <i className="bi bi-clock-history me-2 text-primary"></i>
-          Recent Operations Timeline
+          {title}
         </span>
       </Card.Header>
       <Card.Body style={{ minHeight: "320px", maxHeight: "320px", overflowY: "auto" }} className="pt-3">
@@ -229,6 +233,141 @@ const RecentActivitiesTimeline = ({ activities = [] }) => {
   );
 };
 
+// ─── Staff-Specific: My Recent Orders ────────────────────────────────────────
+
+const MyRecentOrdersPanel = ({ orders = [] }) => {
+  const getOrderStyle = (orderType, status) => {
+    if (orderType === "import") return { icon: "bi-box-arrow-in-down", color: "#2563eb", bg: "#eff6ff" };
+    if (orderType === "export") return { icon: "bi-box-arrow-up", color: "#db2777", bg: "#fce7f3" };
+    return { icon: "bi-file-earmark-text", color: "#4b5563", bg: "#f3f4f6" };
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "approved": return "success";
+      case "rejected": return "danger";
+      case "pending": return "warning";
+      default: return "secondary";
+    }
+  };
+
+  return (
+    <Card className="dashboard-panel h-100 shadow-sm border-0">
+      <Card.Header className="bg-white border-bottom-0 pt-3 pb-0 d-flex align-items-center justify-content-between">
+        <span className="fw-bold text-secondary">
+          <i className="bi bi-list-check me-2 text-primary"></i>
+          My Recent Orders
+        </span>
+        <Badge bg="light" text="dark" className="border">{orders.length}</Badge>
+      </Card.Header>
+      <Card.Body className="pt-2" style={{ minHeight: "280px", maxHeight: "320px", overflowY: "auto" }}>
+        {orders.length === 0 ? (
+          <EmptyState icon="bi-list-check" title="No orders created yet" message="Your import and export requests will appear here." />
+        ) : (
+          <div className="staff-orders-list">
+            {orders.map((order, index) => {
+              const { icon, color, bg } = getOrderStyle(order.orderType);
+              const dateStr = new Date(order.created_at).toLocaleDateString("en-US", {
+                month: "short", day: "numeric", year: "numeric",
+              });
+              return (
+                <motion.div
+                  className="staff-order-item"
+                  key={`${order.orderType}-${order.id}`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.18, delay: index * 0.04 }}
+                >
+                  <div className="staff-order-icon" style={{ backgroundColor: bg, color }}>
+                    <i className={`bi ${icon}`}></i>
+                  </div>
+                  <div className="staff-order-body">
+                    <span className="staff-order-code">{order.code}</span>
+                    <span className="staff-order-type text-muted text-capitalize">{order.orderType}</span>
+                  </div>
+                  <div className="staff-order-right">
+                    <Badge bg={getStatusBadge(order.status)} className="staff-order-status text-capitalize">
+                      {order.status}
+                    </Badge>
+                    <small className="text-muted d-block mt-1">{dateStr}</small>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </Card.Body>
+    </Card>
+  );
+};
+
+// ─── Staff-Specific: Personal Stats Summary ───────────────────────────────────
+
+const StaffPersonalStats = ({ summary }) => {
+  const items = [
+    {
+      label: "Import Requests Created",
+      value: summary.myImportOrders ?? 0,
+      icon: "bi-box-arrow-in-down",
+      color: "#2563eb",
+      bg: "#eff6ff",
+    },
+    {
+      label: "Export Requests Created",
+      value: summary.myExportOrders ?? 0,
+      icon: "bi-box-arrow-up",
+      color: "#db2777",
+      bg: "#fce7f3",
+    },
+    {
+      label: "Pending Requests",
+      value: summary.myPendingOrders ?? 0,
+      icon: "bi-hourglass-split",
+      color: "#d97706",
+      bg: "#fff4dc",
+    },
+    {
+      label: "Approved Requests",
+      value: summary.myApprovedOrders ?? 0,
+      icon: "bi-check-circle",
+      color: "#16a34a",
+      bg: "#eaf8ef",
+    },
+  ];
+
+  return (
+    <Card className="dashboard-panel shadow-sm border-0 mb-4">
+      <Card.Header className="bg-white border-bottom-0 pt-3 pb-0">
+        <span className="fw-bold text-secondary">
+          <i className="bi bi-person-lines-fill me-2 text-primary"></i>
+          My Personal Statistics
+        </span>
+      </Card.Header>
+      <Card.Body className="pt-3">
+        <Row className="g-3">
+          {items.map((item, i) => (
+            <Col xs={6} md={3} key={i}>
+              <motion.div
+                className="staff-personal-stat"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.22, delay: i * 0.06 }}
+              >
+                <div className="staff-personal-stat-icon" style={{ backgroundColor: item.bg, color: item.color }}>
+                  <i className={`bi ${item.icon}`}></i>
+                </div>
+                <div className="staff-personal-stat-value">{Number(item.value).toLocaleString()}</div>
+                <div className="staff-personal-stat-label">{item.label}</div>
+              </motion.div>
+            </Col>
+          ))}
+        </Row>
+      </Card.Body>
+    </Card>
+  );
+};
+
+// ─── Shared helpers ───────────────────────────────────────────────────────────
 
 const formatNumber = (value) => Number(value || 0).toLocaleString();
 
@@ -327,6 +466,8 @@ const CompactList = ({ title, icon, items = [], emptyTitle, renderMeta }) => (
   </Card>
 );
 
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [statistics, setStatistics] = useState(null);
@@ -335,6 +476,9 @@ const Dashboard = () => {
   const [categoryDistribution, setCategoryDistribution] = useState([]);
   const [topEquipment, setTopEquipment] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
+  // Staff-specific
+  const [myRecentOrders, setMyRecentOrders] = useState([]);
+  const [myActivities, setMyActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -344,32 +488,40 @@ const Dashboard = () => {
         setLoading(true);
         const isAdmin = user?.role === "admin";
 
-        const [
-          statsRes,
-          monthlyRes,
-          categoryRes,
-          topRes,
-          activitiesRes,
-        ] = await Promise.all([
-          axiosClient.get("/dashboard/statistics"),
-          axiosClient.get("/dashboard/monthly-report"),
-          axiosClient.get("/dashboard/category-distribution"),
-          axiosClient.get("/dashboard/top-equipment"),
-          axiosClient.get("/dashboard/recent-activities"),
-        ]);
-
-        setStatistics(statsRes?.data || statsRes);
-        setMonthlyReport(monthlyRes?.data || monthlyRes || []);
-        setCategoryDistribution(categoryRes?.data || categoryRes || []);
-        setTopEquipment(topRes?.data || topRes || []);
-        setRecentActivities(activitiesRes?.data || activitiesRes || []);
-
         if (isAdmin) {
-          const detailedRes = await axiosClient.get(
-            "/dashboard/statistics/detailed",
-          );
+          const [
+            statsRes,
+            monthlyRes,
+            categoryRes,
+            topRes,
+            activitiesRes,
+            detailedRes,
+          ] = await Promise.all([
+            axiosClient.get("/dashboard/statistics"),
+            axiosClient.get("/dashboard/monthly-report"),
+            axiosClient.get("/dashboard/category-distribution"),
+            axiosClient.get("/dashboard/top-equipment"),
+            axiosClient.get("/dashboard/recent-activities"),
+            axiosClient.get("/dashboard/statistics/detailed"),
+          ]);
+
+          setStatistics(statsRes?.data || statsRes);
+          setMonthlyReport(monthlyRes?.data || monthlyRes || []);
+          setCategoryDistribution(categoryRes?.data || categoryRes || []);
+          setTopEquipment(topRes?.data || topRes || []);
+          setRecentActivities(activitiesRes?.data || activitiesRes || []);
           setDetailedStats(detailedRes?.data || detailedRes);
         } else {
+          // Staff: only fetch what's needed
+          const [statsRes, ordersRes, activitiesRes] = await Promise.all([
+            axiosClient.get("/dashboard/statistics"),
+            axiosClient.get("/dashboard/my-recent-orders"),
+            axiosClient.get("/dashboard/my-activities"),
+          ]);
+
+          setStatistics(statsRes?.data || statsRes);
+          setMyRecentOrders(ordersRes?.data || ordersRes || []);
+          setMyActivities(activitiesRes?.data || activitiesRes || []);
           setDetailedStats(null);
         }
 
@@ -402,36 +554,13 @@ const Dashboard = () => {
   const lowStock = detailedStats?.equipment?.lowStock || [];
   const outOfStock = detailedStats?.equipment?.outOfStock || [];
   const highStock = detailedStats?.equipment?.highStock || [];
-  const pendingTotal =
-    isAdmin
-      ? Number(summary.pendingImportOrders || 0) +
-        Number(summary.pendingExportOrders || 0)
-      : Number(summary.myPendingOrders || 0);
-
-  const renderVisuals = () => (
-    <>
-      <Row className="g-3 mb-4">
-        <Col lg={8}>
-          <MonthlyImportExportChart data={monthlyReport} />
-        </Col>
-        <Col lg={4}>
-          <CategoryDistributionChart data={categoryDistribution} />
-        </Col>
-      </Row>
-
-      <Row className="g-3 mb-4">
-        <Col lg={6}>
-          <TopEquipmentChart data={topEquipment} />
-        </Col>
-        <Col lg={6}>
-          <RecentActivitiesTimeline activities={recentActivities} />
-        </Col>
-      </Row>
-    </>
-  );
+  const pendingTotal = isAdmin
+    ? Number(summary.pendingImportOrders || 0) + Number(summary.pendingExportOrders || 0)
+    : Number(summary.myPendingOrders || 0);
 
   return (
     <Container fluid className="py-4 dashboard-page">
+      {/* ── Hero ── */}
       <motion.section
         className="dashboard-hero shadow-sm mb-4"
         initial={{ opacity: 0, y: 12 }}
@@ -442,10 +571,12 @@ const Dashboard = () => {
           <Badge bg={isAdmin ? "primary" : "success"} className="mb-2">
             {isAdmin ? "Admin workspace" : "Staff workspace"}
           </Badge>
-          <h1>Inventory Overview</h1>
+          <h1>{isAdmin ? "Inventory Overview" : "My Dashboard"}</h1>
           <p className="mb-3">
-            Welcome back, {user?.full_name || user?.username || "User"}. Track
-            stock, approvals, and operational activity from one place.
+            Welcome back, {user?.full_name || user?.username || "User"}.{" "}
+            {isAdmin
+              ? "Track stock, approvals, and operational activity from one place."
+              : "Manage your import/export requests and track your order history."}
           </p>
           <div className="dashboard-hero-actions d-flex flex-wrap gap-2">
             <Link to="/imports/add" className="btn btn-primary btn-sm px-3 py-2 fw-bold d-inline-flex align-items-center">
@@ -468,6 +599,7 @@ const Dashboard = () => {
       </motion.section>
 
       {isAdmin ? (
+        /* ════════════════════════ ADMIN VIEW ════════════════════════ */
         <>
           <Row className="g-3 mb-4">
             <Col xl={3} md={6}>
@@ -562,7 +694,24 @@ const Dashboard = () => {
             </Col>
           </Row>
 
-          {renderVisuals()}
+          {/* Admin charts */}
+          <Row className="g-3 mb-4">
+            <Col lg={8}>
+              <MonthlyImportExportChart data={monthlyReport} />
+            </Col>
+            <Col lg={4}>
+              <CategoryDistributionChart data={categoryDistribution} />
+            </Col>
+          </Row>
+
+          <Row className="g-3 mb-4">
+            <Col lg={6}>
+              <TopEquipmentChart data={topEquipment} />
+            </Col>
+            <Col lg={6}>
+              <RecentActivitiesTimeline activities={recentActivities} />
+            </Col>
+          </Row>
 
           <Row className="g-3 mb-4">
             <Col lg={4}>
@@ -595,15 +744,18 @@ const Dashboard = () => {
           </Row>
         </>
       ) : (
+        /* ════════════════════════ STAFF VIEW ════════════════════════ */
         <>
+          {/* Staff top-level stats */}
           <Row className="g-3 mb-4">
             <Col xl={3} md={6}>
               <StatCard
                 icon="bi-file-earmark-text"
                 label="My Orders"
                 value={summary.myOrders}
-                hint="Import and export requests"
+                hint="Total import & export requests"
                 tone="blue"
+                delay={0.02}
                 to="/imports"
               />
             </Col>
@@ -614,6 +766,7 @@ const Dashboard = () => {
                 value={summary.myPendingOrders}
                 hint="Waiting for admin approval"
                 tone="amber"
+                delay={0.04}
                 to="/imports"
               />
             </Col>
@@ -624,6 +777,7 @@ const Dashboard = () => {
                 value={summary.equipment}
                 hint="Available inventory catalog"
                 tone="green"
+                delay={0.06}
                 to="/equipment"
               />
             </Col>
@@ -634,12 +788,27 @@ const Dashboard = () => {
                 value={summary.totalQuantity}
                 hint="Units currently in stock"
                 tone="cyan"
+                delay={0.08}
                 to="/equipment"
               />
             </Col>
           </Row>
 
-          {renderVisuals()}
+          {/* Staff personal stats breakdown */}
+          <StaffPersonalStats summary={summary} />
+
+          {/* Staff orders history + personal timeline */}
+          <Row className="g-3 mb-4">
+            <Col lg={6}>
+              <MyRecentOrdersPanel orders={myRecentOrders} />
+            </Col>
+            <Col lg={6}>
+              <RecentActivitiesTimeline
+                activities={myActivities}
+                title="My Activity Timeline"
+              />
+            </Col>
+          </Row>
         </>
       )}
     </Container>

@@ -40,8 +40,20 @@ const DashboardService = {
       };
 
       if (isStaff) {
+        const [approvedImportCount, approvedExportCount] = await Promise.all([
+          db.ImportOrder.count({
+            where: { created_by: user.id, status: "approved" },
+          }),
+          db.ExportOrder.count({
+            where: { created_by: user.id, status: "approved" },
+          }),
+        ]);
+
         summary.myOrders = importCount + exportCount;
         summary.myPendingOrders = pendingImportCount + pendingExportCount;
+        summary.myImportOrders = importCount;
+        summary.myExportOrders = exportCount;
+        summary.myApprovedOrders = approvedImportCount + approvedExportCount;
       } else {
         summary.pendingImportOrders = pendingImportCount;
         summary.pendingExportOrders = pendingExportCount;
@@ -328,6 +340,78 @@ const DashboardService = {
       return activities.slice(0, 10);
     } catch (error) {
       throw new Error("Error fetching recent activities: " + error.message);
+    }
+  },
+
+  async getMyRecentOrders(userId) {
+    try {
+      const [imports, exports] = await Promise.all([
+        db.ImportOrder.findAll({
+          where: { created_by: userId },
+          attributes: ["id", "code", "status", "created_at"],
+          order: [["created_at", "DESC"]],
+          limit: 5,
+        }),
+        db.ExportOrder.findAll({
+          where: { created_by: userId },
+          attributes: ["id", "code", "status", "created_at"],
+          order: [["created_at", "DESC"]],
+          limit: 5,
+        }),
+      ]);
+
+      const combined = [
+        ...imports.map((o) => ({ ...o.toJSON(), orderType: "import" })),
+        ...exports.map((o) => ({ ...o.toJSON(), orderType: "export" })),
+      ];
+      combined.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      return combined.slice(0, 8);
+    } catch (error) {
+      throw new Error("Error fetching my recent orders: " + error.message);
+    }
+  },
+
+  async getMyActivities(userId) {
+    try {
+      const [imports, exports] = await Promise.all([
+        db.ImportOrder.findAll({
+          where: { created_by: userId },
+          attributes: ["id", "code", "status", "created_at"],
+          order: [["created_at", "DESC"]],
+          limit: 8,
+        }),
+        db.ExportOrder.findAll({
+          where: { created_by: userId },
+          attributes: ["id", "code", "status", "created_at"],
+          order: [["created_at", "DESC"]],
+          limit: 8,
+        }),
+      ]);
+
+      const activities = [];
+
+      imports.forEach((imp) => {
+        activities.push({
+          time: imp.created_at,
+          message: `Created Import #${imp.code}`,
+          type: "import",
+          status: imp.status,
+        });
+      });
+
+      exports.forEach((exp) => {
+        activities.push({
+          time: exp.created_at,
+          message: `Created Export #${exp.code}`,
+          type: "export",
+          status: exp.status,
+        });
+      });
+
+      activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+      return activities.slice(0, 10);
+    } catch (error) {
+      throw new Error("Error fetching my activities: " + error.message);
     }
   },
 };

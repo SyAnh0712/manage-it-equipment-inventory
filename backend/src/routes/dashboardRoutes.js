@@ -18,5 +18,7 @@ router.get("/monthly-report", dashboardController.getMonthlyReport);
 router.get("/category-distribution", dashboardController.getCategoryDistribution);
 router.get("/top-equipment", dashboardController.getTopEquipment);
 router.get("/recent-activities", dashboardController.getRecentActivities);
+router.get("/my-recent-orders", dashboardController.getMyRecentOrders);
+router.get("/my-activities", dashboardController.getMyActivities);
 
 module.exports = router;
