@@ -1,7 +1,634 @@
-.login-container {
+/* ═══════════════════════════════════════════════════════════
+   Login Page — mirrors Stitch / Material-3 design tokens
+   Scoped under .lp-* to avoid Bootstrap collisions.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Fonts ──────────────────────────────────────────────────── */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
+
+/* ── Design tokens ──────────────────────────────────────────── */
+:root {
+  --lp-primary-container: #131b2e;
+  /* dark navy bg */
+  --lp-secondary: #0058be;
+  /* brand blue */
+  --lp-secondary-container: #2170e4;
+  --lp-secondary-fixed: #d8e2ff;
+  --lp-surface: #f7f9fb;
+  --lp-surface-lowest: #ffffff;
+  --lp-outline-variant: #c6c6cd;
+  --lp-outline: #76777d;
+  --lp-on-surface: #191c1e;
+  --lp-on-surface-variant: #45464d;
+  --lp-on-primary-container: #7c839b;
+
+  /* spacing */
+  --lp-sp-xs: 4px;
+  --lp-sp-sm: 8px;
+  --lp-sp-md: 16px;
+  --lp-sp-lg: 24px;
+  --lp-sp-xl: 32px;
+  --lp-sp-2xl: 48px;
+}
+
+/* ── Global reset inside the page ──────────────────────────── */
+.lp-root *,
+.lp-root *::before,
+.lp-root *::after {
+  box-sizing: border-box;
+}
+
+/* ── Root layout ─────────────────────────────────────────────── */
+.lp-root {
+  font-family: "Inter", sans-serif;
+  display: flex;
   min-height: 100vh;
+  width: 100%;
+  background: var(--lp-surface);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LEFT PANEL
+   ══════════════════════════════════════════════════════════════ */
+.lp-left {
+  display: none;
+  /* hidden on mobile */
+  position: relative;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--lp-primary-container);
+}
+
+@media (min-width: 1024px) {
+  .lp-left {
+    display: flex;
+  }
+}
+
+@keyframes auto-zoom {
+  0% {
+    transform: scale(1.02);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1.02);
+  }
+}
+
+/* hero background */
+.lp-left__bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("../../images/background_login.png");
+  background-size: 110%;
+  background-position: left -5px center;
+  background-repeat: no-repeat;
+  opacity: 0.4;
+  animation: auto-zoom 15s ease-in-out infinite;
+}
+
+/* bottom gradient fade */
+.lp-left__fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 33.33%;
+  background: linear-gradient(to top, var(--lp-primary-container), transparent);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* content wrapper */
+.lp-left__content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  padding: var(--lp-sp-xl);
+}
+
+/* frosted brand card */
+.lp-brand {
+  background: rgba(19, 27, 46, 0.60);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(198, 198, 205, 0.20);
+  border-radius: 8px;
+  /* rounded-xl in Stitch = 0.5rem */
+  padding: var(--lp-sp-xl);
+}
+
+.lp-brand__header {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-sp-md);
+  margin-bottom: var(--lp-sp-md);
+}
+
+/* blue icon box */
+.lp-brand__icon-wrap {
+  background: var(--lp-secondary);
+  border-radius: 4px;
+  /* rounded-lg in Stitch = 0.25rem */
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  flex-shrink: 0;
+}
+
+.lp-brand__icon {
+  color: #fff;
+  font-size: 32px !important;
+}
+
+.lp-brand__name {
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.lp-brand__desc {
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--lp-on-primary-container);
+  margin: 0 0 var(--lp-sp-xl);
+}
+
+/* badge row */
+.lp-brand__badges {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--lp-sp-md);
+}
+
+.lp-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-sp-sm);
+}
+
+.lp-badge__icon {
+  color: var(--lp-secondary-fixed);
+  font-size: 20px !important;
+  flex-shrink: 0;
+}
+
+.lp-badge__label {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.80);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RIGHT PANEL
+   ══════════════════════════════════════════════════════════════ */
+.lp-right {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--lp-sp-md);
+  background: var(--lp-surface);
+  min-height: 100vh;
+}
+
+@media (min-width: 768px) {
+  .lp-right {
+    padding: var(--lp-sp-xl);
+  }
+}
+
+@media (min-width: 1024px) {
+  .lp-right {
+    width: 50%;
+  }
+}
+
+/* ── mobile brand (hidden on lg) ─────────────────────────────── */
+.lp-mobile-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--lp-sp-xl);
+}
+
+@media (min-width: 1024px) {
+  .lp-mobile-brand {
+    display: none;
+  }
+}
+
+.lp-mobile-brand__icon-wrap {
+  background: var(--lp-secondary);
+  border-radius: 4px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--lp-sp-sm);
+  box-shadow: 0 4px 12px rgba(0, 88, 190, 0.3);
+}
+
+.lp-mobile-brand__icon {
+  color: #fff;
+  font-size: 24px !important;
+}
+
+.lp-mobile-brand__name {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  color: var(--lp-on-surface);
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LOGIN CARD
+   ══════════════════════════════════════════════════════════════ */
+.lp-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--lp-surface-lowest);
+  border: 1px solid var(--lp-outline-variant);
+  border-radius: 8px;
+  padding: var(--lp-sp-xl);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.25s ease;
+}
+
+.lp-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+}
+
+/* card header */
+.lp-card__header {
+  text-align: center;
+  margin-bottom: var(--lp-sp-xl);
+}
+
+.lp-card__title {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--lp-on-surface);
+  margin: 0 0 var(--lp-sp-xs);
+}
+
+.lp-card__subtitle {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--lp-on-surface-variant);
+  margin: 0;
+}
+
+/* ── error alert ─────────────────────────────────────────────── */
+.lp-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-sp-sm);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  font-size: 13px;
+  margin-bottom: var(--lp-sp-lg);
+}
+
+.lp-alert__icon {
+  font-size: 18px !important;
+  flex-shrink: 0;
+}
+
+/* ── form ────────────────────────────────────────────────────── */
+.lp-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lp-sp-lg);
+}
+
+/* ── field ───────────────────────────────────────────────────── */
+.lp-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lp-sp-xs);
+  margin: 0 !important;
+  /* override Bootstrap mb-3 */
+}
+
+.lp-label {
+  font-size: 12px !important;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  font-weight: 600 !important;
+  color: var(--lp-on-surface-variant) !important;
+  margin: 0 !important;
+}
+
+.lp-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lp-forgot {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--lp-secondary);
+  text-decoration: none;
+  transition: text-decoration 0.15s;
+}
+
+.lp-forgot:hover {
+  text-decoration: underline;
+  color: var(--lp-secondary);
+}
+
+/* ── input wrapper ───────────────────────────────────────────── */
+.lp-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* leading icon */
+.lp-input-icon {
+  position: absolute;
+  left: var(--lp-sp-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--lp-outline);
+  font-size: 20px !important;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── input (override Bootstrap) ──────────────────────────────── */
+.lp-input.form-control {
+  height: 44px;
+  padding-left: calc(var(--lp-sp-md) + 20px + var(--lp-sp-sm));
+  /* icon + gap */
+  padding-right: var(--lp-sp-md);
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+  color: var(--lp-on-surface);
+  background: var(--lp-surface-lowest);
+  border: 1px solid var(--lp-outline-variant);
+  border-radius: 6px;
+  outline: none;
+  box-shadow: none !important;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.lp-input.form-control::placeholder {
+  color: rgba(118, 119, 125, 0.60);
+}
+
+.lp-input.form-control:focus {
+  border-color: var(--lp-secondary);
+  box-shadow: 0 0 0 3px rgba(0, 88, 190, 0.15) !important;
+  background: var(--lp-surface-lowest);
+}
+
+/* password field — extra right padding for toggle btn */
+.lp-input--pw.form-control {
+  padding-right: calc(var(--lp-sp-md) + 20px + var(--lp-sp-sm));
+}
+
+/* invalid state */
+.lp-input.form-control.is-invalid,
+.lp-input--invalid.form-control {
+  border-color: #ef4444;
+  background-image: none;
+  /* remove Bootstrap checkmark */
+}
+
+.lp-input.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Bootstrap validation feedback */
+.lp-field-error {
+  font-size: 12px !important;
+  color: #ef4444 !important;
+  margin-top: var(--lp-sp-xs);
+}
+
+/* ── password toggle ─────────────────────────────────────────── */
+.lp-pw-toggle {
+  position: absolute;
+  right: var(--lp-sp-md);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--lp-outline);
+  display: flex;
+  align-items: center;
+  z-index: 2;
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.lp-pw-toggle:hover {
+  color: var(--lp-on-surface);
+}
+
+.lp-pw-toggle .material-symbols-outlined {
+  font-size: 20px !important;
+}
+
+/* ── remember checkbox ───────────────────────────────────────── */
+.lp-remember .form-check-input {
+  width: 16px;
+  height: 16px;
+  border-color: var(--lp-outline-variant);
+  border-radius: 3px;
+  cursor: pointer;
+  accent-color: var(--lp-secondary);
+  flex-shrink: 0;
+}
+
+.lp-remember .form-check-input:checked {
+  background-color: var(--lp-secondary);
+  border-color: var(--lp-secondary);
+}
+
+.lp-remember .form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(0, 88, 190, 0.15);
+}
+
+.lp-remember .form-check-label {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--lp-on-surface-variant);
+  cursor: pointer;
+}
+
+/* ── submit button ───────────────────────────────────────────── */
+@keyframes lp-shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-20deg);
+  }
+
+  100% {
+    transform: translateX(200%) skewX(-20deg);
+  }
+}
+
+.lp-btn {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 48px;
+  background: var(--lp-secondary);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lp-sp-sm);
+  box-shadow: 0 4px 12px rgba(0, 88, 190, 0.35);
+  transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+
+.lp-btn:hover:not(:disabled) {
+  background: rgba(0, 88, 190, 0.90);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 88, 190, 0.40);
+}
+
+.lp-btn:hover:not(:disabled)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right,
+      transparent,
+      rgba(255, 255, 255, 0.30),
+      transparent);
+  animation: lp-shimmer 0.6s ease-in-out;
+}
+
+.lp-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.lp-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.lp-btn .spinner-border {
+  width: 1rem;
+  height: 1rem;
+  border-width: 2px;
+}
+
+.lp-btn__icon {
+  font-size: 20px !important;
+}
+
+/* ── OR divider ──────────────────────────────────────────────── */
+.lp-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--lp-sp-md);
+}
+
+.lp-divider__line {
+  flex: 1;
+  height: 1px;
+  background: var(--lp-outline-variant);
+}
+
+.lp-divider__text {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: rgba(118, 119, 125, 0.60);
+  white-space: nowrap;
+}
+
+/* ── register link ───────────────────────────────────────────── */
+.lp-register {
+  text-align: center;
+  font-size: 14px;
+  color: var(--lp-on-surface-variant);
+  margin: 0;
+}
+
+.lp-register__link {
+  color: var(--lp-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 4px;
+  transition: text-decoration 0.15s;
+}
+
+.lp-register__link:hover {
+  text-decoration: underline;
+  color: var(--lp-secondary);
+}
+
+/* ── footer ──────────────────────────────────────────────────── */
+.lp-footer {
+  margin-top: var(--lp-sp-2xl);
+  display: flex;
+  gap: var(--lp-sp-xl);
+  align-items: center;
+  opacity: 0.60;
+}
+
+.lp-footer__link {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--lp-on-surface-variant);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.lp-footer__link:hover {
+  color: var(--lp-secondary);
+}
+
+.lp-footer__ver {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--lp-on-surface-variant);
 }
