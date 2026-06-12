@@ -13,27 +13,10 @@ const Header = () => {
 
   return (
     <header className="header bg-white shadow-sm py-3">
-      <div className="container-fluid d-flex justify-content-between align-items-center">
-        <div>
-          <h1 className="h5 mb-0">Equipment Inventory Management</h1>
-        </div>
-        <div className="d-flex align-items-center gap-2">
-          <div>
-            <span className="me-2">Welcome,</span>
-            <strong>{user?.full_name}</strong>
-          </div>
-          <button
-            className="btn btn-outline-primary btn-sm"
-            onClick={() => navigate("/profile")}
-          >
-            Profile
-          </button>
-          <button
-            className="btn btn-outline-danger btn-sm"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+      <div className="container-fluid d-flex align-items-center">
+        <div className="d-flex align-items-center gap-2 ms-auto">
+          <span>Welcome,</span>
+          <strong>{user?.full_name}</strong>
         </div>
       </div>
     </header>
