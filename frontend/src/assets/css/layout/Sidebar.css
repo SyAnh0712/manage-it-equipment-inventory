@@ -1,38 +1,558 @@
-.sidebar {
+/* ═══════════════════════════════════════════════════════════
+   Sidebar — Enterprise dark-navy design matching Login/Register
+   Scoped under .sb-* to avoid Bootstrap conflicts.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Fonts & Icons ────────────────────────────────────────── */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
+
+/* ── Design tokens ──────────────────────────────────────────── */
+:root {
+  --sb-bg: #111827;
+  /* inverse-surface — dark navy */
+  --sb-bg-hover: rgba(255, 255, 255, 0.05);
+  --sb-bg-active: rgba(59, 130, 246, 0.12);
+  /* primary/10 */
+  --sb-border: rgba(255, 255, 255, 0.05);
+  --sb-primary: #3b82f6;
+  /* blue-500 */
+  --sb-primary-hover: #2563eb;
+  /* blue-600 */
+  --sb-primary-glow: rgba(59, 130, 246, 0.20);
+  --sb-text: rgba(255, 255, 255, 0.90);
+  --sb-text-dim: rgba(255, 255, 255, 0.55);
+  --sb-text-muted: rgba(255, 255, 255, 0.30);
+  --sb-emerald: #10b981;
+  --sb-red: #f87171;
+  --sb-red-bg: rgba(248, 113, 113, 0.10);
+  --sb-width: 260px;
+
+  /* spacing shorthand */
+  --sb-sp-xs: 4px;
+  --sb-sp-sm: 8px;
+  --sb-sp-md: 16px;
+  --sb-sp-lg: 24px;
+  --sb-sp-xl: 32px;
+}
+
+/* ── Scrollbar (thin, dark) ──────────────────────────────── */
+.sb-root ::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sb-root ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sb-root ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+}
+
+.sb-root ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.20);
+}
+
+/* ── Material icon tuning ─────────────────────────────────── */
+.sb-icon {
+  font-size: 20px !important;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR ROOT
+   ══════════════════════════════════════════════════════════════ */
+.sb-root {
   position: fixed;
   left: 0;
   top: 0;
-  overflow-y: auto;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  height: 100vh;
+  width: var(--sb-width);
+  background: var(--sb-bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  border-right: 1px solid var(--sb-border);
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: width 0.3s ease;
+  /* Subtle depth on the right edge */
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.25);
 }
 
-.sidebar-nav {
-  gap: 0.35rem;
+/* ══════════════════════════════════════════════════════════════
+   BRANDING SECTION
+   ══════════════════════════════════════════════════════════════ */
+.sb-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-sp-sm);
+  padding: var(--sb-sp-lg) var(--sb-sp-md);
+  border-bottom: 1px solid var(--sb-border);
+  flex-shrink: 0;
 }
 
-.sidebar-section-label {
-  padding: 0.25rem 0.75rem;
-  color: rgba(255, 255, 255, 0.48);
-  font-size: 0.72rem;
+/* Blue icon box */
+.sb-brand__icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--sb-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px var(--sb-primary-glow);
+}
+
+.sb-brand__icon {
+  color: #ffffff;
+  font-size: 20px !important;
+}
+
+.sb-brand__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sb-brand__name {
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: 0;
+  color: var(--sb-text);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.sb-brand__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-sp-xs);
+  margin-top: 2px;
+}
+
+.sb-brand__version {
+  font-size: 10px;
+  color: var(--sb-text-muted);
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.nav-item {
+.sb-brand__status {
   display: flex;
   align-items: center;
-  min-height: 42px;
-  padding: 0.55rem 0.75rem;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.10);
+  border: 1px solid rgba(16, 185, 129, 0.20);
+  color: var(--sb-emerald);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 1px 6px;
 }
 
-.nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.sb-brand__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--sb-emerald);
+  animation: sb-pulse 2s ease-in-out infinite;
+}
+
+@keyframes sb-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NAVIGATION
+   ══════════════════════════════════════════════════════════════ */
+.sb-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sb-sp-md) var(--sb-sp-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sb-sp-lg);
+}
+
+/* Dashboard solo slot */
+.sb-nav-solo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Group cluster ────────────────────────────────────────── */
+.sb-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sb-nav-group__label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sb-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 0 var(--sb-sp-md);
+  margin: 0 0 4px;
+}
+
+.sb-nav-group__items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Single nav item ──────────────────────────────────────── */
+.sb-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sb-sp-md);
+  padding: 10px var(--sb-sp-md);
+  border-radius: 8px;
+  color: var(--sb-text-dim);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sb-nav-item:hover {
+  background: var(--sb-bg-hover);
+  color: var(--sb-text);
   text-decoration: none;
 }
 
-.nav-item.active {
-  background-color: #0d6efd;
+.sb-nav-item:active {
+  transform: scale(0.98);
+}
+
+/* Active state */
+.sb-nav-item--active {
+  background: var(--sb-bg-active);
+  color: var(--sb-primary);
+  font-weight: 600;
+}
+
+.sb-nav-item--active:hover {
+  background: var(--sb-bg-active);
+  color: var(--sb-primary);
+}
+
+/* Left-edge indicator bar on active item */
+.sb-nav-item__indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--sb-primary);
+  border-radius: 0 3px 3px 0;
+}
+
+.sb-nav-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CTA — Add Asset Button
+   ══════════════════════════════════════════════════════════════ */
+.sb-cta {
+  padding: var(--sb-sp-sm) var(--sb-sp-md) var(--sb-sp-md);
+  border-top: 1px solid var(--sb-border);
+  flex-shrink: 0;
+}
+
+.sb-cta__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sb-sp-sm);
+  width: 100%;
+  padding: 10px var(--sb-sp-md);
+  background: var(--sb-primary);
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--sb-primary-glow);
+  transition:
+    background-color 0.15s ease,
+    transform 0.12s ease,
+    box-shadow 0.15s ease;
+}
+
+.sb-cta__btn:hover {
+  background: var(--sb-primary-hover);
+  color: #ffffff;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--sb-primary-glow);
+}
+
+.sb-cta__btn:active {
+  transform: translateY(0);
+}
+
+.sb-cta__icon {
+  font-size: 18px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FOOTER — User Panel
+   ══════════════════════════════════════════════════════════════ */
+.sb-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--sb-border);
+  background: rgba(255, 255, 255, 0.02);
+  padding: var(--sb-sp-sm);
+}
+
+/* user row */
+.sb-user {
+  display: flex;
+  align-items: center;
+  gap: var(--sb-sp-sm);
+  padding: var(--sb-sp-sm);
+  border-radius: 10px;
+  cursor: default;
+  transition: background-color 0.15s ease;
+}
+
+.sb-user:hover {
+  background: var(--sb-bg-hover);
+}
+
+/* Avatar */
+.sb-user__avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sb-user__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  filter: grayscale(1);
+  transition: filter 0.2s ease;
+}
+
+.sb-user:hover .sb-user__avatar {
+  filter: grayscale(0);
+}
+
+.sb-user__avatar-initials {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--sb-primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.02em;
+}
+
+.sb-user__status-dot {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  background: var(--sb-emerald);
+  border: 2px solid var(--sb-bg);
+  border-radius: 50%;
+}
+
+/* Name / role */
+.sb-user__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sb-user__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sb-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.sb-user__role {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--sb-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+/* Settings icon button */
+.sb-user__settings {
+  flex-shrink: 0;
+  padding: 4px;
+  color: var(--sb-text-muted);
+  transition: color 0.15s ease;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.sb-user__settings:hover {
+  color: var(--sb-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Logout button */
+.sb-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sb-sp-sm);
+  width: 100%;
+  margin-top: var(--sb-sp-sm);
+  padding: 8px var(--sb-sp-md);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--sb-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: "Inter", sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.sb-logout:hover {
+  color: var(--sb-red);
+  background: var(--sb-red-bg);
+}
+
+.sb-logout__icon {
+  font-size: 16px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   INDEX.CSS OVERRIDE — main content offset
+   The sidebar width is now 260px; update margin-left/width for
+   the flex-grow-1 container to match.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1024px) {
+
+  .sb-brand__status,
+  .sb-brand__version {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .sb-root {
+    width: 72px;
+    overflow: hidden;
+  }
+
+  .sb-brand__text,
+  .sb-nav-group__label,
+  .sb-nav-label,
+  .sb-cta__btn span:not(.sb-cta__icon),
+  .sb-user__info,
+  .sb-user__settings,
+  .sb-logout span:not(.sb-logout__icon),
+  .sb-brand__meta {
+    display: none;
+  }
+
+  .sb-brand {
+    justify-content: center;
+    padding: var(--sb-sp-md) var(--sb-sp-sm);
+  }
+
+  .sb-nav-item {
+    justify-content: center;
+    padding: 10px;
+    gap: 0;
+    border-radius: 8px;
+  }
+
+  .sb-nav-item__indicator {
+    top: auto;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+  }
+
+  .sb-cta {
+    padding: var(--sb-sp-sm);
+  }
+
+  .sb-cta__btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 8px;
+    margin: 0 auto;
+  }
+
+  .sb-user {
+    justify-content: center;
+  }
+
+  .sb-logout {
+    width: 40px;
+    height: 32px;
+    padding: 0;
+    margin: var(--sb-sp-xs) auto 0;
+    font-size: 0;
+    letter-spacing: 0;
+  }
 }
