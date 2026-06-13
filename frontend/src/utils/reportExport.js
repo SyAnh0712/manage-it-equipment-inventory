@@ -1,7 +1,5 @@
-import { utils, writeFile } from "xlsx";
-import jsPDF from "jspdf";
-
-const downloadExcel = (fileName, rows, headers) => {
+const downloadExcel = async (fileName, rows, headers) => {
+  const { utils, writeFile } = await import("xlsx");
   const worksheetData = [headers.map((header) => header.label)];
   rows.forEach((row) => {
     worksheetData.push(headers.map((header) => row[header.key] ?? ""));
@@ -119,7 +117,8 @@ const drawTableRow = (doc, cells, columnWidths, y, options = {}) => {
   return rowHeight;
 };
 
-const downloadPdf = (fileName, title, headers, rows) => {
+const downloadPdf = async (fileName, title, headers, rows) => {
+  const { default: jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "pt", format: "letter", orientation: "landscape" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -174,7 +173,7 @@ const downloadPdf = (fileName, title, headers, rows) => {
   doc.save(fileName);
 };
 
-export const exportImportOrdersToExcel = (orders) => {
+export const exportImportOrdersToExcel = async (orders) => {
   const headers = [
     { label: "Order Code", key: "code" },
     { label: "Supplier", key: "supplier" },
@@ -193,10 +192,10 @@ export const exportImportOrdersToExcel = (orders) => {
     created_at: new Date(order.created_at).toLocaleString(),
   }));
 
-  downloadExcel(`import-orders-${Date.now()}.xlsx`, rows, headers);
+  await downloadExcel(`import-orders-${Date.now()}.xlsx`, rows, headers);
 };
 
-export const exportImportOrdersToPdf = (orders) => {
+export const exportImportOrdersToPdf = async (orders) => {
   const headers = [
     { label: "Order Code", key: "code" },
     { label: "Supplier", key: "supplier" },
@@ -215,7 +214,7 @@ export const exportImportOrdersToPdf = (orders) => {
     created_at: new Date(order.created_at).toLocaleString(),
   }));
 
-  downloadPdf(
+  await downloadPdf(
     `import-orders-${Date.now()}.pdf`,
     "Import Orders Report",
     headers,
@@ -223,7 +222,7 @@ export const exportImportOrdersToPdf = (orders) => {
   );
 };
 
-export const exportExportOrdersToExcel = (orders) => {
+export const exportExportOrdersToExcel = async (orders) => {
   const headers = [
     { label: "Order Code", key: "code" },
     { label: "Department", key: "department" },
@@ -244,10 +243,10 @@ export const exportExportOrdersToExcel = (orders) => {
     created_at: new Date(order.created_at).toLocaleString(),
   }));
 
-  downloadExcel(`export-orders-${Date.now()}.xlsx`, rows, headers);
+  await downloadExcel(`export-orders-${Date.now()}.xlsx`, rows, headers);
 };
 
-export const exportExportOrdersToPdf = (orders) => {
+export const exportExportOrdersToPdf = async (orders) => {
   const headers = [
     { label: "Order Code", key: "code" },
     { label: "Department", key: "department" },
@@ -268,7 +267,7 @@ export const exportExportOrdersToPdf = (orders) => {
     created_at: new Date(order.created_at).toLocaleString(),
   }));
 
-  downloadPdf(
+  await downloadPdf(
     `export-orders-${Date.now()}.pdf`,
     "Export Orders Report",
     headers,
@@ -291,7 +290,7 @@ const buildDetailRows = (order, items, includePrice = false) =>
     };
   });
 
-export const exportImportOrderDetailsToExcel = (order, items) => {
+export const exportImportOrderDetailsToExcel = async (order, items) => {
   const headers = [
     { label: "Equipment Code", key: "code" },
     { label: "Equipment Name", key: "name" },
@@ -301,14 +300,14 @@ export const exportImportOrderDetailsToExcel = (order, items) => {
   ];
 
   const rows = buildDetailRows(order, items, true);
-  downloadExcel(
+  await downloadExcel(
     `import-order-${order.code || order.id}-details.xlsx`,
     rows,
     headers,
   );
 };
 
-export const exportImportOrderDetailsToPdf = (order, items) => {
+export const exportImportOrderDetailsToPdf = async (order, items) => {
   const headers = [
     { label: "Equipment Code", key: "code" },
     { label: "Equipment Name", key: "name" },
@@ -318,7 +317,7 @@ export const exportImportOrderDetailsToPdf = (order, items) => {
   ];
 
   const rows = buildDetailRows(order, items, true);
-  downloadPdf(
+  await downloadPdf(
     `import-order-${order.code || order.id}-details.pdf`,
     `Import Order ${order.code || order.id} Details`,
     headers,
@@ -326,7 +325,7 @@ export const exportImportOrderDetailsToPdf = (order, items) => {
   );
 };
 
-export const exportExportOrderDetailsToExcel = (order, items) => {
+export const exportExportOrderDetailsToExcel = async (order, items) => {
   const headers = [
     { label: "Equipment Code", key: "code" },
     { label: "Equipment Name", key: "name" },
@@ -334,14 +333,14 @@ export const exportExportOrderDetailsToExcel = (order, items) => {
   ];
 
   const rows = buildDetailRows(order, items, false);
-  downloadExcel(
+  await downloadExcel(
     `export-order-${order.code || order.id}-details.xlsx`,
     rows,
     headers,
   );
 };
 
-export const exportExportOrderDetailsToPdf = (order, items) => {
+export const exportExportOrderDetailsToPdf = async (order, items) => {
   const headers = [
     { label: "Equipment Code", key: "code" },
     { label: "Equipment Name", key: "name" },
@@ -349,7 +348,7 @@ export const exportExportOrderDetailsToPdf = (order, items) => {
   ];
 
   const rows = buildDetailRows(order, items, false);
-  downloadPdf(
+  await downloadPdf(
     `export-order-${order.code || order.id}-details.pdf`,
     `Export Order ${order.code || order.id} Details`,
     headers,
@@ -357,7 +356,7 @@ export const exportExportOrderDetailsToPdf = (order, items) => {
   );
 };
 
-export const exportInventoryLogsToExcel = (logs) => {
+export const exportInventoryLogsToExcel = async (logs) => {
   const headers = [
     { label: "Thời gian", key: "created_at" },
     { label: "Loại", key: "action_type" },
@@ -382,10 +381,10 @@ export const exportInventoryLogsToExcel = (logs) => {
     creator: log.creator?.full_name || log.creator?.username || "-",
   }));
 
-  downloadExcel(`inventory-logs-${Date.now()}.xlsx`, rows, headers);
+  await downloadExcel(`inventory-logs-${Date.now()}.xlsx`, rows, headers);
 };
 
-export const exportInventoryLogsToPdf = (logs) => {
+export const exportInventoryLogsToPdf = async (logs) => {
   const headers = [
     { label: "Thời gian", key: "created_at" },
     { label: "Loại", key: "action_type" },
@@ -410,7 +409,7 @@ export const exportInventoryLogsToPdf = (logs) => {
     creator: log.creator?.full_name || log.creator?.username || "-",
   }));
 
-  downloadPdf(
+  await downloadPdf(
     `inventory-logs-${Date.now()}.pdf`,
     "Inventory History Report",
     headers,
