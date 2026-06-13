@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     two_factor_enabled BOOLEAN NOT NULL DEFAULT 0,
     two_factor_secret VARCHAR(255) NULL,
     recovery_codes TEXT NULL,
+    token_version INT NOT NULL DEFAULT 0,
+    refresh_token_jti VARCHAR(64) NULL,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
