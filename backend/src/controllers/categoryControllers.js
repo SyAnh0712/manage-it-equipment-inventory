@@ -1,5 +1,6 @@
 const categoryService = require("../services/equipment/categoryServices");
 const { sendSuccess } = require("../utils/responseHelper");
+const { formatCategory, formatCategoryList } = require("../dto/category/category.response.dto");
 
 const createCategory = async (req, res, next) => {
   try {
@@ -10,7 +11,7 @@ const createCategory = async (req, res, next) => {
         : req.body.image_url,
     };
     const category = await categoryService.createCategory(categoryData);
-    return sendSuccess(res, 201, "Category created successfully", category);
+    return sendSuccess(res, 201, "Category created successfully", formatCategory(category));
   } catch (error) {
     next(error);
   }
@@ -19,7 +20,7 @@ const createCategory = async (req, res, next) => {
 const getAllCategories = async (req, res, next) => {
   try {
     const categories = await categoryService.getAllCategories(req.query);
-    return sendSuccess(res, 200, "Categories fetched successfully", categories);
+    return sendSuccess(res, 200, "Categories fetched successfully", formatCategoryList(categories));
   } catch (error) {
     next(error);
   }
@@ -30,7 +31,7 @@ const getCategoryById = async (req, res, next) => {
     const categoryId = req.params.id;
     const category = await categoryService.getCategoryById(categoryId);
     if (category) {
-      return sendSuccess(res, 200, "Category fetched successfully", category);
+      return sendSuccess(res, 200, "Category fetched successfully", formatCategory(category));
     } else {
       const err = new Error("Category not found");
       err.status = 404;
@@ -59,7 +60,7 @@ const updateCategory = async (req, res, next) => {
         res,
         200,
         "Category updated successfully",
-        updatedCategory,
+        formatCategory(updatedCategory),
       );
     } else {
       const err = new Error("Category not found");

@@ -1,5 +1,6 @@
 const equipmentService = require("../services/equipment/equipmentServices");
 const { sendSuccess } = require("../utils/responseHelper");
+const { formatEquipment, formatEquipmentList } = require("../dto/equipment/equipment.response.dto");
 
 const createEquipment = async (req, res, next) => {
   try {
@@ -10,7 +11,7 @@ const createEquipment = async (req, res, next) => {
         : req.body.image_url,
     };
     const equipment = await equipmentService.createEquipment(equipmentData);
-    return sendSuccess(res, 201, "Equipment created successfully", equipment);
+    return sendSuccess(res, 201, "Equipment created successfully", formatEquipment(equipment));
   } catch (error) {
     next(error);
   }
@@ -19,7 +20,7 @@ const createEquipment = async (req, res, next) => {
 const getAllEquipment = async (req, res, next) => {
   try {
     const equipment = await equipmentService.getAllEquipment(req.query);
-    return sendSuccess(res, 200, "Equipment fetched successfully", equipment);
+    return sendSuccess(res, 200, "Equipment fetched successfully", formatEquipmentList(equipment));
   } catch (error) {
     next(error);
   }
@@ -30,7 +31,7 @@ const getEquipmentById = async (req, res, next) => {
     const equipmentId = req.params.id;
     const equipment = await equipmentService.getEquipmentById(equipmentId);
     if (equipment) {
-      return sendSuccess(res, 200, "Equipment fetched successfully", equipment);
+      return sendSuccess(res, 200, "Equipment fetched successfully", formatEquipment(equipment));
     } else {
       const err = new Error("Equipment not found");
       err.status = 404;
@@ -59,7 +60,7 @@ const updateEquipment = async (req, res, next) => {
         res,
         200,
         "Equipment updated successfully",
-        updatedEquipment,
+        formatEquipment(updatedEquipment),
       );
     } else {
       const err = new Error("Equipment not found");

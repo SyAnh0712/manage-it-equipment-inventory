@@ -1,5 +1,6 @@
 const exportOrderService = require("../services/inventory/exportOrderServices");
 const { sendSuccess } = require("../utils/responseHelper");
+const { formatExportOrder, formatExportOrderList } = require("../dto/order/exportOrder.response.dto");
 
 const createExportOrder = async (req, res, nextHandler) => {
   try {
@@ -11,7 +12,7 @@ const createExportOrder = async (req, res, nextHandler) => {
       res,
       201,
       "Export order created successfully",
-      exportOrder,
+      formatExportOrder(exportOrder),
     );
   } catch (error) {
     nextHandler(error);
@@ -28,7 +29,7 @@ const getAllExportOrders = async (req, res, nextHandler) => {
       res,
       200,
       "Export orders fetched successfully",
-      exportOrders,
+      formatExportOrderList(exportOrders),
     );
   } catch (error) {
     nextHandler(error);
@@ -51,7 +52,7 @@ const getExportOrderById = async (req, res, nextHandler) => {
       res,
       200,
       "Export order fetched successfully",
-      exportOrder,
+      formatExportOrder(exportOrder),
     );
   } catch (error) {
     nextHandler(error);
@@ -70,7 +71,7 @@ const updateExportOrder = async (req, res, nextHandler) => {
       res,
       200,
       "Export order updated successfully",
-      exportOrder,
+      formatExportOrder(exportOrder),
     );
   } catch (error) {
     nextHandler(error);
@@ -104,7 +105,7 @@ const approveExportOrder = async (req, res, nextHandler) => {
       res,
       200,
       "Export order approved successfully",
-      exportOrder,
+      formatExportOrder(exportOrder),
     );
   } catch (error) {
     nextHandler(error);
@@ -121,7 +122,7 @@ const rejectExportOrder = async (req, res, nextHandler) => {
       res,
       200,
       "Export order rejected successfully",
-      exportOrder,
+      formatExportOrder(exportOrder),
     );
   } catch (error) {
     nextHandler(error);

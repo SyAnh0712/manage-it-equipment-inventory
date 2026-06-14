@@ -1,11 +1,12 @@
 const userService = require("../services/user/userServices.js");
 const { sendSuccess, sendError } = require("../utils/responseHelper");
+const { formatUser, formatUserList } = require("../dto/user/user.response.dto");
 
 const createUser = async (req, res, next) => {
   try {
     const userData = req.body;
     const user = await userService.createUser(userData);
-    return sendSuccess(res, 201, "User created successfully", user);
+    return sendSuccess(res, 201, "User created successfully", formatUser(user));
   } catch (error) {
     next(error);
   }
@@ -14,7 +15,7 @@ const createUser = async (req, res, next) => {
 const getAllUsers = async (req, res, next) => {
   try {
     const users = await userService.getAllUsers(req.query);
-    return sendSuccess(res, 200, "Users fetched successfully", users);
+    return sendSuccess(res, 200, "Users fetched successfully", formatUserList(users));
   } catch (error) {
     next(error);
   }
@@ -25,7 +26,7 @@ const getUserById = async (req, res, next) => {
     const userId = req.params.id;
     const user = await userService.getUserById(userId);
     if (user) {
-      return sendSuccess(res, 200, "User fetched successfully", user);
+      return sendSuccess(res, 200, "User fetched successfully", formatUser(user));
     } else {
       const err = new Error("User not found");
       err.status = 404;
@@ -41,7 +42,7 @@ const updateUser = async (req, res, next) => {
     const userId = req.params.id;
     const userData = req.body;
     const updatedUser = await userService.updateUser(userId, userData);
-    return sendSuccess(res, 200, "User updated successfully", updatedUser);
+    return sendSuccess(res, 200, "User updated successfully", formatUser(updatedUser));
   } catch (error) {
     next(error);
   }
@@ -65,7 +66,7 @@ const updateProfile = async (req, res, next) => {
       full_name,
       email,
     });
-    return sendSuccess(res, 200, "Profile updated successfully", result);
+    return sendSuccess(res, 200, "Profile updated successfully", formatUser(result));
   } catch (error) {
     next(error);
   }
@@ -80,7 +81,7 @@ const changePassword = async (req, res, next) => {
       oldPassword,
       newPassword,
     );
-    return sendSuccess(res, 200, "Password changed successfully", result);
+    return sendSuccess(res, 200, "Password changed successfully", formatUser(result));
   } catch (error) {
     next(error);
   }
@@ -94,7 +95,7 @@ const lockUser = async (req, res, next) => {
     }
 
     const result = await userService.lockUser(userId);
-    return sendSuccess(res, 200, "User locked successfully", result);
+    return sendSuccess(res, 200, "User locked successfully", formatUser(result));
   } catch (error) {
     next(error);
   }
@@ -104,7 +105,7 @@ const unlockUser = async (req, res, next) => {
   try {
     const userId = req.params.id;
     const result = await userService.unlockUser(userId);
-    return sendSuccess(res, 200, "User unlocked successfully", result);
+    return sendSuccess(res, 200, "User unlocked successfully", formatUser(result));
   } catch (error) {
     next(error);
   }
@@ -115,7 +116,7 @@ const resetPassword = async (req, res, next) => {
     const userId = req.params.id;
     const { newPassword } = req.body;
     const result = await userService.resetPassword(userId, newPassword);
-    return sendSuccess(res, 200, "Password reset successfully", result);
+    return sendSuccess(res, 200, "Password reset successfully", formatUser(result));
   } catch (error) {
     next(error);
   }
@@ -124,7 +125,7 @@ const resetPassword = async (req, res, next) => {
 const getCurrentUser = async (req, res, next) => {
   try {
     const user = req.user;
-    return sendSuccess(res, 200, "Current user fetched successfully", user);
+    return sendSuccess(res, 200, "Current user fetched successfully", formatUser(user));
   } catch (error) {
     next(error);
   }

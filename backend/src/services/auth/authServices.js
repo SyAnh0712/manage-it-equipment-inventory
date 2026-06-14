@@ -19,13 +19,7 @@ const {
 const jwt = require("jsonwebtoken");
 const { accessTokenSecret, refreshTokenSecret } = require("../../config/jwt");
 
-const formatAuthUser = (user) => ({
-  id: user.id,
-  username: user.username,
-  full_name: user.full_name,
-  email: user.email,
-  role: user.role,
-});
+const { formatAuthUser } = require("../../dto/auth/auth.response.dto");
 
 const issueAuthTokens = async (user) => {
   const refreshJti = createRefreshJti();

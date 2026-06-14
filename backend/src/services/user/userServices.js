@@ -5,15 +5,7 @@ const { emitToUser } = require("../../utils/socket");
 
 const User = db.User;
 
-const removePasswordField = (user) => {
-  if (!user) {
-    return user;
-  }
 
-  const sanitized = user.toJSON ? user.toJSON() : { ...user };
-  delete sanitized.password;
-  return sanitized;
-};
 
 const createUser = async (userData) => {
   try {
@@ -24,7 +16,7 @@ const createUser = async (userData) => {
 
     const newUser = await User.create(payload);
 
-    return removePasswordField(newUser);
+    return newUser;
   } catch (error) {
     throw new Error("Error creating user: " + error.message);
   }
@@ -97,7 +89,7 @@ const updateUser = async (id, userData) => {
 
     await user.update(payload);
 
-    return removePasswordField(user);
+    return user;
   } catch (error) {
     throw new Error("Error updating user: " + error.message);
   }
@@ -142,7 +134,7 @@ const changePassword = async (userId, oldPassword, newPassword) => {
     const hashedPassword = await hashPassword(newPassword);
     await user.update({ password: hashedPassword });
 
-    return removePasswordField(user);
+    return user;
   } catch (error) {
     throw new Error("Error changing password: " + error.message);
   }
@@ -162,7 +154,7 @@ const lockUser = async (id) => {
       message: "Tài khoản của bạn đã bị khóa.",
     });
 
-    return removePasswordField(user);
+    return user;
   } catch (error) {
     throw new Error("Error locking user: " + error.message);
   }
@@ -182,7 +174,7 @@ const unlockUser = async (id) => {
       message: "Tài khoản của bạn đã được mở khóa.",
     });
 
-    return removePasswordField(user);
+    return user;
   } catch (error) {
     throw new Error("Error unlocking user: " + error.message);
   }
@@ -203,7 +195,7 @@ const resetPassword = async (id, newPassword) => {
     const hashedPassword = await hashPassword(newPassword);
     await user.update({ password: hashedPassword });
 
-    return removePasswordField(user);
+    return user;
   } catch (error) {
     throw new Error("Error resetting password: " + error.message);
   }

@@ -1,11 +1,12 @@
 const supplierService = require("../services/supplier/supplierServices");
 const { sendSuccess } = require("../utils/responseHelper");
+const { formatSupplier, formatSupplierList } = require("../dto/supplier/supplier.response.dto");
 
 const createSupplier = async (req, res, next) => {
   try {
     const supplierData = req.body;
     const supplier = await supplierService.createSupplier(supplierData);
-    return sendSuccess(res, 201, "Supplier created successfully", supplier);
+    return sendSuccess(res, 201, "Supplier created successfully", formatSupplier(supplier));
   } catch (error) {
     next(error);
   }
@@ -14,7 +15,7 @@ const createSupplier = async (req, res, next) => {
 const getAllSuppliers = async (req, res, next) => {
   try {
     const suppliers = await supplierService.getAllSuppliers(req.query);
-    return sendSuccess(res, 200, "Suppliers fetched successfully", suppliers);
+    return sendSuccess(res, 200, "Suppliers fetched successfully", formatSupplierList(suppliers));
   } catch (error) {
     next(error);
   }
@@ -25,7 +26,7 @@ const getSupplierById = async (req, res, next) => {
     const supplierId = req.params.id;
     const supplier = await supplierService.getSupplierById(supplierId);
     if (supplier) {
-      return sendSuccess(res, 200, "Supplier fetched successfully", supplier);
+      return sendSuccess(res, 200, "Supplier fetched successfully", formatSupplier(supplier));
     } else {
       const err = new Error("Supplier not found");
       err.status = 404;
@@ -49,7 +50,7 @@ const updateSupplier = async (req, res, next) => {
         res,
         200,
         "Supplier updated successfully",
-        updatedSupplier,
+        formatSupplier(updatedSupplier),
       );
     } else {
       const err = new Error("Supplier not found");

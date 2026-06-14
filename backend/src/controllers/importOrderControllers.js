@@ -1,5 +1,6 @@
 const importOrderService = require("../services/inventory/importOrderServices");
 const { sendSuccess } = require("../utils/responseHelper");
+const { formatImportOrder, formatImportOrderList } = require("../dto/order/importOrder.response.dto");
 
 const createImportOrder = async (req, res, nextHandler) => {
   try {
@@ -11,7 +12,7 @@ const createImportOrder = async (req, res, nextHandler) => {
       res,
       201,
       "Import order created successfully",
-      importOrder,
+      formatImportOrder(importOrder),
     );
   } catch (error) {
     nextHandler(error);
@@ -28,7 +29,7 @@ const getAllImportOrders = async (req, res, nextHandler) => {
       res,
       200,
       "Import orders fetched successfully",
-      importOrders,
+      formatImportOrderList(importOrders),
     );
   } catch (error) {
     nextHandler(error);
@@ -51,7 +52,7 @@ const getImportOrderById = async (req, res, nextHandler) => {
       res,
       200,
       "Import order fetched successfully",
-      importOrder,
+      formatImportOrder(importOrder),
     );
   } catch (error) {
     nextHandler(error);
@@ -70,7 +71,7 @@ const updateImportOrder = async (req, res, nextHandler) => {
       res,
       200,
       "Import order updated successfully",
-      importOrder,
+      formatImportOrder(importOrder),
     );
   } catch (error) {
     nextHandler(error);
@@ -104,7 +105,7 @@ const approveImportOrder = async (req, res, nextHandler) => {
       res,
       200,
       "Import order approved successfully",
-      importOrder,
+      formatImportOrder(importOrder),
     );
   } catch (error) {
     nextHandler(error);
@@ -121,7 +122,7 @@ const rejectImportOrder = async (req, res, nextHandler) => {
       res,
       200,
       "Import order rejected successfully",
-      importOrder,
+      formatImportOrder(importOrder),
     );
   } catch (error) {
     nextHandler(error);

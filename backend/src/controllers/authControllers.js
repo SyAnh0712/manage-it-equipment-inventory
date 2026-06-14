@@ -6,6 +6,7 @@ const {
   clearAuthCookie,
   clearRefreshCookie,
 } = require("../utils/cookieHelper");
+const { formatAuthUser } = require("../dto/auth/auth.response.dto");
 
 const login = async (req, res, next) => {
   try {
@@ -179,7 +180,7 @@ const logout = async (req, res, next) => {
 
 const getMe = async (req, res, next) => {
   return sendSuccess(res, 200, "User profile fetched successfully", {
-    user: req.user,
+    user: formatAuthUser(req.user),
   });
 };
 
