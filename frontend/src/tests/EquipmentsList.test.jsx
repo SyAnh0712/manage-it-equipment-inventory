@@ -6,22 +6,22 @@ import equipmentService from "../services/equipmentService";
 import { useAuth } from "../hooks/useAuth";
 
 // Mock services & hooks
-vi.mock("../../../services/equipmentService", () => ({
+vi.mock("../services/equipmentService.js", () => ({
   default: {
     getAllEquipments: vi.fn(),
     deleteEquipment: vi.fn(),
   },
 }));
 
-vi.mock("../../../hooks/useAuth", () => ({
+vi.mock("../hooks/useAuth.js", () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock("../../../hooks/useDebounce", () => ({
+vi.mock("../hooks/useDebounce.js", () => ({
   useDebounce: (value) => value,
 }));
 
-vi.mock("../../../services/socketService", () => ({
+vi.mock("../services/socketService.js", () => ({
   listenToSocket: vi.fn(() => () => {}),
 }));
 
