@@ -13,7 +13,7 @@ vi.mock("react-router-dom", () => ({
 
 // Mock useAuth
 const mockLogin = vi.fn();
-vi.mock("../../../hooks/useAuth", () => ({
+vi.mock("../hooks/useAuth", () => ({
   useAuth: () => ({
     login: mockLogin,
   }),
