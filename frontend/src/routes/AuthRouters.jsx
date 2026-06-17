@@ -9,6 +9,13 @@ const Setup2fa = lazy(() => import("../pages/auth/Setup2fa"));
 
 const authRoutes = (isAuthenticated) => [
   {
+    path: "/",
+    element: (
+      <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
+    ),
+  },
+
+  {
     path: "/login",
     element: isAuthenticated ? <Navigate to="/dashboard" /> : <Login />,
   },
