@@ -15,6 +15,7 @@ app.set("trust proxy", 1);
 const allowedOrigins = [
   "http://localhost:5173",
   "https://manage-it-equipment-inventory.vercel.app",
+  /\.vercel\.app$/,
 ];
 
 app.use(
