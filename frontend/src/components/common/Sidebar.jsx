@@ -15,7 +15,8 @@ const MatIcon = ({ name, filled = false, className = "" }) => (
 /* ─── Nav Link item ───────────────────────────────────────── */
 const NavItem = ({ to, icon, label, filled = false }) => {
   const location = useLocation();
-  const isActive = location.pathname === to || location.pathname.startsWith(to + "/");
+  const isActive =
+    location.pathname === to || location.pathname.startsWith(to + "/");
 
   return (
     <Link
@@ -100,7 +101,11 @@ const Sidebar = () => {
           {isAdmin && (
             <>
               <NavItem to="/categories" icon="sell" label="Categories" />
-              <NavItem to="/suppliers" icon="local_shipping" label="Suppliers" />
+              <NavItem
+                to="/suppliers"
+                icon="local_shipping"
+                label="Suppliers"
+              />
             </>
           )}
         </NavGroup>
@@ -114,7 +119,11 @@ const Sidebar = () => {
         {/* Reports — admin only */}
         {isAdmin && (
           <NavGroup label="Reports">
-            <NavItem to="/inventory-logs" icon="history" label="Inventory History" />
+            <NavItem
+              to="/inventory-logs"
+              icon="history"
+              label="Inventory History"
+            />
           </NavGroup>
         )}
       </nav>
@@ -153,11 +162,13 @@ const Sidebar = () => {
           </div>
 
           {/* Settings shortcut */}
-          {isAdmin && (
-            <Link to="/profile" className="sb-user__settings" aria-label="Profile settings">
-              <MatIcon name="settings" />
-            </Link>
-          )}
+          <Link
+            to="/profile"
+            className="sb-user__settings"
+            aria-label="Profile settings"
+          >
+            <MatIcon name="settings" />
+          </Link>
         </div>
 
         {/* Logout */}
