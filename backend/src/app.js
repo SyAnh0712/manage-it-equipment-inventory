@@ -10,15 +10,27 @@ const logger = require("./utils/logger");
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://manage-it-equipment-inventory.vercel.app",
+];
+
 app.use(
   helmet({
     contentSecurityPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
   }),
 );
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
