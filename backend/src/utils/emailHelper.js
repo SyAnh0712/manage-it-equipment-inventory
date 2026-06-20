@@ -6,16 +6,21 @@ const isGmail = mailHost.includes("gmail.com");
 const transporter = nodemailer.createTransport(
   isGmail
     ? {
-        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
         auth: {
           user: process.env.MAIL_USER,
           pass: process.env.MAIL_PASSWORD,
         },
+        family: 4,
       }
     : {
         host: mailHost,
         port: parseInt(process.env.MAIL_PORT || "587"),
-        secure: process.env.MAIL_SECURE === "true" || parseInt(process.env.MAIL_PORT || "587") === 465,
+        secure:
+          process.env.MAIL_SECURE === "true" ||
+          parseInt(process.env.MAIL_PORT || "587") === 465,
         auth: {
           user: process.env.MAIL_USER,
           pass: process.env.MAIL_PASSWORD,
@@ -23,7 +28,7 @@ const transporter = nodemailer.createTransport(
         tls: {
           rejectUnauthorized: false,
         },
-      }
+      },
 );
 
 const sendOtpEmail = async (email, otp) => {

@@ -142,7 +142,17 @@ const registerService = async (data) => {
     });
   }
 
-  await sendOtpEmail(data.email, otp);
+  try {
+    await sendOtpEmail(data.email, otp);
+  } catch (error) {
+    console.error("MAIL ERROR:", error);
+
+    return {
+      message: "Không gửi được email nhưng tài khoản chờ xác thực đã được tạo",
+      email: data.email,
+      otp,
+    };
+  }
 
   const result = {
     message: "Mã OTP đã được gửi đến email của bạn",
